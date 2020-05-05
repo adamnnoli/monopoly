@@ -1,0 +1,46 @@
+{
+  "tiles": [
+    {
+      "name": "Go",
+      "price": 0,
+      "mortgage": 0,
+      "rent": 0,
+      "with 1 house": 0,
+      "with 2 houses": 0,
+      "with 3 houses": 0,
+      "with 4 houses": 0,
+      "with hotel": 0,
+      "house cost": 0,
+      "color": "white"
+    },
+    {
+      "name": "Mediterranean Avenue",
+      "price": 60,
+      "mortgage": 30,
+      "rent": 2,
+      "with 1 house": 10,
+      "with 2 houses": 30,
+      "with 3 houses": 90,
+      "with 4 houses": 160,
+      "with hotel": 250,
+      "house cost": 50,
+      "color": "brown"
+    },
+    {
+      "name": "Baltic Avenue",
+      "price": 60,
+      "mortgage": 30,
+      "rent": 4,
+      "with 1 house": 20,
+      "with 2 houses": 60,
+      "with 3 houses": 180,
+      "with 4 houses": 320,
+      "with hotel": 450,
+      "house cost": 50,
+      "color": "brown"
+    }
+  ],
+  "chance cards": [],
+  "community chest cards": [],
+  "pieces": []
+}
