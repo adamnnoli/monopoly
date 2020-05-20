@@ -6,10 +6,17 @@
 """
 
 
-class GameConstants:
-    self.startingCash = 1500
-    self.propertyTileLongSide = 50
-    self.propertyTileShortSide = 25
+class Consts:
+    def __init__(self):
+        self._startingCash = 1500
+        self._propertyTileLongSide = 50
+        self._propertyTileShortSide = 25
+
+    def long(self):
+        return self._propertyTileLongSide
+
+    def short(self):
+        return self._propertyTileShortSide
 
 
 class BoardTile:
@@ -89,7 +96,7 @@ class Player:
         """
         self._number = number
         self._color = color
-        self._cash = GameConstants.startingCash
+        self._cash = Consts.startingCash
         self._location = 0
         self._propertiesIds = []
 
