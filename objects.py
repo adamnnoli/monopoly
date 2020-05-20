@@ -7,7 +7,9 @@
 
 
 class GameConstants:
-    startingCash = 1500
+    self.startingCash = 1500
+    self.propertyTileLongSide = 50
+    self.propertyTileShortSide = 25
 
 
 class BoardTile:
@@ -132,17 +134,12 @@ class ChanceCard:
     def getText(self):
         """
             A getter for the text attribute
-        
+
             Parameters:self
-        
+
             Returns:The text of the chance card
         """
         self._text
 
     def getAction(self):
         self._action
-
-
-"""
-    Summary
-"""

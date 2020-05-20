@@ -1,5 +1,15 @@
-from game import Game
+"""
+    The primary application script for Monopoly
 
-game = Game()
+    This is the module with the application code. Relys on these modules:
 
+        app.py      (the primary controller class)
+        level.py    (the subcontroller for a single game level)
+        models.py   (the model classes)
+        consts.py   (the application constants)
+"""
+
+from app import *
+
+game = Monopoly()
 game.run()

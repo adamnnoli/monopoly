@@ -1,7 +1,7 @@
 """
     Game Module for Monopoly.
 
-    This module contains all of the functions necessary for playing the game.
+    This module contains all of the functions needed to implement the game logic.
     It allows the players to take turns, give input, and play the game.
 """
 
