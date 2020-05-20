@@ -54,6 +54,10 @@ class BoardTile:
         self._owner = None
 
 
+class Board:
+    pass
+
+
 class Player:
     """
         A class to represent a player in the game.
@@ -126,7 +130,19 @@ class ChanceCard:
         self._action = action
 
     def getText(self):
+        """
+            A getter for the text attribute
+        
+            Parameters:self
+        
+            Returns:The text of the chance card
+        """
         self._text
 
     def getAction(self):
         self._action
+
+
+"""
+    Summary
+"""
