@@ -1,5 +1,5 @@
 """
-  APP Module for Monopoly
+  App Module for Monopoly
 
   Contains the classes and methods necessary from creating and playing the game.
 """

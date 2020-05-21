@@ -4,6 +4,7 @@
     This module contains all of the functions needed to implement the game logic.
     It allows the players to take turns, give input, and play the game.
 """
+import json
 
 
 class Game:
@@ -43,11 +44,14 @@ class Game:
     def createPlayers(self):
         pass
 
-    def play(self):
+    def take(self, player):
         pass
 
-    def run(self):
-        createBoard()
-        createCards()
-        createPlayers()
-        play()
+    def give(self, player):
+        pass
+
+    def takeFromEach(self, player):
+        pass
+
+    def giveToEach(self, player):
+        pass
