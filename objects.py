@@ -4,19 +4,7 @@
     This module contains the class information for all of the objects used in the
     game.
 """
-
-
-class Consts:
-    def __init__(self):
-        self._startingCash = 1500
-        self._propertyTileLongSide = 50
-        self._propertyTileShortSide = 25
-
-    def long(self):
-        return self._propertyTileLongSide
-
-    def short(self):
-        return self._propertyTileShortSide
+from consts import *
 
 
 class BoardTile:
@@ -42,7 +30,7 @@ class BoardTile:
             with 0 houses, rents[1] is with 1 house, etc. rents[5] is with hotel
             Precondition: Must be an int list
 
-            Parameter: mortgage, the amount the player would recieve if they
+            Parameter: mortgage, the amount the player would receive if they
             mortgaged the property. IF the tile is not mortgagable then it must be 0.
             Precondition: Must be an int
 
@@ -78,25 +66,30 @@ class Player:
         INSTANCE ATTRIBUTES:
 
         _number: the player number [int]
-        _color: the color of the player's peice [string]
+        _name: the player's name [string]
+        _color: the color of the player's piece [string]
         _cash: the amount of money the player currently has [int]
         _location: the id of the tile the player is currently on [int]
         _propertiesIds: list of the ids of the properties the player owns [int list]
     """
 
-    def __init__(self, number, color):
+    def __init__(self, number, name, color):
         """
             Creates a single player object.
 
             Parameter: number, the number of the player. I.e player 1, 2, etc.
-            Precondtion: Must be an int
+            Requires: Must be an int
+
+            Parmeter: name, the player's name
+            Requires: Must be of type string
 
             Parameter: color, the color of the player's piece.
-            Precondition: Must be a string
+            Requires: Must be a string
         """
         self._number = number
+        self._name = name
         self._color = color
-        self._cash = Consts.startingCash
+        self._cash = STARTING_CASH
         self._location = 0
         self._propertiesIds = []
 
@@ -113,13 +106,28 @@ class CommunityChestCard:
     """
 
     def __init__(self, text, action):
+        """
+            Creates a single Chance Card.
+
+            Parmeter: text, the text on the card
+            Requires: Must be of type string
+
+            Parmeter: action, the action to be executed when the card is drawn
+            Requires: Must be of type function
+        """
         self._text = text
         self._action = action
 
     def getText(self):
+        """
+            Returns: The text of the chance card
+        """
         self._text
 
     def getAction(self):
+        """
+            Returns: The action of the chance card
+        """
         self._action
 
 
@@ -135,18 +143,26 @@ class ChanceCard:
     """
 
     def __init__(self, text, action):
+        """
+            Creates a single Chance Card.
+
+            Parmeter: text, the text on the card
+            Requires: Must be of type string
+
+            Parmeter: action, the action to be executed when the card is drawn
+            Requires: Must be of type function
+        """
         self._text = text
         self._action = action
 
     def getText(self):
         """
-            A getter for the text attribute
-
-            Parameters:self
-
-            Returns:The text of the chance card
+            Returns: The text of the chance card
         """
         self._text
 
     def getAction(self):
+        """
+            Returns: The action of the chance card
+        """
         self._action
