@@ -9,6 +9,7 @@ from game import Game
 
 long = consts.TILE_LONG
 short = consts.TILE_SHORT
+longPlus = [long + i * short for i in range(1, 10)]
 cLength = 2*long+9*short
 
 
@@ -17,14 +18,27 @@ class Monopoly:
     def __init__(self):
         self._window = Tk()
         self._welcome = self.showWelcome(self._window)
-        self._board = self.createBoard(self._window)
-        self._controls = self.createControls(self._window)
+        # self._board = self.createBoard(self._window)
+        # self._controls = self.createControls(self._window)
 
     def run(self):
         self._window.mainloop()
 
     def showWelcome(self, root):
-        pass
+        frame = Frame(root)
+        frame.grid(row=0, column=0)
+
+        text = Label(frame, text="How Many People Will Be Playing: ", padx=5)
+        text.grid(row=0, column=0)
+
+        numPlayers = IntVar()
+        askPlayers = OptionMenu(frame, numPlayers, 1, 2, 3, 4)
+        askPlayers.grid(row=0, column=1)
+        getPlayers = Button(frame, text="Select",
+                            command=lambda: self.showPlayers(root, frame, numPlayers))
+        getPlayers.grid(row=0, column=2)
+        startButton = Button(frame, text="Play!")
+        startButton.grid(row=3, column=0, columnspan=numPlayers.get()+1)
 
     def createControls(self, root):
         frame = Frame(root)
@@ -49,77 +63,59 @@ class Monopoly:
 
     def createTop(self, cvs):
         cvs.create_rectangle(0, 0, long, long)
-        cvs.create_rectangle(long, 0, long + short, long, fill="#d63e3e")
-        cvs.create_rectangle(long + short, 0, long + 2 * short, long)
-        cvs.create_rectangle(long + 2 * short, 0, long +
-                             3 * short, long, fill="#d63e3e")
-        cvs.create_rectangle(long + 3 * short, 0, long +
-                             4 * short, long, fill="#d63e3e")
-        cvs.create_rectangle(long + 4 * short, 0, long + 5 * short, long)
-        cvs.create_rectangle(long + 5 * short, 0, long +
-                             6 * short, long, fill="#e0fc08")
-        cvs.create_rectangle(long + 6 * short, 0, long +
-                             7 * short, long, fill="#e0fc08")
-        cvs.create_rectangle(long + 7 * short, 0, long + 8 * short, long)
-        cvs.create_rectangle(long + 8 * short, 0, long +
-                             9 * short, long, fill="#e0fc08")
-        cvs.create_rectangle(long + 9 * short, 0, 2 * long + 9 * short, long)
+        cvs.create_rectangle(long, 0, longPlus[0], long, fill="#d63e3e")
+        cvs.create_rectangle(longPlus[0], 0, longPlus[1], long)
+        cvs.create_rectangle(longPlus[1], 0, longPlus[2], long, fill="#d63e3e")
+        cvs.create_rectangle(longPlus[2], 0, longPlus[3], long, fill="#d63e3e")
+        cvs.create_rectangle(longPlus[3], 0, longPlus[4], long)
+        cvs.create_rectangle(longPlus[4], 0, longPlus[5], long, fill="#e0fc08")
+        cvs.create_rectangle(longPlus[5], 0, longPlus[6], long, fill="#e0fc08")
+        cvs.create_rectangle(longPlus[6], 0, longPlus[7], long)
+        cvs.create_rectangle(longPlus[7], 0, longPlus[8], long, fill="#e0fc08")
+        cvs.create_rectangle(longPlus[8], 0, cLength, long)
 
     def createLeft(self, cvs):
-        cvs.create_rectangle(0, long, long, long + short, fill="#edbb32")
-        cvs.create_rectangle(0, long + short, long,
-                             long + 2 * short, fill="#edbb32")
-        cvs.create_rectangle(0, long + 2 * short, long, long + 3 * short)
-        cvs.create_rectangle(0, long + 3 * short, long,
-                             long + 4 * short, fill="#edbb32")
-        cvs.create_rectangle(0, long + 4 * short, long, long + 5 * short)
-        cvs.create_rectangle(0, long + 5 * short, long,
-                             long + 6 * short, fill="#e64cdb")
-        cvs.create_rectangle(0, long + 6 * short, long,
-                             long + 7 * short, fill="#e64cdb")
-        cvs.create_rectangle(0, long + 7 * short, long, long + 8 * short)
-        cvs.create_rectangle(0, long + 8 * short, long,
-                             long + 9 * short, fill="#e64cdb")
+        cvs.create_rectangle(0, long, long, longPlus[0], fill="#edbb32")
+        cvs.create_rectangle(0, longPlus[0], long,  longPlus[1], fill="#edbb32")
+        cvs.create_rectangle(0, longPlus[1], long, longPlus[2])
+        cvs.create_rectangle(0, longPlus[2], long,  longPlus[3], fill="#edbb32")
+        cvs.create_rectangle(0, longPlus[3], long, longPlus[4])
+        cvs.create_rectangle(0, longPlus[4], long, longPlus[5], fill="#e64cdb")
+        cvs.create_rectangle(0, longPlus[5], long, longPlus[6], fill="#e64cdb")
+        cvs.create_rectangle(0, longPlus[6], long, longPlus[7])
+        cvs.create_rectangle(0, longPlus[7], long, longPlus[8], fill="#e64cdb")
 
     def createRight(self, cvs):
-        cvs.create_rectangle(long + 9 * short, long, 2 *
-                             long + 9 * short, long + short, fill="#34c926")
-        cvs.create_rectangle(long + 9 * short, long +
-                             short, 2 * long + 9 * short, long + 2 * short, fill="#34c926")
-        cvs.create_rectangle(long + 9 * short, long + 2 *
-                             short, 2 * long + 9 * short, long + 3 * short)
-        cvs.create_rectangle(long + 9 * short, long + 3 *
-                             short, 2 * long + 9 * short, long + 4 * short, fill="#34c926")
-        cvs.create_rectangle(long + 9 * short, long + 4 *
-                             short, 2 * long + 9 * short, long + 5 * short)
-        cvs.create_rectangle(long + 9 * short, long + 5 *
-                             short, 2 * long + 9 * short, long + 6 * short)
-        cvs.create_rectangle(long + 9 * short, long + 6 *
-                             short, 2 * long + 9 * short, long + 7 * short, fill="#245ac7")
-        cvs.create_rectangle(long + 9 * short, long + 7 *
-                             short, 2 * long + 9 * short, long + 8 * short)
-        cvs.create_rectangle(long + 9 * short, long + 8 *
-                             short, 2 * long + 9 * short, long + 9 * short, fill="#245ac7")
+        cvs.create_rectangle(longPlus[8], long, cLength, longPlus[0], fill="#34c926")
+        cvs.create_rectangle(longPlus[8], longPlus[0], cLength, longPlus[1], fill="#34c926")
+        cvs.create_rectangle(longPlus[8], longPlus[1], cLength, longPlus[2])
+        cvs.create_rectangle(longPlus[8], longPlus[2], cLength, longPlus[3], fill="#34c926")
+        cvs.create_rectangle(longPlus[8], longPlus[3], cLength, longPlus[4])
+        cvs.create_rectangle(longPlus[8], longPlus[4], cLength, longPlus[5])
+        cvs.create_rectangle(longPlus[8], longPlus[5], cLength, longPlus[6], fill="#245ac7")
+        cvs.create_rectangle(longPlus[8], longPlus[6], cLength, longPlus[7])
+        cvs.create_rectangle(longPlus[8], longPlus[7], cLength, longPlus[8], fill="#245ac7")
 
     def createBottom(self, cvs):
-        cvs.create_rectangle(0, long + 9 * short, long, 2 * long + 9 * short)
-        cvs.create_rectangle(long, long + 9 * short,
-                             long + short, 2 * long + 9 * short, fill="#4ad6d9")
-        cvs.create_rectangle(long + short, long + 9 * short, long + 2 *
-                             short, 2 * long + 9 * short, fill="#4ad6d9")
-        cvs.create_rectangle(long + 2 * short, long + 9 *
-                             short, long + 3 * short, 2 * long + 9 * short)
-        cvs.create_rectangle(long + 3 * short, long + 9 *
-                             short, long + 4 * short, 2 * long + 9 * short, fill="#4ad6d9")
-        cvs.create_rectangle(long + 4 * short, long + 9 *
-                             short, long + 5 * short, 2 * long + 9 * short)
-        cvs.create_rectangle(long + 5 * short, long + 9 *
-                             short, long + 6 * short, 2 * long + 9 * short)
-        cvs.create_rectangle(long + 6 * short, long + 9 *
-                             short, long + 7 * short, 2 * long + 9 * short, fill="#574400")
-        cvs.create_rectangle(long + 7 * short, long + 9 *
-                             short, long + 8 * short, 2 * long + 9 * short)
-        cvs.create_rectangle(long + 8 * short, long + 9 *
-                             short, long + 9 * short, 2 * long + 9 * short, fill="#574400")
-        cvs.create_rectangle(long + 9 * short, long + 9 *
-                             short, 2 * long + 9 * short, 2 * long + 9 * short)
+        cvs.create_rectangle(0, longPlus[8], long, cLength)
+        cvs.create_rectangle(long, longPlus[8], longPlus[0], cLength, fill="#4ad6d9")
+        cvs.create_rectangle(longPlus[0], longPlus[8], longPlus[1], cLength, fill="#4ad6d9")
+        cvs.create_rectangle(longPlus[1], longPlus[8], longPlus[2], cLength)
+        cvs.create_rectangle(longPlus[2], longPlus[8], longPlus[3], cLength, fill="#4ad6d9")
+        cvs.create_rectangle(longPlus[3], longPlus[8], longPlus[4], cLength)
+        cvs.create_rectangle(longPlus[4], longPlus[8], longPlus[5], cLength)
+        cvs.create_rectangle(longPlus[5], longPlus[8], longPlus[6], cLength, fill="#574400")
+        cvs.create_rectangle(longPlus[6], longPlus[8], longPlus[7], cLength)
+        cvs.create_rectangle(longPlus[7], longPlus[8], longPlus[8], cLength, fill="#574400")
+        cvs.create_rectangle(longPlus[8], longPlus[8], cLength, cLength)
+
+    def showPlayers(self, root, frame, numPlayers):
+        for i in range(1, numPlayers.get() + 1):
+            texti = Label(frame, text=f"Player {i}:", padx=5)
+            namei = Entry(root)
+            playerIColor = StringVar()
+            colori = OptionMenu(frame, playerIColor, "red", "blue", "green", "yellow")
+
+            texti.grid(row=1, column=i)
+            namei.grid(row=1, column=i+1)
+            colori.grid(row=2, column=i, columnspan=2)
