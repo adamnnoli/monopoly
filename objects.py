@@ -95,6 +95,12 @@ class Player:
         self._location = 0
         self._propertiesIds = []
 
+    def move(self, places):
+        self._location += places
+        if self._location >= 38:
+            self._cash += 200
+            self._location %= 38
+
 
 class CommunityChestCard:
     """

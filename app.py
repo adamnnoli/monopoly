@@ -94,10 +94,12 @@ class Monopoly:
         self._controls = Frame(root)
         self._controls.grid(row=0, column=1)
 
-        rollDice = Button(self._controls, text="Roll Dice", padx=5)
+        rollDice = Button(self._controls, text="Roll Dice", padx=5,
+                          command=lambda: self._rollDice(self._board))
         rollDice.grid(row=0, column=0)
 
-        trade = Button(self._controls, text="Trade", padx=5)
+        trade = Button(self._controls, text="Trade", padx=5,
+                       command=self._trade)
         trade.grid(row=0, column=1)
 
     # Helper functions make game board
@@ -228,3 +230,9 @@ class Monopoly:
         self._game = Game(players)
         self._board = self._createBoard(self._window)
         self._controls = self._createControls(self._window)
+
+    def _rollDice(self, board):
+        pass
+
+    def _trade(self):
+        pass

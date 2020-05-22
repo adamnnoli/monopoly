@@ -6,6 +6,7 @@
 """
 import json
 from objects import *
+import random
 
 
 class Game:
@@ -152,4 +153,12 @@ class Game:
         pass
 
     def giveToEach(self, player):
+        pass
+
+    def rollDice(self):
+        roll = random.randint(0, 12)
+        self._currPlayer.move(roll)
+        self._handleTile()
+
+    def _handleTile(self):
         pass
