@@ -15,7 +15,7 @@ class BoardTile:
         to allow actions to be done on the tile such as buying and building.
     """
 
-    def __init__(self, id, price, rents, mortgage, houseCost, color):
+    def __init__(self, id, name, price, rents, mortgage, houseCost, color):
         """
             Creates a single Tile object.
 
@@ -43,6 +43,7 @@ class BoardTile:
             Precondition: Must be a string
         """
         self._id = id
+        self._name = name
         self._price = price
         self._rents = rents
         self._mortgage = mortgage
@@ -52,7 +53,8 @@ class BoardTile:
 
 
 class Board:
-    pass
+    def __init__(self, tiles):
+        self._tiles = tiles
 
 
 class Player:

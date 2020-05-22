@@ -20,6 +20,14 @@ class Monopoly:
 
         Contains the methods necessary for creating the game windows.
         Calls to methods in game.Game to implement functionality
+
+        INSTANCE ATTRIBUTES
+        _window: the main game window [tkinter.Tk()]
+        _welcome: the frame that handles the pre-game set-up[tkinter.Frame]
+        _board: canvas with the game board and pieces drawn on it [tkinter.Canvas]
+        _controls: frame that contains the buttons for player actions: [tkinter.frame]
+        _playerInfo: frame that displays the information of the current player [tkinter.frame]
+        _game: the Game object with the current game information [game.Game]
     """
 
     def __init__(self):
@@ -30,9 +38,10 @@ class Monopoly:
             the welcome frame takes over from here to implement most functionality
         """
         self._window = Tk()
-        self._welcome = self._showWelcome(self._window)
-        # self._board = self._createBoard(self._window)
-        # self._controls = self._createControls(self._window)
+        self._showWelcome(self._window)
+        self._board = None
+        self._controls = None
+        self._playerInfo = None
 
     def run(self):
         """
@@ -51,19 +60,25 @@ class Monopoly:
             Parameter: root, the window that the welcome frame is added to. 
             Requires: Must be of type tkinter.Tk()
         """
-        frame = Frame(root)
-        frame.grid(row=0, column=0)
+        # Frame To Hold Everything
+        self._welcome = Frame(root)
+        self._welcome.grid(row=0, column=0)
 
-        text = Label(frame, text="How Many People Will Be Playing: ", padx=5)
+        # Instructions on what to do
+        text = Label(self._welcome, text="How Many People Will Be Playing: ", padx=5)
         text.grid(row=0, column=0)
 
+        # Ask how many players and create next dialogue box to get names and colors
         numPlayers = IntVar()
-        askPlayers = OptionMenu(frame, numPlayers, 1, 2, 3, 4)
+        askPlayers = OptionMenu(self._welcome, numPlayers, 1, 2, 3, 4)
         askPlayers.grid(row=0, column=1)
-        getPlayers = Button(frame, text="Select",
-                            command=lambda: self._showPlayers(frame, numPlayers.get()))
+        getPlayers = Button(self._welcome, text="Select",
+                            command=lambda: self._showPlayers(self._welcome, numPlayers.get()))
         getPlayers.grid(row=0, column=2)
-        startButton = Button(frame, text="Play!")
+
+        # Start the Game
+        startButton = Button(self._welcome, text="Play!",
+                             command=lambda: self._play(self._welcome, root, numPlayers.get()))
         startButton.grid(row=3, column=0, columnspan=numPlayers.get()+1)
 
     def _createControls(self, root):
@@ -76,13 +91,13 @@ class Monopoly:
             Parameter: root, the window that the controls are added to 
             Requires: Must be of type tkinter.Tk()
         """
-        frame = Frame(root)
-        frame.grid(row=0, column=1)
+        self._controls = Frame(root)
+        self._controls.grid(row=0, column=1)
 
-        rollDice = Button(frame, text="Roll Dice", padx=5)
+        rollDice = Button(self._controls, text="Roll Dice", padx=5)
         rollDice.grid(row=0, column=0)
 
-        trade = Button(frame, text="Trade", padx=5)
+        trade = Button(self._controls, text="Trade", padx=5)
         trade.grid(row=0, column=1)
 
     # Helper functions make game board
@@ -97,13 +112,13 @@ class Monopoly:
             Parameter: root, the window that the board is drawn on
             Requires: Must be of type tkinter.Tk()
         """
-        canvas = Canvas(root, width=cLength, height=cLength)
-        canvas.create_rectangle(0, 0, cLength, cLength, fill="#c0e2ca")
-        canvas.grid(row=0, column=0)
-        self._createTop(canvas)
-        self._createLeft(canvas)
-        self._createRight(canvas)
-        self._createBottom(canvas)
+        self._board = Canvas(root, width=cLength, height=cLength)
+        self._board.create_rectangle(0, 0, cLength, cLength, fill="#c0e2ca")
+        self._board.grid(row=0, column=0)
+        self._createTop(self._board)
+        self._createLeft(self._board)
+        self._createRight(self._board)
+        self._createBottom(self._board)
 
     def _createTop(self, cvs):
         """
@@ -201,3 +216,15 @@ class Monopoly:
             texti.grid(row=1, column=i-1)
             namei.grid(row=1, column=i)
             colori.grid(row=2, column=i-1, columnspan=2)
+
+    def _play(self, currWindow, root, numPlayers):
+        print(numPlayers)
+        playersFrame = currWindow.winfo_children()[1].winfo_children()
+        colors = playersFrame[0:numPlayers]
+        names = playersFrame[numPlayers:]
+        players = list(zip(names, colors))
+        print(len(players))
+        currWindow.destroy()
+        self._game = Game(players)
+        self._board = self._createBoard(self._window)
+        self._controls = self._createControls(self._window)

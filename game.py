@@ -15,19 +15,25 @@ class Game:
         Contains all of the methods need to run the game
 
         INSTANCE ATTRIBUTES:
-        _board
-        _chanceCards
-        _communityChestCards
-        _players
-        _currPlayer
+        _board: the game board object [Board]
+        _chanceCards: the list of all Chance Cards in the game [ChanceCard list]
+        _communityChestCards: the list of all Community Chest Cards in the game [CommunityChestCard list]
+        _players: a list of the players in the game [Player list]
+        _currPlayer: the player whose turn it currently is [Player]
     """
 
-    def __init__(self):
+    def __init__(self, players):
+        """
+            Creates a single Game object.
+
+            Parmeter: players, a list of tuples containing the names and colors of the players
+            Requires: Must be of type (string, string) list
+        """
         self._board = self._createBoard()
-        cards = self._createCards()
-        self._chanceCards = cards[0]
-        self._communityChestCards = cards[1]
-        self._players = self._createPlayers()
+        # cards = self._createCards()
+        # self._chanceCards = cards[0]
+        # self._communityChestCards = cards[1]
+        self._players = self._createPlayers(players)
         self._currPlayer = self._players[0]
 
     def _createBoard(self):
@@ -39,7 +45,19 @@ class Game:
 
             Returns: A Board Object
         """
-        pass
+        tiles = []
+        with open("D:\CS Stuff\Git Repositories\monopoly\\board.json") as boardJson:
+            board = json.load(boardJson)
+            for i, tile in enumerate(board["tiles"]):
+                name = tile["name"]
+                price = tile["price"]
+                mortgage = tile["mortgage"]
+                rents = tile["rents"]
+                houseCost = tile["house cost"]
+                color = tile["color"]
+                newTile = BoardTile(i, name, price, rents, mortgage, houseCost, color)
+                tiles.append(BoardTile)
+        return Board(tiles)
 
     def _createCards(self):
         """
@@ -51,8 +69,18 @@ class Game:
         """
         return [self._createChanceCards(), self._createCommunityChestCards()]
 
-    def _createPlayers(self):
-        pass
+    def _createPlayers(self, players):
+        """
+            Creates the list of player objects for the game
+
+            Parmeter: players, a list of tuples containing the names and colors of the players
+            Requires: Must be of type (string, string) list
+        """
+        playerList = []
+        for i, name, color in enumerate(players):
+            print(len(playerList))
+            playerList.append(Player(i, name, color))
+        return playerList
 
     def _chanceCardTexts(self):
         zero = "You have won a crossword competition. Collect $100."
@@ -80,7 +108,7 @@ class Game:
     def _createChanceCards(self):
         chanceCards = []
         texts = self._chanceCardTexts()
-        actions = self._chanceCardsActions()
+        actions = self._chanceCardActions()
         for text, action in zip(texts, actions):
             chanceCards.append(ChanceCard(text, action))
 
@@ -104,7 +132,7 @@ class Game:
         sixteen = "You inherit $100."
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen]
 
-    def _chanceCardActions(self):
+    def _communityChestCardActions(self):
         return []
 
     def _createCommunityChestCards(self):
