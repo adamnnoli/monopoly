@@ -1,6 +1,11 @@
 {
   "python.formatting.provider": "autopep8",
   "cSpell.words": [
-    "padx"
+    "colori",
+    "curr",
+    "namei",
+    "padx",
+    "texti",
+    "winfo"
   ]
 }

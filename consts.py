@@ -11,4 +11,4 @@ TILE_SHORT = 50
 STARTING_CASH = 1500
 
 # Length of one side of a game piece
-PIECE_SIZE = 5
+PIECE_SIZE = 25

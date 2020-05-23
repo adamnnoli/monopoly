@@ -22,7 +22,7 @@ class Game:
         _players: a list of the players in the game [Player list]
         _currPlayer: the player whose turn it currently is [Player]
     """
-# Initialization
+# Initialization----------------------------------------------------------------------------
 
     def __init__(self, players):
         """
@@ -148,13 +148,19 @@ class Game:
             playerList.append(Player(i, name, color))
         return playerList
 
-# Getters
+# Getters------------------------------------------------------------------------------------
+    def getPlayers(self):
+        """
+            Returns a list of dictionaries that represent each player. 
+        """
+        return list(map(lambda player: player.to_dict(), self._players))
 
-# Game Functionality
+# Game Functionality-------------------------------------------------------------------------
 
 # General
     def rollDice(self):
-        roll = random.randint(0, 12)
+        roll = random.randint(2, 12)
+        print(roll)
         self._currPlayer.move(roll)
         self._handleTile()
 
@@ -170,8 +176,13 @@ class Game:
 
     def giveToEach(self, player):
         pass
+
 # Board
 
     def _handleTile(self):
         pass
+
 # Cards
+
+    def _drawCard(self):
+        pass

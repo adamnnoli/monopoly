@@ -101,6 +101,19 @@ class Player:
             self._cash += 200
             self._location %= 38
 
+    def to_dict(self):
+        """
+            Returns a dictionary representation of the player.
+        """
+        dict = {
+            "id": self._number,
+            "name": self._name,
+            "color": self._color,
+            "cash": self._cash,
+            "location": self._location,
+            "propertyLocations": self._propertiesIds
+        }
+        return dict
 
 class CommunityChestCard:
     """

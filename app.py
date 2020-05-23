@@ -4,13 +4,13 @@
   Contains the classes and methods necessary from creating and playing the game.
 """
 from tkinter import *
-import consts
+from consts import *
 from game import Game
 
 # Used to Neaten Code
-long = consts.TILE_LONG
-short = consts.TILE_SHORT
-longPlus = [long + i * short for i in range(1, 10)]
+long = TILE_LONG
+short = TILE_SHORT
+longPlus = [long + i * short for i in range(1, 10)]  # longPlus[i] = long + (i + 1) * short
 cLength = 2 * long + 9 * short
 
 # Necessary Global Variables
@@ -26,11 +26,12 @@ class Monopoly:
 
         INSTANCE ATTRIBUTES
         _window: the main game window [tkinter.Tk()]
-        _welcome: the frame that handles the pre-game set-up[tkinter.Frame]
+        _welcome: the frame that handles the pre-game set-up [tkinter.Frame]
         _board: canvas with the game board and pieces drawn on it [tkinter.Canvas]
-        _controls: frame that contains the buttons for player actions: [tkinter.frame]
-        _playerInfo: frame that displays the information of the current player [tkinter.frame]
+        _controls: frame that contains the buttons for player actions [tkinter.Frame]
+        _playerInfo: frame that displays the information of the current player [tkinter.Frame]
         _game: the Game object with the current game information [game.Game]
+        _gameLog: frame with labels to log responses from the game [tkinter.Frame]
     """
 
 # START UP----------------------------------------------------------------------------
@@ -46,6 +47,8 @@ class Monopoly:
         self._board = None
         self._controls = None
         self._playerInfo = None
+        self._game = None
+        self._gameLog = None
 
     def run(self):
         """
@@ -172,6 +175,7 @@ class Monopoly:
         self._createLeft(self._board)
         self._createRight(self._board)
         self._createBottom(self._board)
+        self._drawPlayers(self._board)
 
     def _createTop(self, cvs):
         """
@@ -274,6 +278,7 @@ class Monopoly:
 
     def _rollDice(self):
         self._game.rollDice()
+        self._createBoard(self._window)
 
     def _trade(self):
         pass
@@ -283,18 +288,19 @@ class Monopoly:
         playerInfo = self._game.getCurrPlayerInfo()
 
 # Players
-    def _drawPlayers(self):
+    def _drawPlayers(self, board):
         """
             Draws the Players' pieces.
         """
-        locColors = []
-        with self._game.getPlayers() as players:
-            for player in players:
-                locColors.append((player["loc"], player["color"]))
-        for loc, color in locColors:
-            self._drawPiece(loc, color)
+        idsLocsColors = []
+        players = self._game.getPlayers()
+        for player in players:
+            idsLocsColors.append((player["id"], player["location"], player["color"]))
 
-    def _drawPiece(self, location, color, offset):
+        for id, loc, color in idsLocsColors:
+            self._drawPiece(board, loc, color, (id - 1) * PIECE_SIZE)
+
+    def _drawPiece(self, board, location, color, offset):
         """
             Draws a square on the board, PIECE_SIZE x PIECE_SIZE, in tile number location,
             with color color, moved overed from the edge of the board by offset.
@@ -308,10 +314,38 @@ class Monopoly:
             Parmeter: offset, number of pixels away from board edge the piece will be drawn
             Requires: Must be of type int
         """
-        if location < 10:
-            pass
+        if location == 0:
+            board.create_rectangle(cLength - long, cLength - offset - PIECE_SIZE,
+                                   cLength - long + PIECE_SIZE, cLength-offset, fill=color)
+        elif location < 10:
+            board.create_rectangle(cLength - longPlus[location-1], cLength - offset - PIECE_SIZE,
+                                   cLength - longPlus[location-1] + PIECE_SIZE, cLength-offset, fill=color)
+        elif location == 10:
+            board.create_rectangle(offset, cLength-PIECE_SIZE, offset +
+                                   PIECE_SIZE, cLength, fill=color)
+        elif location < 19:
+            board.create_rectangle(
+                offset, longPlus[18-location], offset+PIECE_SIZE, longPlus[18-location] + PIECE_SIZE, fill=color)
+        elif location == 19:
+            board.create_rectangle(offset, long, offset+PIECE_SIZE, long+PIECE_SIZE, fill=color)
+        elif location == 20:
+            board.create_rectangle(long-PIECE_SIZE, offset, long, offset+PIECE_SIZE, fill=color)
+        elif location < 31:
+            board.create_rectangle(longPlus[location-21]-PIECE_SIZE, offset,
+                                   longPlus[location-21], offset+PIECE_SIZE, fill=color)
+        elif location == 31:
+            board.create_rectangle(cLength - long + offset, long, cLength - long + offset + PIECE_SIZE,
+                                   long + PIECE_SIZE, fill=color)
+        else:
+            board.create_rectangle(cLength - long + offset, longPlus[location-31],
+                                   cLength - long + offset + PIECE_SIZE,
+                                   longPlus[location-31] + PIECE_SIZE,
+                                   fill=color)
 
+
+# Game Log
 # END GAME---------------------------------------------------------------------------------
+
 
     def _displaywinner(self):
         pass
