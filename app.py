@@ -13,6 +13,9 @@ short = consts.TILE_SHORT
 longPlus = [long + i * short for i in range(1, 10)]
 cLength = 2 * long + 9 * short
 
+# Necessary Global Variables
+playerColors = []  # Holds the variables that contain the player colors
+
 
 class Monopoly:
     """
@@ -57,7 +60,7 @@ class Monopoly:
             and colors to be. Upon clicking start, the window will be destroyed and the main game
             frame will be created.
 
-            Parameter: root, the window that the welcome frame is added to. 
+            Parameter: root, the window that the welcome frame is added to.
             Requires: Must be of type tkinter.Tk()
         """
         # Frame To Hold Everything
@@ -88,14 +91,14 @@ class Monopoly:
             This frame contains all of the buttons needed to perform game actions, calling upon
             methods in game.Game to implement functionality.
 
-            Parameter: root, the window that the controls are added to 
+            Parameter: root, the window that the controls are added to
             Requires: Must be of type tkinter.Tk()
         """
         self._controls = Frame(root)
         self._controls.grid(row=0, column=1)
 
         rollDice = Button(self._controls, text="Roll Dice", padx=5,
-                          command=lambda: self._rollDice(self._board))
+                          command=self._rollDice)
         rollDice.grid(row=0, column=0)
 
         trade = Button(self._controls, text="Trade", padx=5,
@@ -131,13 +134,13 @@ class Monopoly:
         """
         cvs.create_rectangle(0, 0, long, long)
         cvs.create_rectangle(long, 0, longPlus[0], long, fill="#d63e3e")
-        cvs.create_rectangle(longPlus[0], 0, longPlus[1], long)
+        cvs.create_rectangle(longPlus[0], 0, longPlus[1], long, fill="#cb75e0")
         cvs.create_rectangle(longPlus[1], 0, longPlus[2], long, fill="#d63e3e")
         cvs.create_rectangle(longPlus[2], 0, longPlus[3], long, fill="#d63e3e")
-        cvs.create_rectangle(longPlus[3], 0, longPlus[4], long)
+        cvs.create_rectangle(longPlus[3], 0, longPlus[4], long, fill="#7e7f85")
         cvs.create_rectangle(longPlus[4], 0, longPlus[5], long, fill="#e0fc08")
         cvs.create_rectangle(longPlus[5], 0, longPlus[6], long, fill="#e0fc08")
-        cvs.create_rectangle(longPlus[6], 0, longPlus[7], long)
+        cvs.create_rectangle(longPlus[6], 0, longPlus[7], long, fill="white")
         cvs.create_rectangle(longPlus[7], 0, longPlus[8], long, fill="#e0fc08")
         cvs.create_rectangle(longPlus[8], 0, cLength, long)
 
@@ -151,12 +154,12 @@ class Monopoly:
         """
         cvs.create_rectangle(0, long, long, longPlus[0], fill="#edbb32")
         cvs.create_rectangle(0, longPlus[0], long,  longPlus[1], fill="#edbb32")
-        cvs.create_rectangle(0, longPlus[1], long, longPlus[2])
+        cvs.create_rectangle(0, longPlus[1], long, longPlus[2], fill="#5462ba")
         cvs.create_rectangle(0, longPlus[2], long,  longPlus[3], fill="#edbb32")
-        cvs.create_rectangle(0, longPlus[3], long, longPlus[4])
+        cvs.create_rectangle(0, longPlus[3], long, longPlus[4], fill="#7e7f85")
         cvs.create_rectangle(0, longPlus[4], long, longPlus[5], fill="#e64cdb")
         cvs.create_rectangle(0, longPlus[5], long, longPlus[6], fill="#e64cdb")
-        cvs.create_rectangle(0, longPlus[6], long, longPlus[7])
+        cvs.create_rectangle(0, longPlus[6], long, longPlus[7], fill="white")
         cvs.create_rectangle(0, longPlus[7], long, longPlus[8], fill="#e64cdb")
 
     def _createRight(self, cvs):
@@ -169,12 +172,12 @@ class Monopoly:
         """
         cvs.create_rectangle(longPlus[8], long, cLength, longPlus[0], fill="#34c926")
         cvs.create_rectangle(longPlus[8], longPlus[0], cLength, longPlus[1], fill="#34c926")
-        cvs.create_rectangle(longPlus[8], longPlus[1], cLength, longPlus[2])
+        cvs.create_rectangle(longPlus[8], longPlus[1], cLength, longPlus[2], fill="#5462ba")
         cvs.create_rectangle(longPlus[8], longPlus[2], cLength, longPlus[3], fill="#34c926")
-        cvs.create_rectangle(longPlus[8], longPlus[3], cLength, longPlus[4])
-        cvs.create_rectangle(longPlus[8], longPlus[4], cLength, longPlus[5])
+        cvs.create_rectangle(longPlus[8], longPlus[3], cLength, longPlus[4], fill="#7e7f85")
+        cvs.create_rectangle(longPlus[8], longPlus[4], cLength, longPlus[5], fill="#cb75e0")
         cvs.create_rectangle(longPlus[8], longPlus[5], cLength, longPlus[6], fill="#245ac7")
-        cvs.create_rectangle(longPlus[8], longPlus[6], cLength, longPlus[7])
+        cvs.create_rectangle(longPlus[8], longPlus[6], cLength, longPlus[7], fill="black")
         cvs.create_rectangle(longPlus[8], longPlus[7], cLength, longPlus[8], fill="#245ac7")
 
     def _createBottom(self, cvs):
@@ -187,52 +190,91 @@ class Monopoly:
         cvs.create_rectangle(0, longPlus[8], long, cLength)
         cvs.create_rectangle(long, longPlus[8], longPlus[0], cLength, fill="#4ad6d9")
         cvs.create_rectangle(longPlus[0], longPlus[8], longPlus[1], cLength, fill="#4ad6d9")
-        cvs.create_rectangle(longPlus[1], longPlus[8], longPlus[2], cLength)
+        cvs.create_rectangle(longPlus[1], longPlus[8], longPlus[2], cLength, fill="#cb75e0")
         cvs.create_rectangle(longPlus[2], longPlus[8], longPlus[3], cLength, fill="#4ad6d9")
-        cvs.create_rectangle(longPlus[3], longPlus[8], longPlus[4], cLength)
-        cvs.create_rectangle(longPlus[4], longPlus[8], longPlus[5], cLength)
+        cvs.create_rectangle(longPlus[3], longPlus[8], longPlus[4], cLength, fill="#7e7f85")
+        cvs.create_rectangle(longPlus[4], longPlus[8], longPlus[5], cLength, fill="black")
         cvs.create_rectangle(longPlus[5], longPlus[8], longPlus[6], cLength, fill="#574400")
-        cvs.create_rectangle(longPlus[6], longPlus[8], longPlus[7], cLength)
+        cvs.create_rectangle(longPlus[6], longPlus[8], longPlus[7], cLength, fill="#5462ba")
         cvs.create_rectangle(longPlus[7], longPlus[8], longPlus[8], cLength, fill="#574400")
         cvs.create_rectangle(longPlus[8], longPlus[8], cLength, cLength)
 
-    def _showPlayers(self, frame, numPlayers):
+    def _showPlayers(self, outerFrame, numPlayers):
         """
             Displays the Player Selection Menu
 
             Gives every player an text field to select their name and a dropdown menu to select
             their color
 
-            Parameter: frame, the frame that the Menu is placed on.
-            Requires: Must be a tkinter.Frame 
+            Parameter: outerFrame, the frame that the Menu is placed on.
+            Requires: Must be a tkinter.Frame
 
             Parameter: numPlayers, the number of players in the game
             Requires: Must be an int
         """
-        for i in range(1, numPlayers + 1):
-            texti = Label(frame, text=f"Player {i}:", padx=5)
-            namei = Entry(frame)
-            playerIColor = StringVar()
-            colori = OptionMenu(frame, playerIColor, "red", "blue", "green", "yellow")
+        # Frame to hold the Selection menu
+        innerFrame = Frame(outerFrame)
 
+        # Create an place widgets in menu
+        for i in range(1, numPlayers + 1):
+            texti = Label(innerFrame, text=f"Player {i}:", padx=5)
+            namei = Entry(innerFrame)
+
+            playerIColor = StringVar()
+            # Save Player colors for later
+            playerColors.append(playerIColor)
+
+            colori = OptionMenu(innerFrame, playerIColor, "red", "blue", "green", "yellow")
             texti.grid(row=1, column=i-1)
             namei.grid(row=1, column=i)
             colori.grid(row=2, column=i-1, columnspan=2)
 
+        # Add frame to screen
+        innerFrame.grid(row=1, column=0, columnspan=numPlayers+1)
+
     def _play(self, currWindow, root, numPlayers):
-        print(numPlayers)
-        playersFrame = currWindow.winfo_children()[1].winfo_children()
-        colors = playersFrame[0:numPlayers]
-        names = playersFrame[numPlayers:]
-        players = list(zip(names, colors))
-        print(len(players))
+        """
+            Begins the game
+
+            Clears the current window, creates the game object, board canvas, and controls and 
+            adds them to their respective attributes
+
+            Parmeter: currWindow, the parent widget that has all of the welcome information
+            Requires: Must be of type tkinter.frame
+
+            Parmeter: root, the parent window where the board and controls will be added to
+            Requires: Must be of type tkinter.Tk()
+
+            Parmeter: numPlayers, the number of players in the game
+            Requires: Must be of type int
+        """
+        # Get the frame that has all of the player information
+        playersFrame = currWindow.winfo_children()[-1].winfo_children()
+
+        # Make a list of (id, name, color)
+        names = map(lambda nameEntry: nameEntry.get(), playersFrame[1:(3*numPlayers - 1):3])
+        colors = map(lambda colorEntry: colorEntry.get(), playerColors)
+        playerIds = list(range(1, numPlayers + 2))
+
+        players = list(zip(playerIds, names, colors))
+
+        # Clear the root window
         currWindow.destroy()
+
+        # Make the game object and add the board and controls to the root window
         self._game = Game(players)
         self._board = self._createBoard(self._window)
         self._controls = self._createControls(self._window)
 
-    def _rollDice(self, board):
+    def _drawPlayers(self):
         pass
+
+    def _rollDice(self):
+        self._game.rollDice()
 
     def _trade(self):
         pass
+
+    def _createPlayerInfo(self):
+        playerInfo = self._game.getCurrPlayerInfo()
+        

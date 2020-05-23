@@ -27,8 +27,8 @@ class Game:
         """
             Creates a single Game object.
 
-            Parmeter: players, a list of tuples containing the names and colors of the players
-            Requires: Must be of type (string, string) list
+            Parmeter: players, a list of tuples containing the ids, names, and colors of the players
+            Requires: Must be of type (int, string, string) list
         """
         self._board = self._createBoard()
         # cards = self._createCards()
@@ -74,12 +74,11 @@ class Game:
         """
             Creates the list of player objects for the game
 
-            Parmeter: players, a list of tuples containing the names and colors of the players
-            Requires: Must be of type (string, string) list
+            Parmeter: players, a list of tuples containing the ids, names and colors of the players
+            Requires: Must be of type (int, string, string) list
         """
         playerList = []
-        for i, name, color in enumerate(players):
-            print(len(playerList))
+        for i, name, color in players:
             playerList.append(Player(i, name, color))
         return playerList
 
