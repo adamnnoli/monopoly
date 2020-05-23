@@ -49,6 +49,7 @@ class Monopoly:
         self._playerInfo = None
         self._game = None
         self._gameLog = None
+        self._askPlayers = None
 
     def run(self):
         """
@@ -77,11 +78,9 @@ class Monopoly:
 
         # Ask how many players and create next dialogue box to get names and colors
         numPlayers = IntVar()
-        askPlayers = OptionMenu(self._welcome, numPlayers, 1, 2, 3, 4)
+        askPlayers = OptionMenu(self._welcome, numPlayers, 1, 2, 3, 4,
+                                command=lambda numPlayers: self._showPlayers(self._welcome, numPlayers))
         askPlayers.grid(row=0, column=1)
-        getPlayers = Button(self._welcome, text="Select",
-                            command=lambda: self._showPlayers(self._welcome, numPlayers.get()))
-        getPlayers.grid(row=0, column=2)
 
         # Start the Game
         startButton = Button(self._welcome, text="Play!",
@@ -101,25 +100,27 @@ class Monopoly:
             Parameter: numPlayers, the number of players in the game
             Requires: Must be an int
         """
+        if self._askPlayers is not None:
+            self._askPlayers.destroy()
         # Frame to hold the Selection menu
-        innerFrame = Frame(outerFrame)
+        self._askPlayers = Frame(outerFrame)
 
         # Create an place widgets in menu
         for i in range(1, numPlayers + 1):
-            texti = Label(innerFrame, text=f"Player {i}:", padx=5)
-            namei = Entry(innerFrame)
+            texti = Label(self._askPlayers, text=f"Player {i}:", padx=5)
+            namei = Entry(self._askPlayers, width=15)
 
             playerIColor = StringVar()
             # Save Player colors for later
             playerColors.append(playerIColor)
 
-            colori = OptionMenu(innerFrame, playerIColor, "red", "blue", "green", "yellow")
-            texti.grid(row=1, column=i-1)
-            namei.grid(row=1, column=i)
-            colori.grid(row=2, column=i-1, columnspan=2)
+            colori = OptionMenu(self._askPlayers, playerIColor, "red", "blue", "green", "yellow")
+            texti.grid(row=i, column=0)
+            namei.grid(row=i, column=1)
+            colori.grid(row=i, column=2)
 
         # Add frame to screen
-        innerFrame.grid(row=1, column=0, columnspan=numPlayers+1)
+        self._askPlayers.grid(row=1, column=0, columnspan=numPlayers+1)
 
     def _play(self, currWindow, root, numPlayers):
         """
@@ -267,14 +268,16 @@ class Monopoly:
         self._controls.grid(row=0, column=1)
 
         # Roll Dice Button
-        rollDice = Button(self._controls, text="Roll Dice", padx=5,
-                          command=self._rollDice)
+        rollDice = Button(self._controls, text="Roll Dice", padx=5, command=self._rollDice)
         rollDice.grid(row=0, column=0)
 
         # Trade Button
-        trade = Button(self._controls, text="Trade", padx=5,
-                       command=self._trade)
+        trade = Button(self._controls, text="Trade", padx=5, command=self._trade)
         trade.grid(row=0, column=1)
+
+        # But Button
+        buy = Button(self._controls, text="Buy", padx=5, command=self._buy)
+        buy.grid(row=1, column=0)
 
     def _rollDice(self):
         self._game.rollDice()
@@ -283,7 +286,10 @@ class Monopoly:
     def _trade(self):
         pass
 
+    def _buy(self):
+        self._game.buy()
 # Player Info
+
     def _createPlayerInfo(self):
         playerInfo = self._game.getCurrPlayerInfo()
 

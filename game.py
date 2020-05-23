@@ -160,11 +160,23 @@ class Game:
 # General
     def rollDice(self):
         roll = random.randint(2, 12)
-        print(roll)
         self._currPlayer.move(roll)
         self._handleTile()
+        self._currPlayer = self._players[(self._players.index(
+            self._currPlayer) + 1) % len(self._players)]
 
-# Players
+    def buy(self):
+        player = self._currPlayer
+        tileID = player.getLocation()
+        if self._board.getOwner(tileID) is not None:
+            pass
+        elif self._board.getPrice(tileID) == 0:
+            pass
+        elif self._board.getPrice(tileID) > player.getCash():
+            pass
+        else:
+            pass
+
     def take(self, player):
         pass
 

@@ -56,6 +56,18 @@ class Board:
     def __init__(self, tiles):
         self._tiles = tiles
 
+    def getID(self, tileName):
+        pass
+
+    def getOwner(self, tileID):
+        pass
+
+    def getPrice(self, tileID):
+        pass
+
+    def setOwner(self, tileID):
+        pass
+
 
 class Player:
     """
@@ -114,6 +126,10 @@ class Player:
             "propertyLocations": self._propertiesIds
         }
         return dict
+
+    def getLocation(self):
+        return self._location
+
 
 class CommunityChestCard:
     """
