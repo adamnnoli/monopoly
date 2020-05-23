@@ -33,6 +33,7 @@ class Monopoly:
         _game: the Game object with the current game information [game.Game]
     """
 
+# START UP----------------------------------------------------------------------------
     def __init__(self):
         """
             Creates a instance of Monopoly
@@ -84,29 +85,76 @@ class Monopoly:
                              command=lambda: self._play(self._welcome, root, numPlayers.get()))
         startButton.grid(row=3, column=0, columnspan=numPlayers.get()+1)
 
-    def _createControls(self, root):
+    def _showPlayers(self, outerFrame, numPlayers):
         """
-            Creates a frame and adds it to root.
+            Displays the Player Selection Menu
 
-            This frame contains all of the buttons needed to perform game actions, calling upon
-            methods in game.Game to implement functionality.
+            Gives every player an text field to select their name and a dropdown menu to select
+            their color
 
-            Parameter: root, the window that the controls are added to
+            Parameter: outerFrame, the frame that the Menu is placed on.
+            Requires: Must be a tkinter.Frame
+
+            Parameter: numPlayers, the number of players in the game
+            Requires: Must be an int
+        """
+        # Frame to hold the Selection menu
+        innerFrame = Frame(outerFrame)
+
+        # Create an place widgets in menu
+        for i in range(1, numPlayers + 1):
+            texti = Label(innerFrame, text=f"Player {i}:", padx=5)
+            namei = Entry(innerFrame)
+
+            playerIColor = StringVar()
+            # Save Player colors for later
+            playerColors.append(playerIColor)
+
+            colori = OptionMenu(innerFrame, playerIColor, "red", "blue", "green", "yellow")
+            texti.grid(row=1, column=i-1)
+            namei.grid(row=1, column=i)
+            colori.grid(row=2, column=i-1, columnspan=2)
+
+        # Add frame to screen
+        innerFrame.grid(row=1, column=0, columnspan=numPlayers+1)
+
+    def _play(self, currWindow, root, numPlayers):
+        """
+            Begins the game
+
+            Clears the current window, creates the game object, board canvas, and controls and
+            adds them to their respective attributes
+
+            Parmeter: currWindow, the parent widget that has all of the welcome information
+            Requires: Must be of type tkinter.frame
+
+            Parmeter: root, the parent window where the board and controls will be added to
             Requires: Must be of type tkinter.Tk()
+
+            Parmeter: numPlayers, the number of players in the game
+            Requires: Must be of type int
         """
-        self._controls = Frame(root)
-        self._controls.grid(row=0, column=1)
+        # Get the frame that has all of the player information
+        playersFrame = currWindow.winfo_children()[-1].winfo_children()
 
-        rollDice = Button(self._controls, text="Roll Dice", padx=5,
-                          command=self._rollDice)
-        rollDice.grid(row=0, column=0)
+        # Make a list of (id, name, color)
+        names = map(lambda nameEntry: nameEntry.get(), playersFrame[1:(3*numPlayers - 1):3])
+        colors = map(lambda colorEntry: colorEntry.get(), playerColors)
+        playerIds = list(range(1, numPlayers + 2))
 
-        trade = Button(self._controls, text="Trade", padx=5,
-                       command=self._trade)
-        trade.grid(row=0, column=1)
+        players = list(zip(playerIds, names, colors))
 
-    # Helper functions make game board
+        # Clear the root window
+        currWindow.destroy()
 
+        # Make the game object and add the board and controls to the root window
+        self._game = Game(players)
+        self._board = self._createBoard(self._window)
+        self._controls = self._createControls(self._window)
+
+# DURING GAME--------------------------------------------------------------------------------
+
+# Board
     def _createBoard(self, root):
         """
             Creates a canvas that has the board drawn on it and adds it to root.
@@ -199,75 +247,30 @@ class Monopoly:
         cvs.create_rectangle(longPlus[7], longPlus[8], longPlus[8], cLength, fill="#574400")
         cvs.create_rectangle(longPlus[8], longPlus[8], cLength, cLength)
 
-    def _showPlayers(self, outerFrame, numPlayers):
+# Controls
+    def _createControls(self, root):
         """
-            Displays the Player Selection Menu
+            Creates a frame and adds it to root.
 
-            Gives every player an text field to select their name and a dropdown menu to select
-            their color
+            This frame contains all of the buttons needed to perform game actions, calling upon
+            methods in game.Game to implement functionality.
 
-            Parameter: outerFrame, the frame that the Menu is placed on.
-            Requires: Must be a tkinter.Frame
-
-            Parameter: numPlayers, the number of players in the game
-            Requires: Must be an int
-        """
-        # Frame to hold the Selection menu
-        innerFrame = Frame(outerFrame)
-
-        # Create an place widgets in menu
-        for i in range(1, numPlayers + 1):
-            texti = Label(innerFrame, text=f"Player {i}:", padx=5)
-            namei = Entry(innerFrame)
-
-            playerIColor = StringVar()
-            # Save Player colors for later
-            playerColors.append(playerIColor)
-
-            colori = OptionMenu(innerFrame, playerIColor, "red", "blue", "green", "yellow")
-            texti.grid(row=1, column=i-1)
-            namei.grid(row=1, column=i)
-            colori.grid(row=2, column=i-1, columnspan=2)
-
-        # Add frame to screen
-        innerFrame.grid(row=1, column=0, columnspan=numPlayers+1)
-
-    def _play(self, currWindow, root, numPlayers):
-        """
-            Begins the game
-
-            Clears the current window, creates the game object, board canvas, and controls and 
-            adds them to their respective attributes
-
-            Parmeter: currWindow, the parent widget that has all of the welcome information
-            Requires: Must be of type tkinter.frame
-
-            Parmeter: root, the parent window where the board and controls will be added to
+            Parameter: root, the window that the controls are added to
             Requires: Must be of type tkinter.Tk()
-
-            Parmeter: numPlayers, the number of players in the game
-            Requires: Must be of type int
         """
-        # Get the frame that has all of the player information
-        playersFrame = currWindow.winfo_children()[-1].winfo_children()
+        # Frame to Hold Buttons
+        self._controls = Frame(root)
+        self._controls.grid(row=0, column=1)
 
-        # Make a list of (id, name, color)
-        names = map(lambda nameEntry: nameEntry.get(), playersFrame[1:(3*numPlayers - 1):3])
-        colors = map(lambda colorEntry: colorEntry.get(), playerColors)
-        playerIds = list(range(1, numPlayers + 2))
+        # Roll Dice Button
+        rollDice = Button(self._controls, text="Roll Dice", padx=5,
+                          command=self._rollDice)
+        rollDice.grid(row=0, column=0)
 
-        players = list(zip(playerIds, names, colors))
-
-        # Clear the root window
-        currWindow.destroy()
-
-        # Make the game object and add the board and controls to the root window
-        self._game = Game(players)
-        self._board = self._createBoard(self._window)
-        self._controls = self._createControls(self._window)
-
-    def _drawPlayers(self):
-        pass
+        # Trade Button
+        trade = Button(self._controls, text="Trade", padx=5,
+                       command=self._trade)
+        trade.grid(row=0, column=1)
 
     def _rollDice(self):
         self._game.rollDice()
@@ -275,6 +278,40 @@ class Monopoly:
     def _trade(self):
         pass
 
+# Player Info
     def _createPlayerInfo(self):
         playerInfo = self._game.getCurrPlayerInfo()
-        
+
+# Players
+    def _drawPlayers(self):
+        """
+            Draws the Players' pieces.
+        """
+        locColors = []
+        with self._game.getPlayers() as players:
+            for player in players:
+                locColors.append((player["loc"], player["color"]))
+        for loc, color in locColors:
+            self._drawPiece(loc, color)
+
+    def _drawPiece(self, location, color, offset):
+        """
+            Draws a square on the board, PIECE_SIZE x PIECE_SIZE, in tile number location,
+            with color color, moved overed from the edge of the board by offset.
+
+            Parmeter: location, the tile number where the piece will be drawn
+            Requires: Must be of type int
+
+            Parmeter: color, the color of the piece
+            Requires: Must be of type string
+
+            Parmeter: offset, number of pixels away from board edge the piece will be drawn
+            Requires: Must be of type int
+        """
+        if location < 10:
+            pass
+
+# END GAME---------------------------------------------------------------------------------
+
+    def _displaywinner(self):
+        pass

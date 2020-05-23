@@ -9,3 +9,6 @@ TILE_SHORT = 50
 
 # The amount of money each player starts with
 STARTING_CASH = 1500
+
+# Length of one side of a game piece
+PIECE_SIZE = 5

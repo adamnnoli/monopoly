@@ -22,6 +22,7 @@ class Game:
         _players: a list of the players in the game [Player list]
         _currPlayer: the player whose turn it currently is [Player]
     """
+# Initialization
 
     def __init__(self, players):
         """
@@ -36,6 +37,7 @@ class Game:
         # self._communityChestCards = cards[1]
         self._players = self._createPlayers(players)
         self._currPlayer = self._players[0]
+# Board
 
     def _createBoard(self):
         """
@@ -59,6 +61,7 @@ class Game:
                 newTile = BoardTile(i, name, price, rents, mortgage, houseCost, color)
                 tiles.append(BoardTile)
         return Board(tiles)
+# Cards
 
     def _createCards(self):
         """
@@ -69,18 +72,7 @@ class Game:
             I.e. [Chance Cards, Community Chest Cards]
         """
         return [self._createChanceCards(), self._createCommunityChestCards()]
-
-    def _createPlayers(self, players):
-        """
-            Creates the list of player objects for the game
-
-            Parmeter: players, a list of tuples containing the ids, names and colors of the players
-            Requires: Must be of type (int, string, string) list
-        """
-        playerList = []
-        for i, name, color in players:
-            playerList.append(Player(i, name, color))
-        return playerList
+    # Chance
 
     def _chanceCardTexts(self):
         zero = "You have won a crossword competition. Collect $100."
@@ -111,6 +103,7 @@ class Game:
         actions = self._chanceCardActions()
         for text, action in zip(texts, actions):
             chanceCards.append(ChanceCard(text, action))
+    # Community Chest
 
     def _communityChestCardTexts(self):
         zero = "Advance to Go."
@@ -142,6 +135,30 @@ class Game:
         for text, action in zip(texts, actions):
             communityChestCards.append(CommunityChestCard(text, action))
 
+# Players
+    def _createPlayers(self, players):
+        """
+            Creates the list of player objects for the game
+
+            Parmeter: players, a list of tuples containing the ids, names and colors of the players
+            Requires: Must be of type (int, string, string) list
+        """
+        playerList = []
+        for i, name, color in players:
+            playerList.append(Player(i, name, color))
+        return playerList
+
+# Getters
+
+# Game Functionality
+
+# General
+    def rollDice(self):
+        roll = random.randint(0, 12)
+        self._currPlayer.move(roll)
+        self._handleTile()
+
+# Players
     def take(self, player):
         pass
 
@@ -153,11 +170,8 @@ class Game:
 
     def giveToEach(self, player):
         pass
-
-    def rollDice(self):
-        roll = random.randint(0, 12)
-        self._currPlayer.move(roll)
-        self._handleTile()
+# Board
 
     def _handleTile(self):
         pass
+# Cards
