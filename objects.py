@@ -50,7 +50,7 @@ class BoardTile:
         self._houseCost = houseCost
         self._color = color
         self._owner = None
-
+        self._numHouses = 0
 #Getters and Setters
 
     def getId(self):
@@ -77,6 +77,9 @@ class BoardTile:
     def getOwner(self):
         return self._owner
 
+    def getNumHouses(self):
+        return self._numHouses
+
     def setOwner(self, owner):
         self._owner = owner
 
@@ -99,6 +102,9 @@ class Board:
 
     def getName(self, tileID):
         return self._findTile(tileID).getName()
+
+    def getNumHouses(self, tileID):
+        return self._findTile(tileID).getNumHouses()
 
     def setOwner(self, tileID, owner):
         return self._findTile(tileID).setOwner(owner)
@@ -125,6 +131,8 @@ class Player:
         _cash: the amount of money the player currently has [int]
         _location: the id of the tile the player is currently on [int]
         _propertiesIds: list of the ids of the properties the player owns [int list]
+        _inJail: true if the player is currently in jail[bool]
+        _numGetOutJail: the number of get out of jail free cards the player has[int]
     """
 
     def __init__(self, number, name, color):
@@ -146,6 +154,8 @@ class Player:
         self._cash = STARTING_CASH
         self._location = 0
         self._propertiesIds = []
+        self._inJail = False
+        self._numGetOutJail = 0
 
 #Getters and Setters
 
@@ -172,9 +182,9 @@ class Player:
 # Actions
     def move(self, places):
         self._location += places
-        if self._location >= 38:
+        if self._location >= 39:
             self._cash += 200
-            self._location %= 38
+            self._location %= 39
 
     def takeCash(self, amount):
         self._cash -= amount
@@ -184,6 +194,69 @@ class Player:
 
     def giveProperty(self, tileID):
         self._propertiesIds.append(tileID)
+
+    def advanceTo(self, tileName, board):
+        tileLoc = board.getID(tileName)
+        if self._location > tileLoc:
+            self.giveCash(200)
+        self._location = tileLoc
+
+    def giveToEach(self, amount, players):
+        for player in players:
+            player.giveCash(amount)
+        self.takeCash(amount * len(players))
+
+    def takeFromEach(self, amount, players):
+        for player in players:
+            player.takeCash(amount)
+        self.giveCash(amount * len(players))
+
+    def makeRepairs(self, perHouse, perHotel):
+        numHouses = 0
+        numHotels = 0
+
+        for tileID in self._propertiesIds:
+            housesOnProperty = Board.getNumHouses(tileID)
+            if housesOnProperty == 5:
+                numHotels += 1
+            else:
+                numHouses += housesOnProperty
+
+        self.takeCash(perHouse * numHouses)
+        self.takeCash(perHotel * numHotels)
+
+    def goToJail(self):
+        self._location = 10
+        self._inJail = True
+
+    def giveGetOutOfJail(self):
+        self._numGetOutJail += 1
+
+    def advanceToNearestUtility(self, board):
+        
+        electricCompLoc = board.getID("Electric Company")
+        waterWorksLoc = board.getID("Water Works")
+        
+        if self._location > waterWorksLoc or self._location < electricCompLoc:
+            self.advanceTo("Electric Company", board)
+        else:
+            self.advanceTo("Water Works", board)
+
+    def advanceToNearestRailroad(self, board):
+        
+        readingLoc = board.getID("Reading Railrod")
+        pennsylvaniaLoc = board.getID("Pennsylvania Railroad")
+        bAndOLoc = board.getID("B. & O. Railroad")
+        shortLoc = board.getID("Short Line")
+       
+        if self._location < readingLoc or self._location > shortLoc:
+            self.advanceTo("Reading Railroad", board)
+        elif self._location < pennsylvaniaLoc:
+            self.advanceTo("Pennsylvania Railroad", board)
+        elif self._location < bAndOLoc:
+            self.advanceTo("B. & O. Railroad", board)
+        else:
+            self.advanceTo("Short Line")
 
 
 class CommunityChestCard:

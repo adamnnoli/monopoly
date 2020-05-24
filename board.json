@@ -225,7 +225,7 @@
       "color": "yellow"
     },
     {
-      "name": "Water Work",
+      "name": "Water Works",
       "price": 150,
       "mortgage": 75,
       "rents": [0, 0, 0, 0, 0, 0],
@@ -279,6 +279,14 @@
       "rents": [28, 150, 450, 1000, 1200, 1400],
       "house cost": 200,
       "color": "green"
+    },
+    {
+      "name": "Short Line",
+      "price": 200,
+      "mortgage": 100,
+      "rents": [25, 25, 25, 25, 25, 25],
+      "house cost": 0,
+      "color": "white"
     },
     {
       "name": "Chance",

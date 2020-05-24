@@ -377,7 +377,6 @@ class Monopoly:
 
 
 # Game Log
-
     def _createLog(self):
         pass
 # END GAME---------------------------------------------------------------------------------
