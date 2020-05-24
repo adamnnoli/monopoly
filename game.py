@@ -32,11 +32,15 @@ class Game:
             Requires: Must be of type (int, string, string) list
         """
         self._board = self._createBoard()
-        # cards = self._createCards()
-        # self._chanceCards = cards[0]
-        # self._communityChestCards = cards[1]
+        cards = self._createCards()
+        self._chanceCards = cards[0]
+        self._communityChestCards = cards[1]
         self._players = self._createPlayers(players)
         self._currPlayer = self._players[0]
+
+        self._hasRolled = False
+        self._currChance = 0
+        self._currCommunityChest = 0
 # Board
 
     def _createBoard(self):
@@ -59,7 +63,7 @@ class Game:
                 houseCost = tile["house cost"]
                 color = tile["color"]
                 newTile = BoardTile(i, name, price, rents, mortgage, houseCost, color)
-                tiles.append(BoardTile)
+                tiles.append(newTile)
         return Board(tiles)
 # Cards
 
@@ -72,7 +76,7 @@ class Game:
             I.e. [Chance Cards, Community Chest Cards]
         """
         return [self._createChanceCards(), self._createCommunityChestCards()]
-    # Chance
+# Chance
 
     def _chanceCardTexts(self):
         zero = "You have won a crossword competition. Collect $100."
@@ -95,7 +99,23 @@ class Game:
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
 
     def _chanceCardActions(self):
-        return []
+        def zero(player): return player.giveCash(100)
+        def one(player): return player.advanceTo("Go")
+        def two(player): return player.advanceTo("Illinois Ave")
+        def three(player): return player.advanceTo("St. Charles Place")
+        def four(player): return player.advanceToNearestUtility()
+        def five(player): return player.advanceToNearestRailroad()
+        def six(player): return player.giveCash(50)
+        def seven(player): return player.giveGetOutOfJail()
+        def eight(player): return player.move(-3)
+        def nine(player): return player.goToJail()
+        def ten(player): return player.makeRepairs(25, 100)
+        def eleven(player): return player.takeCash(15)
+        def twelve(player): return player.advanceTo("Reading Railroad")
+        def thirteen(player): return player.advanceTo("Boardwalk")
+        def fourteen(player): return player.giveToEach(50, self._players)
+        def fifteen(player): return player.giveCash(150)
+        return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
 
     def _createChanceCards(self):
         chanceCards = []
@@ -103,7 +123,7 @@ class Game:
         actions = self._chanceCardActions()
         for text, action in zip(texts, actions):
             chanceCards.append(ChanceCard(text, action))
-    # Community Chest
+# Community Chest
 
     def _communityChestCardTexts(self):
         zero = "Advance to Go."
@@ -126,12 +146,29 @@ class Game:
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen]
 
     def _communityChestCardActions(self):
-        return []
+        def zero(player): return player.advanceTo("Go")
+        def one(player): return player.giveCash(200)
+        def two(player): return player.takeCash(50)
+        def three(player): return player.giveCash(50)
+        def four(player): return player.giveGetOutOfJail()
+        def five(player): return player.goToJail()
+        def six(player): return player.takeFromEach(50, self._players)
+        def seven(player): return player.giveCash(100)
+        def eight(player): return player.giveCash(20)
+        def nine(player): return player.takeFromEach(10, self._players)
+        def ten(player): return player.giveCash(100)
+        def eleven(player): return player.takeCash(50)
+        def twelve(player): return player.takeCash(50)
+        def thirteen(player): return player.giveCash(50)
+        def fourteen(player): return player.makeRepair(40, 115)
+        def fifteen(player): return player.giveCash(10)
+        def sixteen(player): return player.giveCash(100)
+        return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen]
 
     def _createCommunityChestCards(self):
         communityChestCards = []
-        texts = self._communityChestCardTexts
-        actions = self._communityChestCardActions
+        texts = self._communityChestCardTexts()
+        actions = self._communityChestCardActions()
         for text, action in zip(texts, actions):
             communityChestCards.append(CommunityChestCard(text, action))
 
@@ -155,27 +192,52 @@ class Game:
         """
         return list(map(lambda player: player.to_dict(), self._players))
 
+    def getCurrPlayer(self):
+        """
+            Returns a dictionary representation of the current player
+        """
+        return self._currPlayer.to_dict()
+
+    def getTileName(self, tileID):
+        return self._board.getName(tileID)
 # Game Functionality-------------------------------------------------------------------------
 
 # General
     def rollDice(self):
-        roll = random.randint(2, 12)
-        self._currPlayer.move(roll)
-        self._handleTile()
-        self._currPlayer = self._players[(self._players.index(
-            self._currPlayer) + 1) % len(self._players)]
+        if not self._hasRolled:
+            roll = random.randint(2, 12)
+            self._currPlayer.move(roll)
+            self._handleTile()
+            self._hasRolled = True
+            return ("Success")
+        else:
+            return ("Already Rolled")
 
     def buy(self):
         player = self._currPlayer
         tileID = player.getLocation()
+        price = self._board.getPrice(tileID)
+
         if self._board.getOwner(tileID) is not None:
-            pass
-        elif self._board.getPrice(tileID) == 0:
-            pass
-        elif self._board.getPrice(tileID) > player.getCash():
-            pass
+            return("Already Owned")
+        elif price == 0:
+            return("Not Buyable")
+        elif price > player.getCash():
+            return("Not enough Money")
         else:
-            pass
+            self._board.setOwner(tileID, player)
+            player.takeCash(price)
+            player.giveProperty(tileID)
+            return("Success")
+
+    def endTurn(self):
+        if self._hasRolled:
+            nextPlayerIndex = (self._players.index(self._currPlayer) + 1) % len(self._players)
+            self._currPlayer = self._players[nextPlayerIndex]
+            self._hasRolled = False
+            return "Success"
+        else:
+            return "Has Not Rolled"
 
     def take(self, player):
         pass

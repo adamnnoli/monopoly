@@ -51,22 +51,62 @@ class BoardTile:
         self._color = color
         self._owner = None
 
+#Getters and Setters
+
+    def getId(self):
+        return self._id
+
+    def getName(self):
+        return self._name
+
+    def getPrice(self):
+        return self._price
+
+    def getRents(self):
+        return self._rents
+
+    def getMortgage(self):
+        return self._mortgage
+
+    def getHouseCost(self):
+        return self._houseCost
+
+    def getColor(self):
+        return self._houseCost
+
+    def getOwner(self):
+        return self._owner
+
+    def setOwner(self, owner):
+        self._owner = owner
+
 
 class Board:
     def __init__(self, tiles):
         self._tiles = tiles
 
+#Getters and Setters
     def getID(self, tileName):
-        pass
+        for tile in self._tiles:
+            if tile.getName() == tileName:
+                return tile.getID()
 
     def getOwner(self, tileID):
-        pass
+        return self._findTile(tileID).getOwner()
 
     def getPrice(self, tileID):
-        pass
+        return self._findTile(tileID).getPrice()
 
-    def setOwner(self, tileID):
-        pass
+    def getName(self, tileID):
+        return self._findTile(tileID).getName()
+
+    def setOwner(self, tileID, owner):
+        return self._findTile(tileID).setOwner(owner)
+
+    def _findTile(self, tileID):
+        for tile in self._tiles:
+            if tile.getId() == tileID:
+                return tile
 
 
 class Player:
@@ -107,11 +147,13 @@ class Player:
         self._location = 0
         self._propertiesIds = []
 
-    def move(self, places):
-        self._location += places
-        if self._location >= 38:
-            self._cash += 200
-            self._location %= 38
+#Getters and Setters
+
+    def getLocation(self):
+        return self._location
+
+    def getCash(self):
+        return self._cash
 
     def to_dict(self):
         """
@@ -127,8 +169,21 @@ class Player:
         }
         return dict
 
-    def getLocation(self):
-        return self._location
+# Actions
+    def move(self, places):
+        self._location += places
+        if self._location >= 38:
+            self._cash += 200
+            self._location %= 38
+
+    def takeCash(self, amount):
+        self._cash -= amount
+
+    def giveCash(self, amount):
+        self._cash += amount
+
+    def giveProperty(self, tileID):
+        self._propertiesIds.append(tileID)
 
 
 class CommunityChestCard:

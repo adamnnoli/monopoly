@@ -155,6 +155,7 @@ class Monopoly:
         self._game = Game(players)
         self._board = self._createBoard(self._window)
         self._controls = self._createControls(self._window)
+        self._playerInfo = self._createPlayerInfo()
 
 # DURING GAME--------------------------------------------------------------------------------
 
@@ -171,7 +172,7 @@ class Monopoly:
         """
         self._board = Canvas(root, width=cLength, height=cLength)
         self._board.create_rectangle(0, 0, cLength, cLength, fill="#c0e2ca")
-        self._board.grid(row=0, column=0)
+        self._board.grid(row=0, column=0, rowspan=3)
         self._createTop(self._board)
         self._createLeft(self._board)
         self._createRight(self._board)
@@ -271,27 +272,53 @@ class Monopoly:
         rollDice = Button(self._controls, text="Roll Dice", padx=5, command=self._rollDice)
         rollDice.grid(row=0, column=0)
 
+        # Buy Button
+        buy = Button(self._controls, text="Buy", padx=5, command=self._buy)
+        buy.grid(row=0, column=1)
+
         # Trade Button
         trade = Button(self._controls, text="Trade", padx=5, command=self._trade)
-        trade.grid(row=0, column=1)
+        trade.grid(row=1, column=0)
 
-        # But Button
-        buy = Button(self._controls, text="Buy", padx=5, command=self._buy)
-        buy.grid(row=1, column=0)
+        # End Turn Button
+        endTurn = Button(self._controls, text="End Turn", padx=5, command=self._endTurn)
+        endTurn.grid(row=1, column=1)
 
     def _rollDice(self):
         self._game.rollDice()
         self._createBoard(self._window)
+        self._createPlayerInfo()
 
     def _trade(self):
-        pass
+        self._createPlayerInfo()
 
     def _buy(self):
         self._game.buy()
+        self._createPlayerInfo()
+
+    def _endTurn(self):
+        self._game.endTurn()
+        self._createPlayerInfo()
 # Player Info
 
     def _createPlayerInfo(self):
-        playerInfo = self._game.getCurrPlayerInfo()
+        playerInfo = self._game.getCurrPlayer()
+        name = playerInfo["name"]
+        cash = playerInfo["cash"]
+
+        tileName = self._game.getTileName(playerInfo["location"])
+
+        if self._playerInfo is not None:
+            self._playerInfo.destroy()
+
+        frame = Frame(self._window)
+        frame.grid(row=1, column=1)
+
+        nameLabel = Label(frame, text=name).pack()
+        cashLabel = Label(frame, text=cash).pack()
+        locationLabel = Label(frame, text=tileName).pack()
+
+        self._playerInfo = frame
 
 # Players
     def _drawPlayers(self, board):
@@ -350,8 +377,10 @@ class Monopoly:
 
 
 # Game Log
-# END GAME---------------------------------------------------------------------------------
 
+    def _createLog(self):
+        pass
+# END GAME---------------------------------------------------------------------------------
 
     def _displaywinner(self):
         pass
