@@ -126,6 +126,9 @@ class Game:
 # Community Chest
 
     def _communityChestCardTexts(self):
+        """
+            Returns an array with all of the texts for the Community Chest Cards
+        """
         zero = "Advance to Go."
         one = "Bank error in your favor. Collect $200."
         two = "Doctor's fees. Pay $50."
@@ -146,6 +149,11 @@ class Game:
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen]
 
     def _communityChestCardActions(self):
+        """
+            Returns an array with all of the actions for the Community Chest Cards.
+
+            Order matches the order of the Community Chest Card Texts
+        """
         def zero(player): return player.advanceTo("Go")
         def one(player): return player.giveCash(200)
         def two(player): return player.takeCash(50)
@@ -166,6 +174,10 @@ class Game:
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen]
 
     def _createCommunityChestCards(self):
+        """
+            Returns an array of  Community Chest Card Objects that represent all of the community
+            chest cards in game.
+        """
         communityChestCards = []
         texts = self._communityChestCardTexts()
         actions = self._communityChestCardActions()
@@ -199,11 +211,22 @@ class Game:
         return self._currPlayer.to_dict()
 
     def getTileName(self, tileID):
+        """
+            Returns the name of tile with id [tileID]
+
+            Parmeter: tileID, the id of the tile requested
+            Requires: Must be of type int
+
+        """
         return self._board.getName(tileID)
 # Game Functionality-------------------------------------------------------------------------
 
 # General
     def rollDice(self):
+        """
+            If the current player has not rolled yet then rolls the dice and moves the player by
+            the number of places shown and returns "Success". Returns "Already Rolled" otherwise.
+        """
         if not self._hasRolled:
             roll = random.randint(2, 12)
             self._currPlayer.move(roll)
@@ -214,6 +237,9 @@ class Game:
             return ("Already Rolled")
 
     def buy(self):
+        """
+            Return
+        """
         player = self._currPlayer
         tileID = player.getLocation()
         price = self._board.getPrice(tileID)

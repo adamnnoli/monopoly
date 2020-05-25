@@ -32,6 +32,11 @@ class Monopoly:
         _playerInfo: frame that displays the information of the current player [tkinter.Frame]
         _game: the Game object with the current game information [game.Game]
         _gameLog: frame with labels to log responses from the game [tkinter.Frame]
+        _askPlayers: the frame displayed when asking the names and colors of players[tkinter.Frame]
+        _buyWindow: the window prompting the user if they want to buy the property they are on[tkinter.Tk()]
+        _tradeWindow: the window that handles trades in the game[tkinter.Tk()]
+        _buildWindow: the window that handles building on properties[tkinter.Tk()]
+        _auctionWindow: the window that handles auctions in the game[tkinter.Tk()]
     """
 
 # START UP----------------------------------------------------------------------------
@@ -50,6 +55,10 @@ class Monopoly:
         self._game = None
         self._gameLog = None
         self._askPlayers = None
+        self._buyWindow = None
+        self._tradeWindow = None
+        self._buildWindow = None
+        self._auctionWindow = None
 
     def run(self):
         """
@@ -347,38 +356,42 @@ class Monopoly:
             Parmeter: offset, number of pixels away from board edge the piece will be drawn
             Requires: Must be of type int
         """
+        longPiece = long + PIECE_SIZE
+        offsetPiece = offset + PIECE_SIZE
         if location == 0:
-            board.create_rectangle(cLength - long, cLength - offset - PIECE_SIZE,
+            board.create_rectangle(cLength - long, cLength - offsetPiece,
                                    cLength - long + PIECE_SIZE, cLength-offset, fill=color)
         elif location < 10:
-            board.create_rectangle(cLength - longPlus[location-1], cLength - offset - PIECE_SIZE,
+            board.create_rectangle(cLength - longPlus[location-1], cLength - offsetPiece,
                                    cLength - longPlus[location-1] + PIECE_SIZE, cLength-offset, fill=color)
         elif location == 10:
-            board.create_rectangle(offset, cLength-PIECE_SIZE, offset +
-                                   PIECE_SIZE, cLength, fill=color)
+            board.create_rectangle(offset, cLength-PIECE_SIZE, offsetPiece, cLength, fill=color)
         elif location < 19:
             board.create_rectangle(
-                offset, longPlus[18-location], offset+PIECE_SIZE, longPlus[18-location] + PIECE_SIZE, fill=color)
+                offset, longPlus[18-location], offsetPiece, longPlus[18-location] + PIECE_SIZE, fill=color)
         elif location == 19:
-            board.create_rectangle(offset, long, offset+PIECE_SIZE, long+PIECE_SIZE, fill=color)
+            board.create_rectangle(offset, long, offsetPiece, longPiece, fill=color)
         elif location == 20:
             board.create_rectangle(long-PIECE_SIZE, offset, long, offset+PIECE_SIZE, fill=color)
         elif location < 31:
             board.create_rectangle(longPlus[location-21]-PIECE_SIZE, offset,
                                    longPlus[location-21], offset+PIECE_SIZE, fill=color)
         elif location == 31:
-            board.create_rectangle(cLength - long + offset, long, cLength - long + offset + PIECE_SIZE,
-                                   long + PIECE_SIZE, fill=color)
+            board.create_rectangle(cLength - long + offset, long, cLength - long + offsetPiece,
+                                   longPiece, fill=color)
         else:
             board.create_rectangle(cLength - long + offset, longPlus[location-31],
-                                   cLength - long + offset + PIECE_SIZE,
-                                   longPlus[location-31] + PIECE_SIZE,
+                                   cLength - long + offsetPiece, longPlus[location-31] + PIECE_SIZE,
                                    fill=color)
-
 
 # Game Log
     def _createLog(self):
         pass
+
+# Buying
+# Trading
+# Building
+# Auctioning
 # END GAME---------------------------------------------------------------------------------
 
     def _displaywinner(self):
