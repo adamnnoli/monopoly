@@ -414,8 +414,28 @@ class Monopoly:
             text from game cards, alerting the player with the results of the action they want to do,
             etc.
         """
-        pass
+        self._gameLog = Frame(self._window)
+        self._gameLog.grid(row=2, column=1, rowspan=3)
 
+    def _log(self, text):
+        """
+            Adds a label with text to the gameLog
+
+            Parameter: text, the text to be logged
+            Requires: Must be of type string
+        """
+        label = Label(self._gameLog, text=text)
+        label.pack()
+
+    def _handleLog(self, result):
+        """
+            Adds an appropriate message to the gameLog if result is not "Success"
+
+            Parameter: result, the result that might be logged
+            Requires: Must be of type string
+        """
+        if result == "Already Owned":
+            self._log("The Property is Already Owned")
 # Buying
 # Trading
 # Building
