@@ -45,7 +45,7 @@ class Monopoly:
             Creates a instance of Monopoly
 
             Opens a Tkinter Window and adds a welcome frame to the window,
-            the welcome frame takes over from here to implement most functionality
+            the welcome frame takes over from there to implement most functionality
         """
         self._window = Tk()
         self._showWelcome(self._window)
@@ -91,11 +91,6 @@ class Monopoly:
                                 command=lambda numPlayers: self._showPlayers(self._welcome, numPlayers))
         askPlayers.grid(row=0, column=1)
 
-        # Start the Game
-        startButton = Button(self._welcome, text="Play!",
-                             command=lambda: self._play(self._welcome, root, numPlayers.get()))
-        startButton.grid(row=3, column=0, columnspan=numPlayers.get()+1)
-
     def _showPlayers(self, outerFrame, numPlayers):
         """
             Displays the Player Selection Menu
@@ -111,6 +106,7 @@ class Monopoly:
         """
         if self._askPlayers is not None:
             self._askPlayers.destroy()
+
         # Frame to hold the Selection menu
         self._askPlayers = Frame(outerFrame)
 
@@ -128,6 +124,11 @@ class Monopoly:
             namei.grid(row=i, column=1)
             colori.grid(row=i, column=2)
 
+        # Create Start Button
+        startButton = Button(self._askPlayers, text="Play!",
+                             command=lambda: self._play(self._welcome, self._window, numPlayers))
+        startButton.grid(row=numPlayers+1, column=0, columnspan=numPlayers+1)
+
         # Add frame to screen
         self._askPlayers.grid(row=1, column=0, columnspan=numPlayers+1)
 
@@ -138,13 +139,13 @@ class Monopoly:
             Clears the current window, creates the game object, board canvas, and controls and
             adds them to their respective attributes
 
-            Parmeter: currWindow, the parent widget that has all of the welcome information
+            Parameter: currWindow, the parent widget that has all of the welcome information
             Requires: Must be of type tkinter.frame
 
-            Parmeter: root, the parent window where the board and controls will be added to
+            Parameter: root, the parent window where the board and controls will be added to
             Requires: Must be of type tkinter.Tk()
 
-            Parmeter: numPlayers, the number of players in the game
+            Parameter: numPlayers, the number of players in the game
             Requires: Must be of type int
         """
         # Get the frame that has all of the player information
@@ -294,6 +295,10 @@ class Monopoly:
         endTurn.grid(row=1, column=1)
 
     def _rollDice(self):
+        """
+            Calls Helper Methods in Game to roll the dice and move the players, then redraws the 
+            board and player info frame.
+        """
         self._game.rollDice()
         self._createBoard(self._window)
         self._createPlayerInfo()
@@ -302,15 +307,28 @@ class Monopoly:
         self._createPlayerInfo()
 
     def _buy(self):
+        """
+            Calls Helper Method in game to buy the current property and redraws the player info frame
+        """
         self._game.buy()
         self._createPlayerInfo()
 
     def _endTurn(self):
+        """
+            Calls Helper method in game to end the current player's turn and redraws the player info
+            frame
+        """
         self._game.endTurn()
         self._createPlayerInfo()
 # Player Info
 
     def _createPlayerInfo(self):
+        """
+            Creates the Player info frame.
+
+            The frame contains the current player's name, how much money they have, the name of 
+            the tile they are located on, and a list of the names of the properties they own.
+        """
         playerInfo = self._game.getCurrPlayer()
         name = playerInfo["name"]
         cash = playerInfo["cash"]
@@ -347,13 +365,16 @@ class Monopoly:
             Draws a square on the board, PIECE_SIZE x PIECE_SIZE, in tile number location,
             with color color, moved overed from the edge of the board by offset.
 
-            Parmeter: location, the tile number where the piece will be drawn
+            Parameter: board, the board that the piece is drawn on
+            Requires: Must be of type tkinter.Canvas
+
+            Parameter: location, the tile number where the piece will be drawn
             Requires: Must be of type int
 
-            Parmeter: color, the color of the piece
+            Parameter: color, the color of the piece
             Requires: Must be of type string
 
-            Parmeter: offset, number of pixels away from board edge the piece will be drawn
+            Parameter: offset, number of pixels away from board edge the piece will be drawn
             Requires: Must be of type int
         """
         longPiece = long + PIECE_SIZE
@@ -386,6 +407,13 @@ class Monopoly:
 
 # Game Log
     def _createLog(self):
+        """
+            Creates the Game Log
+
+            The Log will have labels for events in the game, such as buying properties, displaying
+            text from game cards, alerting the player with the results of the action they want to do,
+            etc.
+        """
         pass
 
 # Buying

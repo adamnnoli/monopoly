@@ -7,6 +7,7 @@
 import json
 from objects import *
 import random
+import os
 
 
 class Game:
@@ -17,8 +18,8 @@ class Game:
 
         INSTANCE ATTRIBUTES:
         _board: the game board object [Board]
-        _chanceCards: the list of all Chance Cards in the game [ChanceCard list]
-        _communityChestCards: the list of all Community Chest Cards in the game [CommunityChestCard list]
+        _chanceCards: the list of all Chance Cards in the game [Card list]
+        _communityChestCards: the list of all Community Chest Cards in the game [Card list]
         _players: a list of the players in the game [Player list]
         _currPlayer: the player whose turn it currently is [Player]
     """
@@ -28,7 +29,7 @@ class Game:
         """
             Creates a single Game object.
 
-            Parmeter: players, a list of tuples containing the ids, names, and colors of the players
+            Parameter: players, a list of tuples containing the ids, names, and colors of the players
             Requires: Must be of type (int, string, string) list
         """
         self._board = self._createBoard()
@@ -53,7 +54,7 @@ class Game:
             Returns: A Board Object
         """
         tiles = []
-        with open("D:\CS Stuff\Git Repositories\monopoly\\board.json") as boardJson:
+        with open(os.getcwd() + "\monopoly\\board.json") as boardJson:
             board = json.load(boardJson)
             for i, tile in enumerate(board["tiles"]):
                 name = tile["name"]
@@ -79,6 +80,9 @@ class Game:
 # Chance
 
     def _chanceCardTexts(self):
+        """
+            Returns a list of the texts for every chance card in the game.
+        """
         zero = "You have won a crossword competition. Collect $100."
         one = "Advance To Go. Collect $200"
         two = "Advance to Illinois Ave. If you pass Go, collect $200."
@@ -99,6 +103,11 @@ class Game:
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
 
     def _chanceCardActions(self):
+        """
+            Returns a list of the actions for every chance card in the game.
+
+            Ordered to match the text of the cards.
+        """
         def zero(player): return player.giveCash(100)
         def one(player): return player.advanceTo("Go")
         def two(player): return player.advanceTo("Illinois Ave", self._board)
@@ -118,11 +127,14 @@ class Game:
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
 
     def _createChanceCards(self):
+        """
+            Returns a list of Card objects for every chance card in the game.
+        """
         chanceCards = []
         texts = self._chanceCardTexts()
         actions = self._chanceCardActions()
         for text, action in zip(texts, actions):
-            chanceCards.append(ChanceCard(text, action))
+            chanceCards.append(Card(text, action))
 # Community Chest
 
     def _communityChestCardTexts(self):
@@ -175,21 +187,21 @@ class Game:
 
     def _createCommunityChestCards(self):
         """
-            Returns an array of  Community Chest Card Objects that represent all of the community
+            Returns an array of  Card Objects that represent all of the community
             chest cards in game.
         """
         communityChestCards = []
         texts = self._communityChestCardTexts()
         actions = self._communityChestCardActions()
         for text, action in zip(texts, actions):
-            communityChestCards.append(CommunityChestCard(text, action))
+            communityChestCards.append(Card(text, action))
 
 # Players
     def _createPlayers(self, players):
         """
             Creates the list of player objects for the game
 
-            Parmeter: players, a list of tuples containing the ids, names and colors of the players
+            Parameter: players, a list of tuples containing the ids, names and colors of the players
             Requires: Must be of type (int, string, string) list
         """
         playerList = []
@@ -214,7 +226,7 @@ class Game:
         """
             Returns the name of tile with id [tileID]
 
-            Parmeter: tileID, the id of the tile requested
+            Parameter: tileID, the id of the tile requested
             Requires: Must be of type int
 
         """
@@ -238,7 +250,15 @@ class Game:
 
     def buy(self):
         """
-            Return
+            Returns a string and may purchase the current tile.
+
+
+            Returns "Already Owned" if the tile the current player is on has an owner, "Not Buyable",
+            the current tile is not a property tile, "Not Enough Money" if the current player
+            cannot afford to buy the current tile, and "Success" if the current player can buy the
+            current tile.
+            If the player can buy the current tile then they will, I.e. cash is taken and ownership
+            given.
         """
         player = self._currPlayer
         tileID = player.getLocation()
@@ -249,7 +269,7 @@ class Game:
         elif price == 0:
             return("Not Buyable")
         elif price > player.getCash():
-            return("Not enough Money")
+            return("Not Enough Money")
         else:
             self._board.setOwner(tileID, player)
             player.takeCash(price)
@@ -257,6 +277,10 @@ class Game:
             return("Success")
 
     def endTurn(self):
+        """
+            Returns "Success" and changes the current player if the player has rolled, "Has Not 
+            Rolled" otherwise.
+        """
         if self._hasRolled:
             nextPlayerIndex = (self._players.index(self._currPlayer) + 1) % len(self._players)
             self._currPlayer = self._players[nextPlayerIndex]
@@ -264,19 +288,6 @@ class Game:
             return "Success"
         else:
             return "Has Not Rolled"
-
-    def take(self, player):
-        pass
-
-    def give(self, player):
-        pass
-
-    def takeFromEach(self, player):
-        pass
-
-    def giveToEach(self, player):
-        pass
-
 # Board
 
     def _handleTile(self):
