@@ -264,6 +264,8 @@ class Monopoly:
         cvs.create_rectangle(longPlus[8], longPlus[8], cLength, cLength)
 
 # Controls
+
+# TODO: Add Buttons for Building and Trading, get rid of buy button.
     def _createControls(self, root):
         """
             Creates a frame and adds it to root.
@@ -436,10 +438,67 @@ class Monopoly:
         """
         if result == "Already Owned":
             self._log("The Property is Already Owned")
+        elif result == "Never Owned":
+            self._createBuyWindow()
+
 # Buying
+    def _createBuyWindow(self):
+        # TODO: this is not done. Make the buttons work
+        self._buyWindow = Tk()
+        name = self._game.getCurrentTile()
+        text = Label(self._buyWindow, text=f"Buy {name}?")
+        text.grid(row=0, column=0, columnspan=2)
+        yesBtn = Button(self._buyWindow, text="Yes")
+        yesBtn.grid(row=1, column=0)
+        noBtn = Button(self._buyWindow, text="No")
+        noBtn.grid(row=0, column=1)
 # Trading
+
+    def _createTradeWindow(self):
+        # TODO: Fill in the rest of this function, make a separate frame to put all of the player
+        # 1 stuff in and then make a function that's called with the player dropdown selection menu
+        # that makes the other frame. Make entries and dropdowns to select properties and stuff and
+        # make the accept button work with the function below
+        self._tradeWindow = Tk()
+
+        currPlayerName = self._game.getCurrPlayer()["name"]
+        playerNames = []
+        for player in self._game.getPlayers():
+            if player["name"] != currPlayerName:
+                playerNames.append(player["name"])
+
+        player1Cash = Label(self._tradeWindow, text=f"{currPlayerName} Cash")
+        player2Cash = Label(self._tradeWindow, text=f"{currPlayerName} Cash")
+
+        player1Props = Label(self._tradeWindow, text=f"{currPlayerName} Properties")
+        player2Props = Label(self._tradeWindow, text=f"{currPlayerName} Properties")
+
+        player1GetOutJail = Label(
+            self._tradeWindow, text=f"{currPlayerName} Get Out of Jail Free Cards")
+        player2GetOutJail = Label(
+            self._tradeWindow, text=f"{currPlayerName} Get Out of Jail Free Cards")
+
+        acceptBtn = Button(self._tradeWindow, text="Accept Trade")
+
+    def _acceptTrade(self):
+        # TODO: fill in this function. It should call a helper in game with two trade objects maybe
+        # I don't know how I want to represent the data yet, or how I even want to pass it into this
+        # function, but you'll figure it out.
+        pass
+
 # Building
+
+    def _createBuildWindow(self):
+        # TODO: Fill in this function. Just ask what property to build on, what to build and then
+        # accept button that calls helper in game. Use log function to make sure things went ok.
+        # Don't forget that you need a monopoly to build on properties.
+        pass
 # Auctioning
+
+    def _createAuctionWindow(self):
+        # TODO: fill in this function. I don't know how I want to do auctions, maybe just ask each
+        # player individually and highest bid wins.
+        pass
 # END GAME---------------------------------------------------------------------------------
 
     def _displaywinner(self):

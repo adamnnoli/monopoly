@@ -291,9 +291,14 @@ class Game:
 # Board
 
     def _handleTile(self):
+        # Check if the tile is unowned and buyable, let the player buy it if possible.
+        # Call draw card if necessary, take taxes if necessary, pay rent if necessary.
         pass
 
+    def getCurrentTile(self):
+        return self._board.getName(self._currPlayer.getLocation())
 # Cards
 
     def _drawCard(self):
+        # Log the text and have the current player execute the action
         pass
