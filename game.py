@@ -242,9 +242,8 @@ class Game:
         if not self._hasRolled:
             roll = random.randint(2, 12)
             self._currPlayer.move(roll)
-            self._handleTile()
             self._hasRolled = True
-            return ("Success")
+            return self._handleTile()
         else:
             return ("Already Rolled")
 
@@ -264,17 +263,13 @@ class Game:
         tileID = player.getLocation()
         price = self._board.getPrice(tileID)
 
-        if self._board.getOwner(tileID) is not None:
-            return("Already Owned")
-        elif price == 0:
-            return("Not Buyable")
-        elif price > player.getCash():
+        if price > player.getCash():
             return("Not Enough Money")
         else:
             self._board.setOwner(tileID, player)
             player.takeCash(price)
             player.giveProperty(tileID)
-            return("Success")
+            return("Buy Success")
 
     def endTurn(self):
         """
@@ -291,9 +286,17 @@ class Game:
 # Board
 
     def _handleTile(self):
-        # Check if the tile is unowned and buyable, let the player buy it if possible.
         # Call draw card if necessary, take taxes if necessary, pay rent if necessary.
-        pass
+        tileID = self._currPlayer.getLocation()
+        name = self._board.getName(tileID)
+        if self._board.getPrice(tileID) != 0 and self._board.getOwner(tileID) is None:
+            return "Not Owned"
+        if name == "Chance" or name == "Community Chest":
+            self._drawCard()
+        if name == "Income Tax":
+            pass
+        if name == "Luxury Tax":
+            pass
 
     def getCurrentTile(self):
         return self._board.getName(self._currPlayer.getLocation())

@@ -166,6 +166,7 @@ class Monopoly:
         self._board = self._createBoard(self._window)
         self._controls = self._createControls(self._window)
         self._playerInfo = self._createPlayerInfo()
+        self._createLog()
 
 # DURING GAME--------------------------------------------------------------------------------
 
@@ -284,9 +285,9 @@ class Monopoly:
         rollDice = Button(self._controls, text="Roll Dice", padx=5, command=self._rollDice)
         rollDice.grid(row=0, column=0)
 
-        # Buy Button
-        buy = Button(self._controls, text="Buy", padx=5, command=self._buy)
-        buy.grid(row=0, column=1)
+        # Build Button
+        build = Button(self._controls, text="Build", padx=5, command=self._build)
+        build.grid(row=0, column=1)
 
         # Trade Button
         trade = Button(self._controls, text="Trade", padx=5, command=self._trade)
@@ -301,19 +302,15 @@ class Monopoly:
             Calls Helper Methods in Game to roll the dice and move the players, then redraws the 
             board and player info frame.
         """
-        self._game.rollDice()
+        self._handleLog(self._game.rollDice())
         self._createBoard(self._window)
         self._createPlayerInfo()
 
     def _trade(self):
         self._createPlayerInfo()
 
-    def _buy(self):
-        """
-            Calls Helper Method in game to buy the current property and redraws the player info frame
-        """
-        self._game.buy()
-        self._createPlayerInfo()
+    def _build(self):
+        pass
 
     def _endTurn(self):
         """
@@ -427,7 +424,7 @@ class Monopoly:
             Requires: Must be of type string
         """
         label = Label(self._gameLog, text=text)
-        label.pack()
+        label.grid(row=self._gameLog.grid_size()[1]+1)
 
     def _handleLog(self, result):
         """
@@ -436,22 +433,42 @@ class Monopoly:
             Parameter: result, the result that might be logged
             Requires: Must be of type string
         """
-        if result == "Already Owned":
-            self._log("The Property is Already Owned")
-        elif result == "Never Owned":
+        property = self._game.getCurrentTile()
+        name = self._game.getCurrPlayer()["name"]
+        if result == "Not Owned":
             self._createBuyWindow()
+        elif result == "Buy Success":
+            self._buyWindow.destroy()
+            self._log(f"{name} bought {property}")
+        elif result == "Not Enough Money":
+            self._log(f"You don't have enough money to buy {property}")
+        elif result == "Already Rolled":
+            self._log("You already rolled.")
 
 # Buying
     def _createBuyWindow(self):
         # TODO: this is not done. Make the buttons work
-        self._buyWindow = Tk()
+        print("Making window")
+        self._buyWindow = Toplevel()
+
         name = self._game.getCurrentTile()
         text = Label(self._buyWindow, text=f"Buy {name}?")
         text.grid(row=0, column=0, columnspan=2)
-        yesBtn = Button(self._buyWindow, text="Yes")
+
+        yesBtn = Button(self._buyWindow, text="Yes", command=lambda: self._handleLog(self._buy()))
         yesBtn.grid(row=1, column=0)
-        noBtn = Button(self._buyWindow, text="No")
-        noBtn.grid(row=0, column=1)
+
+        noBtn = Button(self._buyWindow, text="No", command=lambda: self._handleLog(self._auction()))
+        noBtn.grid(row=1, column=1)
+
+    def _buy(self):
+        """
+            Calls Helper Method in game to buy the current property and redraws the player info frame
+        """
+        result = self._game.buy()
+        self._createPlayerInfo()
+        return result
+
 # Trading
 
     def _createTradeWindow(self):
