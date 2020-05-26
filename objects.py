@@ -461,10 +461,10 @@ class Card:
         """
             Returns: The text of the chance card
         """
-        self._text
+        return self._text
 
     def getAction(self):
         """
             Returns: The action of the chance card
         """
-        self._action
+        return self._action

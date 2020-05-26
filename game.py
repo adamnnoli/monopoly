@@ -135,6 +135,7 @@ class Game:
         actions = self._chanceCardActions()
         for text, action in zip(texts, actions):
             chanceCards.append(Card(text, action))
+        return chanceCards
 # Community Chest
 
     def _communityChestCardTexts(self):
@@ -195,6 +196,8 @@ class Game:
         actions = self._communityChestCardActions()
         for text, action in zip(texts, actions):
             communityChestCards.append(Card(text, action))
+        print(communityChestCards[1])
+        return communityChestCards
 
 # Players
     def _createPlayers(self, players):
@@ -286,22 +289,37 @@ class Game:
 # Board
 
     def _handleTile(self):
-        # Call draw card if necessary, take taxes if necessary, pay rent if necessary.
+        # TODO: pay rent if necessary.
         tileID = self._currPlayer.getLocation()
         name = self._board.getName(tileID)
         if self._board.getPrice(tileID) != 0 and self._board.getOwner(tileID) is None:
             return "Not Owned"
         if name == "Chance" or name == "Community Chest":
-            self._drawCard()
+            return self._drawCard()
         if name == "Income Tax":
-            pass
+            self._currPlayer.takeCash(200)
+            return "Paid Income Tax"
         if name == "Luxury Tax":
-            pass
+            self._currPlayer.takeCash(100)
+            return "Paid Luxury Tax"
 
     def getCurrentTile(self):
         return self._board.getName(self._currPlayer.getLocation())
 # Cards
 
     def _drawCard(self):
-        # Log the text and have the current player execute the action
-        pass
+        # TODO: Log the text
+        tileID = self._currPlayer.getLocation()
+        name = self._board.getName(tileID)
+        if name == "Chance":
+            card = self._chanceCards[self._currChance]
+            action = card.getAction()
+            action(self._currPlayer)
+            self._currChance += 1
+            return card.getText()
+        else:
+            card = self._communityChestCards[self._currCommunityChest]
+            action = card.getAction()
+            action(self._currPlayer)
+            self._currCommunityChest += 1
+            return card.getText()
