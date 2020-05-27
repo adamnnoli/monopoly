@@ -196,7 +196,6 @@ class Game:
         actions = self._communityChestCardActions()
         for text, action in zip(texts, actions):
             communityChestCards.append(Card(text, action))
-        print(communityChestCards[1])
         return communityChestCards
 
 # Players

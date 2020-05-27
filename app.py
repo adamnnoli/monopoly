@@ -6,7 +6,7 @@
 from tkinter import *
 from consts import *
 from game import Game
-
+from functools import partial
 # Used to Neaten Code
 long = TILE_LONG
 short = TILE_SHORT
@@ -87,19 +87,17 @@ class Monopoly:
 
         # Ask how many players and create next dialogue box to get names and colors
         numPlayers = IntVar()
-        askPlayers = OptionMenu(self._welcome, numPlayers, 1, 2, 3, 4,
-                                command=lambda numPlayers: self._showPlayers(self._welcome, numPlayers))
+        maxPlayerList = [x for x in range(1, 5)]
+        askPlayers = OptionMenu(self._welcome, numPlayers, *maxPlayerList,
+                                command=lambda numPlayers: self._showPlayers(numPlayers))
         askPlayers.grid(row=0, column=1)
 
-    def _showPlayers(self, outerFrame, numPlayers):
+    def _showPlayers(self, numPlayers):
         """
             Displays the Player Selection Menu
 
             Gives every player an text field to select their name and a dropdown menu to select
             their color
-
-            Parameter: outerFrame, the frame that the Menu is placed on.
-            Requires: Must be a tkinter.Frame
 
             Parameter: numPlayers, the number of players in the game
             Requires: Must be an int
@@ -108,7 +106,7 @@ class Monopoly:
             self._askPlayers.destroy()
 
         # Frame to hold the Selection menu
-        self._askPlayers = Frame(outerFrame)
+        self._askPlayers = Frame(self._welcome)
 
         # Create an place widgets in menu
         for i in range(1, numPlayers + 1):
@@ -153,10 +151,18 @@ class Monopoly:
 
         # Make a list of (id, name, color)
         names = map(lambda nameEntry: nameEntry.get(), playersFrame[1:(3*numPlayers - 1):3])
+        trueNames = []
+        for i, name in enumerate(names, start=1):
+            if name == "":
+                trueNames.append(f"Player {i}")
+            else:
+                trueNames.append(name)
+
         colors = map(lambda colorEntry: colorEntry.get(), playerColors)
+
         playerIds = list(range(1, numPlayers + 2))
 
-        players = list(zip(playerIds, names, colors))
+        players = list(zip(playerIds, trueNames, colors))
 
         # Clear the root window
         currWindow.destroy()
@@ -307,7 +313,7 @@ class Monopoly:
         self._createPlayerInfo()
 
     def _trade(self):
-        self._createPlayerInfo()
+        self._createTradeWindow()
 
     def _build(self):
         pass
@@ -447,7 +453,7 @@ class Monopoly:
 
 # Buying
     def _createBuyWindow(self):
-        # TODO: this is not done. Make the buttons work
+        # TODO: this is not done. Make auction buttons work
         print("Making window")
         self._buyWindow = Toplevel()
 
@@ -476,26 +482,90 @@ class Monopoly:
         # 1 stuff in and then make a function that's called with the player dropdown selection menu
         # that makes the other frame. Make entries and dropdowns to select properties and stuff and
         # make the accept button work with the function below
-        self._tradeWindow = Tk()
+        self._tradeWindow = Toplevel()
+
+        prompt = Label(self._tradeWindow, text="Select who you want to trade with: ")
+        prompt.grid(row=0, column=0)
 
         currPlayerName = self._game.getCurrPlayer()["name"]
+
         playerNames = []
         for player in self._game.getPlayers():
             if player["name"] != currPlayerName:
                 playerNames.append(player["name"])
 
-        player1Cash = Label(self._tradeWindow, text=f"{currPlayerName} Cash")
-        player2Cash = Label(self._tradeWindow, text=f"{currPlayerName} Cash")
+        if len(playerNames) == 0:
+            playerNames.append("")
 
-        player1Props = Label(self._tradeWindow, text=f"{currPlayerName} Properties")
-        player2Props = Label(self._tradeWindow, text=f"{currPlayerName} Properties")
+        player2 = StringVar()
+        dropdown = OptionMenu(self._tradeWindow, player2, *playerNames,
+                              command=lambda player2: self._makePlayer2(player2))
+        dropdown.grid(row=0, column=1)
+        self._makePlayer1()
 
-        player1GetOutJail = Label(
-            self._tradeWindow, text=f"{currPlayerName} Get Out of Jail Free Cards")
-        player2GetOutJail = Label(
-            self._tradeWindow, text=f"{currPlayerName} Get Out of Jail Free Cards")
+        acceptBtn = Button(self._tradeWindow, text="Accept Trade", command=self._acceptTrade)
+        acceptBtn.grid(row=2, column=0, columnspan=2)
 
-        acceptBtn = Button(self._tradeWindow, text="Accept Trade")
+    def _makePlayer1(self):
+        name = self._game.getCurrPlayer()["name"]
+        p1Frame = LabelFrame(self._tradeWindow, text="Your Items")
+
+        p1Cash = Label(p1Frame, text=f"{name} Cash")
+        p1Cash.grid(row=0, column=0)
+        p1CashEntry = Entry(p1Frame)
+        p1CashEntry.grid(row=0, column=1)
+
+        props = StringVar()
+        p1Props = Label(p1Frame, text=f"{name} Properties")
+        p1Props.grid(row=1, column=0)
+        # Names of Properties the Current Player Owns
+        p1PropNames = list(map(lambda prop: self._game.getTileName(
+            prop), self._game.getCurrPlayer()["propertyLocations"]))
+        # Make sure propnames is not empty, optionMenu needs at least 1 value
+        if len(p1PropNames) == 0:
+            p1PropNames.append("")
+        p1PropEntry = OptionMenu(p1Frame, props, *p1PropNames)
+        p1PropEntry.grid(row=1, column=1)
+
+        p1GetOutJail = Label(p1Frame, text=f"{name} Get Out of Jail Free Cards")
+        p1GetOutJail.grid(row=2, column=0)
+        p1JailEntry = Entry(p1Frame)
+        p1JailEntry.grid(row=2, column=1)
+
+        p1Frame.grid(row=1, column=0)
+
+    def _makePlayer2(self, name):
+
+        p2Frame = LabelFrame(self._tradeWindow, text="Their Items")
+
+        p2Cash = Label(p2Frame, text=f"{name} Cash")
+        p2Cash.grid(row=0, column=0)
+        p2CashEntry = Entry(p2Frame)
+        p2CashEntry.grid(row=0, column=1)
+
+        props = StringVar()
+        p2Props = Label(p2Frame, text=f"{name} Properties")
+        p2Props.grid(row=1, column=0)
+        for player in self._game.getPlayers():
+            if player["name"] == name:
+                p2PropNames = list(map(lambda prop: self._game.getTileName(
+                    prop), player["propertyLocations"]))
+                # TODO: Get the properties of the player with name name, make sure to get the name
+                # of the properties no the ids. Finish the rest of this function gridding the items
+                # To the Screen, Decide what to actually do if the players did not give a name or
+                # Don't have any properties.
+        if len(p2PropNames) == 0:
+            p2PropNames.append("")
+        p1PropEntry = OptionMenu(p2Frame, props, *p2PropNames)
+        p1PropEntry.grid(row=1, column=1)
+
+        p1GetOutJail = Label(p2Frame, text=f"{name} Get Out of Jail Free Cards")
+        p1GetOutJail.grid(row=2, column=0)
+
+        p2JailEntry = Entry(p2Frame)
+        p2JailEntry.grid(row=2, column=1)
+
+        p2Frame.grid(row=1, column=1)
 
     def _acceptTrade(self):
         # TODO: fill in this function. It should call a helper in game with two trade objects maybe
