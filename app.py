@@ -292,7 +292,7 @@ class Monopoly:
         rollDice.grid(row=0, column=0)
 
         # Build Button
-        build = Button(self._controls, text="Build", padx=5, command=self._build)
+        build = Button(self._controls, text="Build", padx=5, command=self._createBuildWindow)
         build.grid(row=0, column=1)
 
         # Trade Button
@@ -450,11 +450,12 @@ class Monopoly:
             self._log(f"You don't have enough money to buy {property}")
         elif result == "Already Rolled":
             self._log("You already rolled.")
+        else:
+            self._log(result)
 
 # Buying
     def _createBuyWindow(self):
         # TODO: this is not done. Make auction buttons work
-        print("Making window")
         self._buyWindow = Toplevel()
 
         name = self._game.getCurrentTile()
@@ -579,7 +580,25 @@ class Monopoly:
         # TODO: Fill in this function. Just ask what property to build on, what to build and then
         # accept button that calls helper in game. Use log function to make sure things went ok.
         # Don't forget that you need a monopoly to build on properties.
-        pass
+        self._buildWindow = Toplevel()
+        playerName = self._game.getCurrPlayer()["name"]
+        # TODO: Find which properties are monopolies.
+        monopolyProps = list(map(self._game.getTileName, self._game.getMonopolies(playerName)))
+        if len(monopolyProps) == 0:
+            monopolyProps.append("")
+        nameLabel = Label(self._buildWindow, text="Select Property")
+        nameLabel.grid(row=0, column=0)
+        name = StringVar()
+        nameDrop = OptionMenu(self._buildWindow, name, monopolyProps)
+        nameDrop.grid(row=0, column=1)
+
+        numHousesLabel = Label(self._buildWindow, text="How Many Houses To Build?")
+        numHousesEntry = None
+
+        # How Much does the total build cost?
+        price = None
+        priceCalcLabel = Label(self._buildWindow, text="Total Cost:")
+        acceptButton = None
 # Auctioning
 
     def _createAuctionWindow(self):
@@ -590,3 +609,41 @@ class Monopoly:
 
     def _displaywinner(self):
         pass
+
+
+"""
+Pre Break Notes
+
+I'm getting tired of coding right now so here's what you need to do.
+
+You made it so you can select from the build window, but you need to actually implement building.
+
+Ask for the number of houses and make and call a method in game to add that many houses.
+Check to makes sure the money is there first.
+You were working on implementing trading. Finish the check trades function with a loop to make sure 
+all the properties are there and the get out of jail free cards are there. Propagate the results 
+through so that yu can log them. Add a log for when building doesn't work.
+
+The next big hurdles are rent and jail.
+Make a take rent method in game that if the tile is owned then takes and gives the amount of 
+rents[numHouses]. Special cases are railroads and utilities. Make separate helper methods that 
+take in a player name and return the number of railroads or utilities they own. For the utilities
+pass in the amount on the roll, for the railroads look at how many they own.
+
+Jail
+If the player lands on the Go To Jail tile you will need put them in jail.
+You have to decide what happens in jail. Make it so that they can roll, but only move if they roll 
+a double. They can pay 50 to get out, but must pay before rolling. I don't know how you will do it 
+but after 3 turns force them to pay and then they roll.
+Add something to the player status that shows that they are in jail.
+Make it so they can use get out of jail free cards.
+
+Auctioning
+I think the best way is just, maybe no auctions. You must land on the property and pay the amount
+shown to get it. Or just the plain everyone enter their amount and highest one wins.
+
+Bells and Whistles
+Colors and prettier buttons. Houses and hotels drawn onto the board. Colors on the board to show 
+who owns a property. The word monopoly on the board. Frames for the controls, log, and player info
+become label frames.
+"""

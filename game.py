@@ -53,6 +53,7 @@ class Game:
 
             Returns: A Board Object
         """
+        possMonopolies = {}
         tiles = []
         with open(os.getcwd() + "\monopoly\\board.json") as boardJson:
             board = json.load(boardJson)
@@ -65,6 +66,11 @@ class Game:
                 color = tile["color"]
                 newTile = BoardTile(i, name, price, rents, mortgage, houseCost, color)
                 tiles.append(newTile)
+                if possMonopolies.get(color) is None:
+                    possMonopolies[color] = set()
+                possMonopolies[color].add(i)
+        del possMonopolies["white"]
+        self._possMonopolies = possMonopolies
         return Board(tiles)
 # Cards
 
@@ -271,6 +277,7 @@ class Game:
             self._board.setOwner(tileID, player)
             player.takeCash(price)
             player.giveProperty(tileID)
+            self._checkMonopoly()
             return("Buy Success")
 
     def endTurn(self):
@@ -304,10 +311,22 @@ class Game:
 
     def getCurrentTile(self):
         return self._board.getName(self._currPlayer.getLocation())
+
+    def _checkMonopoly(self):
+        player = self.getCurrPlayer()
+        for color, props in self._possMonopolies.items():
+            if props <= player["propertyLocations"]:
+                self._board.setMonopoly(player["name"], color)
+
+    def getMonopolies(self, name):
+        monopolies = []
+        for color, owner in self._board.getMonopolies().items():
+            if owner == name:
+                monopolies.append(color)
+        return monopolies
 # Cards
 
     def _drawCard(self):
-        # TODO: Log the text
         tileID = self._currPlayer.getLocation()
         name = self._board.getName(tileID)
         if name == "Chance":
@@ -322,3 +341,51 @@ class Game:
             action(self._currPlayer)
             self._currCommunityChest += 1
             return card.getText()
+
+# Trading
+    def trade(self, p1Dict, p2Dict):
+        if self._checkTrade(p1Dict, p2Dict) == "Good":
+            p1 = self._currPlayer
+            for player in self._player:
+                if player.getName() == p2Dict["name"]:
+                    p2 = player
+
+            p1.giveCash(p2Dict["cash"])
+            p2.giveCash(p1Dict["cash"])
+            p1.takeCash(p1Dict["cash"])
+            p2.takeCash(p2Dict["cash"])
+
+            for prop in p1Dict["properties"]:
+                p1.takeProperty(prop)
+                p2.giveProperty(prop)
+            for prop in p2Dict["properties"]:
+                p1.giveProperty(prop)
+                p2.takeProperty(prop)
+
+            for i in range(p1Dict["numJail"]):
+                p1.takeGetOutOfJail()
+                p2.giveGetOutOfJail()
+            for i in range(p2Dict["numJail"]):
+                p1.giveGetOutOfJail()
+                p2.takeGetOutOfJail()
+
+        def _checkTrade(self, p1Dict, p2Dict):
+            p1 = self._currPlayer
+            for player in self._player:
+                if player.getName() == p2Dict["name"]:
+                    p2 = player
+            p1Cash = p1Dict["cash"]
+            p2Cash = p2Dict["cash"]
+            p1Props = p1Dict["properties"]
+            p2Props = p2Dict["properties"]
+            p1Jail = p1Dict["numJail"]
+            p2Jail = p2Dict["numJail"]
+
+            if p1.getCash() < p1Cash:
+                return f"{p1.getName} doesn't have ${p1Cash}"
+            elif p2.getCash() < p2Cash:
+                return f"{p2.getName} doesn't have ${p2Cash}"
+            # Check Props
+            # Check Jails
+            else:
+                return "Good"

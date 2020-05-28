@@ -135,6 +135,7 @@ class Board:
 
         """
         self._tiles = tiles
+        self._monopolies = {}
 
 # Getters and Setters
     def getID(self, tileName):
@@ -201,6 +202,12 @@ class Board:
         """
         return self._findTile(tileID).setOwner(owner)
 
+    def getMonopolies(self):
+        return self._monopolies
+
+    def setMonopoly(self, name, color):
+        self._monopolies[color] = name
+
     def _findTile(self, tileID):
         """
             Returns the BoardTile object with id tileID
@@ -228,7 +235,7 @@ class Player:
         _color: the color of the player's piece [string]
         _cash: the amount of money the player currently has [int]
         _location: the id of the tile the player is currently on [int]
-        _propertiesIds: list of the ids of the properties the player owns [int list]
+        _propertiesIds: list of the ids of the properties the player owns [int set]
         _inJail: true if the player is currently in jail[bool]
         _numGetOutJail: the number of get out of jail free cards the player has[int]
     """
@@ -251,7 +258,7 @@ class Player:
         self._color = color
         self._cash = STARTING_CASH
         self._location = 0
-        self._propertiesIds = []
+        self._propertiesIds = set()
         self._inJail = False
         self._numGetOutJail = 0
 
@@ -315,7 +322,10 @@ class Player:
             Parameter: tileID, the id of the property to be given
             Requires: Must be of type int
         """
-        self._propertiesIds.append(tileID)
+        self._propertiesIds.add(tileID)
+
+    def takeProperty(self, tileID):
+        self._propertiesIds.discard(tileID)
 
     def advanceTo(self, tileName, board):
         """
@@ -395,6 +405,9 @@ class Player:
             Gives the player 1 get out of jail free card.
         """
         self._numGetOutJail += 1
+
+    def takeGetOutOfJail(self):
+        self._numGetOutJail -= 1
 
     def advanceToNearestUtility(self, board):
         """
