@@ -116,8 +116,8 @@ class Monopoly:
             playerIColor = StringVar()
             # Save Player colors for later
             playerColors.append(playerIColor)
-
-            colori = OptionMenu(self._askPlayers, playerIColor, "red", "blue", "green", "yellow")
+            colors= ["red", "blue", "green", "yellow", "white", "black", "magenta", "cyan"]
+            colori = OptionMenu(self._askPlayers, playerIColor, *colors)
             texti.grid(row=i, column=0)
             namei.grid(row=i, column=1)
             colori.grid(row=i, column=2)
@@ -316,7 +316,7 @@ class Monopoly:
         self._createTradeWindow()
 
     def _build(self):
-        pass
+        self._createBuildWindow()
 
     def _endTurn(self):
         """
@@ -406,8 +406,8 @@ class Monopoly:
             board.create_rectangle(cLength - long + offset, long, cLength - long + offsetPiece,
                                    longPiece, fill=color)
         else:
-            board.create_rectangle(cLength - long + offset, longPlus[location-31],
-                                   cLength - long + offsetPiece, longPlus[location-31] + PIECE_SIZE,
+            board.create_rectangle(cLength - long + offset, longPlus[location-32],
+                                   cLength - long + offsetPiece, longPlus[location-32] + PIECE_SIZE,
                                    fill=color)
 
 # Game Log
@@ -439,6 +439,7 @@ class Monopoly:
             Parameter: result, the result that might be logged
             Requires: Must be of type string
         """
+        print(result)
         property = self._game.getCurrentTile()
         name = self._game.getCurrPlayer()["name"]
         if result == "Not Owned":
@@ -446,11 +447,7 @@ class Monopoly:
         elif result == "Buy Success":
             self._buyWindow.destroy()
             self._log(f"{name} bought {property}")
-        elif result == "Not Enough Money":
-            self._log(f"You don't have enough money to buy {property}")
-        elif result == "Already Rolled":
-            self._log("You already rolled.")
-        else:
+        elif result is not None:
             self._log(result)
 
 # Buying
@@ -504,9 +501,6 @@ class Monopoly:
         dropdown.grid(row=0, column=1)
         self._makePlayer1()
 
-        acceptBtn = Button(self._tradeWindow, text="Accept Trade", command=self._acceptTrade)
-        acceptBtn.grid(row=2, column=0, columnspan=2)
-
     def _makePlayer1(self):
         name = self._game.getCurrPlayer()["name"]
         p1Frame = LabelFrame(self._tradeWindow, text="Your Items")
@@ -551,10 +545,6 @@ class Monopoly:
             if player["name"] == name:
                 p2PropNames = list(map(lambda prop: self._game.getTileName(
                     prop), player["propertyLocations"]))
-                # TODO: Get the properties of the player with name name, make sure to get the name
-                # of the properties no the ids. Finish the rest of this function gridding the items
-                # To the Screen, Decide what to actually do if the players did not give a name or
-                # Don't have any properties.
         if len(p2PropNames) == 0:
             p2PropNames.append("")
         p1PropEntry = OptionMenu(p2Frame, props, *p2PropNames)
@@ -568,11 +558,17 @@ class Monopoly:
 
         p2Frame.grid(row=1, column=1)
 
+        acceptBtn = Button(self._tradeWindow, text="Accept Trade", command=self._acceptTrade)
+        acceptBtn.grid(row=2, column=0, columnspan=2)
+
     def _acceptTrade(self):
         # TODO: fill in this function. It should call a helper in game with two trade objects maybe
         # I don't know how I want to represent the data yet, or how I even want to pass it into this
         # function, but you'll figure it out.
-        pass
+        p1Frame = self._tradeWindow.winfo_children()[2]
+        p2Frame = self._tradeWindow.winfo_children()[4]
+        print(p1Frame.winfo_children())
+        print(p2Frame.winfo_children())
 
 # Building
 
@@ -582,23 +578,37 @@ class Monopoly:
         # Don't forget that you need a monopoly to build on properties.
         self._buildWindow = Toplevel()
         playerName = self._game.getCurrPlayer()["name"]
-        # TODO: Find which properties are monopolies.
         monopolyProps = list(map(self._game.getTileName, self._game.getMonopolies(playerName)))
         if len(monopolyProps) == 0:
             monopolyProps.append("")
         nameLabel = Label(self._buildWindow, text="Select Property")
         nameLabel.grid(row=0, column=0)
         name = StringVar()
-        nameDrop = OptionMenu(self._buildWindow, name, monopolyProps)
+        nameDrop = OptionMenu(self._buildWindow, name, *monopolyProps,
+                              command=lambda name: self._askHouses(name))
         nameDrop.grid(row=0, column=1)
 
+    def _askHouses(self, name):
+        numHouses = IntVar()
         numHousesLabel = Label(self._buildWindow, text="How Many Houses To Build?")
-        numHousesEntry = None
+        numHousesLabel.grid(row=1, column=0)
+        numHousesEntry = OptionMenu(self._buildWindow, numHouses, 1, 2, 3,
+                                    4, 5, command=lambda numHouses: self._showPrice(name, numHouses))
+        numHousesEntry.grid(row=1, column=1)
 
+    def _showPrice(self, name, numHouses):
         # How Much does the total build cost?
-        price = None
-        priceCalcLabel = Label(self._buildWindow, text="Total Cost:")
-        acceptButton = None
+        houseCost = self._game.getHouseCost(self._game.getTileID(name))
+        price = houseCost * numHouses
+        priceCalcLabel = Label(self._buildWindow, text=f"Total Cost: {price}")
+        priceCalcLabel.grid(row=2, column=0, columnspan=2)
+        acceptButton = Button(self._buildWindow, text="Accept",
+                              command=lambda: self._executeBuild(name, numHouses))
+        acceptButton.grid(row=3, column=0, columnspan=2)
+
+    def _executeBuild(self, name, numHouses):
+        tileID = self._game.getTileID(name)
+        self._handleLog(self._game.build(tileID, numHouses))
 # Auctioning
 
     def _createAuctionWindow(self):
@@ -624,11 +634,6 @@ You were working on implementing trading. Finish the check trades function with 
 all the properties are there and the get out of jail free cards are there. Propagate the results 
 through so that yu can log them. Add a log for when building doesn't work.
 
-The next big hurdles are rent and jail.
-Make a take rent method in game that if the tile is owned then takes and gives the amount of 
-rents[numHouses]. Special cases are railroads and utilities. Make separate helper methods that 
-take in a player name and return the number of railroads or utilities they own. For the utilities
-pass in the amount on the roll, for the railroads look at how many they own.
 
 Jail
 If the player lands on the Go To Jail tile you will need put them in jail.

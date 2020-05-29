@@ -6,7 +6,7 @@
         app.py      (the primary controller class)
         level.py    (the subcontroller for a single game level)
         models.py   (the model classes)
-        consts.py   (the application constants)
+        consts.py   (the application constants)fdv
 """
 
 from app import *

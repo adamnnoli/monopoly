@@ -8,6 +8,7 @@ import json
 from objects import *
 import random
 import os
+from functools import reduce
 
 
 class Game:
@@ -22,6 +23,11 @@ class Game:
         _communityChestCards: the list of all Community Chest Cards in the game [Card list]
         _players: a list of the players in the game [Player list]
         _currPlayer: the player whose turn it currently is [Player]
+
+        _hasRolled: true if the current player has already rolled[bool]
+        _currChance: the index of the top chance card[int]
+        _currCommunityChest: the index of the top Community Chest Card[int]
+        _possMonopolies: dictionary of the color and properties in each monopoly[string:int set dict]
     """
 # Initialization----------------------------------------------------------------------------
 
@@ -42,6 +48,7 @@ class Game:
         self._hasRolled = False
         self._currChance = 0
         self._currCommunityChest = 0
+        # self._possMonopolies  is set-up when creating Board
 # Board
 
     def _createBoard(self):
@@ -115,7 +122,7 @@ class Game:
             Ordered to match the text of the cards.
         """
         def zero(player): return player.giveCash(100)
-        def one(player): return player.advanceTo("Go")
+        def one(player): return player.advanceTo("Go", self._board)
         def two(player): return player.advanceTo("Illinois Ave", self._board)
         def three(player): return player.advanceTo("St. Charles Place", self._board)
         def four(player): return player.advanceToNearestUtility(self._board)
@@ -173,7 +180,7 @@ class Game:
 
             Order matches the order of the Community Chest Card Texts
         """
-        def zero(player): return player.advanceTo("Go")
+        def zero(player): return player.advanceTo("Go", self._board)
         def one(player): return player.giveCash(200)
         def two(player): return player.takeCash(50)
         def three(player): return player.giveCash(50)
@@ -220,7 +227,7 @@ class Game:
 # Getters------------------------------------------------------------------------------------
     def getPlayers(self):
         """
-            Returns a list of dictionaries that represent each player. 
+            Returns a list of dictionaries that represent each player.
         """
         return list(map(lambda player: player.to_dict(), self._players))
 
@@ -239,6 +246,24 @@ class Game:
 
         """
         return self._board.getName(tileID)
+
+    def getTileID(self, tileName):
+        """
+            Returns the id of the tile with name tileName
+
+            Parameter: tileName, the name of tile requested
+            Requires: Must be of type string
+        """
+        return self._board.getID(tileName)
+
+    def getHouseCost(self, tileID):
+        """
+            Returns the cost to build a house on the tile with id, tileID
+
+            Parameter: tileID, the id of the tile requested
+            Requires: Must be of type int
+        """
+        return self._board.getHouseCost(tileID)
 # Game Functionality-------------------------------------------------------------------------
 
 # General
@@ -251,9 +276,9 @@ class Game:
             roll = random.randint(2, 12)
             self._currPlayer.move(roll)
             self._hasRolled = True
-            return self._handleTile()
+            return self._handleTile(roll)
         else:
-            return ("Already Rolled")
+            return "You already rolled"
 
     def buy(self):
         """
@@ -272,17 +297,17 @@ class Game:
         price = self._board.getPrice(tileID)
 
         if price > player.getCash():
-            return("Not Enough Money")
+            f"You don't have enough money to buy {self._board.getName(tileID)}"
         else:
             self._board.setOwner(tileID, player)
             player.takeCash(price)
             player.giveProperty(tileID)
-            self._checkMonopoly()
-            return("Buy Success")
+            self._updateMonopoly()
+            return "Buy Success"
 
     def endTurn(self):
         """
-            Returns "Success" and changes the current player if the player has rolled, "Has Not 
+            Returns "Success" and changes the current player if the player has rolled, "Has Not
             Rolled" otherwise.
         """
         if self._hasRolled:
@@ -294,12 +319,16 @@ class Game:
             return "Has Not Rolled"
 # Board
 
-    def _handleTile(self):
-        # TODO: pay rent if necessary.
+    def _handleTile(self, roll):
         tileID = self._currPlayer.getLocation()
         name = self._board.getName(tileID)
-        if self._board.getPrice(tileID) != 0 and self._board.getOwner(tileID) is None:
+        owner = self._board.getOwner(tileID)
+        playerName = self._currPlayer.to_dict()["name"]
+        if self._board.getPrice(tileID) != 0 and owner is None:
             return "Not Owned"
+        if owner is not None:
+            ownerName = owner.to_dict()["name"]
+            return f"{playerName} paid {self._takeRent(roll)} to {ownerName}"
         if name == "Chance" or name == "Community Chest":
             return self._drawCard()
         if name == "Income Tax":
@@ -308,38 +337,59 @@ class Game:
         if name == "Luxury Tax":
             self._currPlayer.takeCash(100)
             return "Paid Luxury Tax"
+        if name == "Go To Jail":
+            self._currPlayer.goToJail()
 
     def getCurrentTile(self):
+        """
+            Returns the name of the tile the current player is on.
+        """
         return self._board.getName(self._currPlayer.getLocation())
 
-    def _checkMonopoly(self):
+    def _updateMonopoly(self):
+        """
+            Updates the monopolies on the board if there are any.
+        """
         player = self.getCurrPlayer()
         for color, props in self._possMonopolies.items():
             if props <= player["propertyLocations"]:
                 self._board.setMonopoly(player["name"], color)
 
-    def getMonopolies(self, name):
+    def getMonopolies(self, player):
+        """
+            Returns a list of all of colors that player has monopolized.
+
+            Parameter: player, the player requested
+            Requires: Must be of type Player
+        """
         monopolies = []
         for color, owner in self._board.getMonopolies().items():
-            if owner == name:
+            if owner == player:
                 monopolies.append(color)
         return monopolies
 # Cards
 
     def _drawCard(self):
+        """
+            Draws the top chance card if the player is on a chance tile or top community chest card
+            otherwise.
+
+            Performs the action, updates the top card, and returns the text
+        """
         tileID = self._currPlayer.getLocation()
         name = self._board.getName(tileID)
         if name == "Chance":
             card = self._chanceCards[self._currChance]
             action = card.getAction()
             action(self._currPlayer)
-            self._currChance += 1
+            self._currChance = (self._currChance + 1) % len(self._chanceCards)
             return card.getText()
         else:
             card = self._communityChestCards[self._currCommunityChest]
             action = card.getAction()
             action(self._currPlayer)
-            self._currCommunityChest += 1
+            self._currCommunityChest = (self._currCommunityChest +
+                                        1) % len(self._communityChestCards)
             return card.getText()
 
 # Trading
@@ -368,24 +418,131 @@ class Game:
             for i in range(p2Dict["numJail"]):
                 p1.giveGetOutOfJail()
                 p2.takeGetOutOfJail()
+            return "Trade Success"
+        else:
+            return self._checkTrade(p1Dict, p2Dict)
 
-        def _checkTrade(self, p1Dict, p2Dict):
-            p1 = self._currPlayer
-            for player in self._player:
-                if player.getName() == p2Dict["name"]:
-                    p2 = player
-            p1Cash = p1Dict["cash"]
-            p2Cash = p2Dict["cash"]
-            p1Props = p1Dict["properties"]
-            p2Props = p2Dict["properties"]
-            p1Jail = p1Dict["numJail"]
-            p2Jail = p2Dict["numJail"]
+    def _checkTrade(self, p1Dict, p2Dict):
+        p1 = self._currPlayer
+        for player in self._player:
+            if player.getName() == p2Dict["name"]:
+                p2 = player
+        p1Cash = p1Dict["cash"]
+        p2Cash = p2Dict["cash"]
+        p1Props = p1Dict["properties"]
+        p2Props = p2Dict["properties"]
+        p1Jail = p1Dict["numJail"]
+        p2Jail = p2Dict["numJail"]
 
-            if p1.getCash() < p1Cash:
-                return f"{p1.getName} doesn't have ${p1Cash}"
-            elif p2.getCash() < p2Cash:
-                return f"{p2.getName} doesn't have ${p2Cash}"
-            # Check Props
-            # Check Jails
+        if p1.getCash() < p1Cash:
+            return f"{p1.getName} doesn't have ${p1Cash}"
+        elif p2.getCash() < p2Cash:
+            return f"{p2.getName} doesn't have ${p2Cash}"
+        # Check Props
+        for prop in p1Props:
+            if self._board.getOwner(prop) != p1:
+                return f"Doesn't Own {self._board.getName(prop)}"
+        for prop in p1Props:
+            if self._board.getOwner(prop) != p2:
+                return f"Doesn't Own {self._board.getName(prop)}"
+        # Check Jails
+        if p1.getJails() < p1Jail:
+            return f"{p1.getName} doesn't have ${p1Jail} Get Out of Jail Free Cards"
+        elif p2.getJails() < p2Jail:
+            return f"{p2.getName} doesn't have ${p2Jail} Get Out of Jail Free Cards"
+        else:
+            return "Good"
+
+    def _takeRent(self, roll):
+        """
+            Gives the owner of the tile with id, tileID, the amount of rent owed to them.
+
+            Requires: the tile has an owner
+            Returns: the amount paid
+
+            Parameter: roll, the amount the current player rolled
+            Requires: Must be of type int
+        """
+        tileName = self._board.getName(self._currPlayer.getLocation())
+        railroads = ["Reading Railroad", "Pennsylvania Railroad", "B. & O. Railroad", "Short Line"]
+        utilities = ["Electric Company", "Water Works"]
+        owner = self._board.getOwner(self._currPlayer.getLocation())
+        if tileName in railroads:
+            numOwned = self._numOwned(owner, railroads)
+            if numOwned == 1:
+                self._currPlayer.takeCash(25)
+                owner.giveCash(25)
+                return 25
+            elif numOwned == 2:
+                self._currPlayer.takeCash(50)
+                owner.giveCash(50)
+                return 50
+            elif numOwned == 3:
+                self._currPlayer.takeCash(100)
+                owner.giveCash(100)
+                return 100
+            elif numOwned == 4:
+                self._currPlayer.takeCash(200)
+                owner.giveCash(200)
+                return 200
+        if tileName in utilities:
+            numOwned = self._numOwned(owner, utilities)
+            if numOwned == 1:
+                amount = 4 * roll
+                self._currPlayer.takeCash(amount)
+                owner.giveCash(amount)
+                return amount
+            if numOwned == 2:
+                amount = 10 * roll
+                self._currPlayer.takeCash(amount)
+                owner.giveCash(amount)
+                return amount
+        else:
+            amount = self._board.getRent(self._currPlayer.getLocation())
+            self._currPlayer.takeCash(amount)
+            owner.giveCash(amount)
+            return amount
+
+    def _numOwned(self, owner, props):
+        """
+            Returns the number of properties in props that are owned by owner.
+
+            Parameter: owner, the owner requested
+            Requires: Must be of type Player
+
+            Parameter: props, list of the names of properties to check
+            Requires: Must be of type string list
+        """
+        total = 0
+        for prop in props:
+            if self._board.getOwner(self._board.getID(prop)) == owner:
+                total += 1
+        return total
+
+    def build(self, tileID, numHouses):
+        """
+            Builds numHouses houses on the tile with id, tileID
+
+            Requires: the current player owns the requested tile, and has a monopoly on its color.
+            Returns:"Built a hotel on [tileName]" if a hotel was built,
+                    "Built [numHouses] houses on [tileName]" if only houses were built,
+                    "Cannot Build [numHouses] houses on [tileName]" if the player does not have
+                    enough money.
+
+            Parameter: tileID, the id of the tile requested
+            Requires: Must be of type int
+
+            Parameter: numHouses, the number of houses to build
+            Requires: Must be of type int. Must not bring the total number of houses above 5.
+        """
+        perHouse = self._board.getHouseCost(tileID)
+        totalCost = perHouse * numHouses
+        if totalCost <= self._currPlayer.getCash():
+            self._currPlayer.takeCash(totalCost)
+            self._board.buildHouses(tileID, numHouses)
+            if self._board.getNumHouses(tileID) == 5:
+                return f"Built a hotel on {self._board.getName(tileID)}"
             else:
-                return "Good"
+                return f"Built {numHouses} houses on {self._board.getName(tileID)}"
+        else:
+            return f"Cannot Build {numHouses} houses on {self._board.getName(tileID)}"

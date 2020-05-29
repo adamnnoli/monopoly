@@ -107,6 +107,9 @@ class BoardTile:
         """
         return self._numHouses
 
+    def build(self, numHouses):
+        self._numHouses += numHouses
+
     def setOwner(self, owner):
         """
             Sets the owner of tile to owner.
@@ -124,6 +127,7 @@ class Board:
 
         INSTANCE ATTRIBUTES:
         _tiles: the list of BoardTiles in the game [BoardTile list]
+        _monopolies: dictionary of all of the monopolies owned [string:string dict]
     """
 
     def __init__(self, tiles):
@@ -148,7 +152,7 @@ class Board:
         """
         for tile in self._tiles:
             if tile.getName() == tileName:
-                return tile.getID()
+                return tile.getId()
 
     def getOwner(self, tileID):
         """
@@ -203,10 +207,34 @@ class Board:
         return self._findTile(tileID).setOwner(owner)
 
     def getMonopolies(self):
+        """
+            Returns the dictionary of all of the monopolies owned
+        """
         return self._monopolies
 
     def setMonopoly(self, name, color):
+        """
+            Sets the owner of the monopoly of the color tiles, to name 
+
+            Parameter: name, the name of the monopoly owner
+            Requires: Must be of type string
+
+            Parameter: color, the color of the monopoly owned
+            Requires: Must be of type string
+        """
         self._monopolies[color] = name
+
+    def getHouseCost(self, tileID):
+        """
+            Returns the cost to build a house on the tile with id, tileID
+
+            Parameter: tileID, the id of the tile requested
+            Requires: Must be of type int
+        """
+        return self._findTIle(tileID).getHouseCost()
+
+    def buildHouses(self, tileID, numHouses):
+        self._findTile(tileID).build(numHouses)
 
     def _findTile(self, tileID):
         """
@@ -218,6 +246,16 @@ class Board:
         for tile in self._tiles:
             if tile.getId() == tileID:
                 return tile
+
+    def getRent(self, tileID):
+        """
+            Returns the amount of the current rent on the tile with id, tileID
+
+            Parameter: tileID, the id of the tile requested
+            Requires: Must be of type int
+        """
+        tile = self._findTile(tileID)
+        return tile.getRents()[tile.getNumHouses()]
 
 
 class Player:
@@ -237,6 +275,7 @@ class Player:
         _location: the id of the tile the player is currently on [int]
         _propertiesIds: list of the ids of the properties the player owns [int set]
         _inJail: true if the player is currently in jail[bool]
+        _turnsInJail: the number of turns that the player has been in jail for [int]
         _numGetOutJail: the number of get out of jail free cards the player has[int]
     """
 
@@ -260,14 +299,21 @@ class Player:
         self._location = 0
         self._propertiesIds = set()
         self._inJail = False
+        self._turnsInJail = 0
         self._numGetOutJail = 0
 
 # Getters and Setters
 
     def getLocation(self):
+        """
+            Returns the id of the tile that the player is on.
+        """
         return self._location
 
     def getCash(self):
+        """
+            Returns the amount of cash the player has.
+        """
         return self._cash
 
     def to_dict(self):
@@ -325,6 +371,12 @@ class Player:
         self._propertiesIds.add(tileID)
 
     def takeProperty(self, tileID):
+        """
+            Takes the property with id tileID from player
+
+            Parameter: tileID, the id of the property to be given
+            Requires: Must be of type int
+        """
         self._propertiesIds.discard(tileID)
 
     def advanceTo(self, tileName, board):
@@ -407,6 +459,9 @@ class Player:
         self._numGetOutJail += 1
 
     def takeGetOutOfJail(self):
+        """
+            Takes 1 get out of jail free card from the player.
+        """
         self._numGetOutJail -= 1
 
     def advanceToNearestUtility(self, board):
@@ -444,6 +499,12 @@ class Player:
             self.advanceTo("B. & O. Railroad", board)
         else:
             self.advanceTo("Short Line")
+
+    def inJail(self):
+        return self._inJail
+
+    def numTurnsInJail(self):
+        return self._turnsInJail
 
 
 class Card:
