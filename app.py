@@ -116,7 +116,7 @@ class Monopoly:
             playerIColor = StringVar()
             # Save Player colors for later
             playerColors.append(playerIColor)
-            colors= ["red", "blue", "green", "yellow", "white", "black", "magenta", "cyan"]
+            colors = ["red", "blue", "green", "yellow", "white", "black", "magenta", "cyan"]
             colori = OptionMenu(self._askPlayers, playerIColor, *colors)
             texti.grid(row=i, column=0)
             namei.grid(row=i, column=1)
@@ -323,7 +323,7 @@ class Monopoly:
             Calls Helper method in game to end the current player's turn and redraws the player info
             frame
         """
-        self._game.endTurn()
+        self._handleLog(self._game.endTurn())
         self._createPlayerInfo()
 # Player Info
 
@@ -447,6 +447,14 @@ class Monopoly:
         elif result == "Buy Success":
             self._buyWindow.destroy()
             self._log(f"{name} bought {property}")
+        elif result == "In Jail":
+            self._createJailWindow()
+        elif result == "Paid to Leave Jail":
+            self._jailWindow.destroy()
+            self._log(f"{name} paid to leave jail")
+        elif result == "Used Card to Leave Jail":
+            self._jailWindow.destroy()
+            self._log(f"{name} used a Get Out of Jail Free Card")
         elif result is not None:
             self._log(result)
 
@@ -615,6 +623,27 @@ class Monopoly:
         # TODO: fill in this function. I don't know how I want to do auctions, maybe just ask each
         # player individually and highest bid wins.
         pass
+
+# Jail
+    def _createJailWindow(self):
+        self._jailWindow = Toplevel()
+
+        payButton = Button(self._jailWindow, text="Pay $50", command=self._pay)
+        payButton.grid()
+        rollButton = Button(self._jailWindow, text="Roll For Doubles", command=self._jailRoll)
+        rollButton.grid(column=1)
+        cardButton = Button(
+            self._jailWindow, text="Use Get Out of Jail Free Card", command=self._useCard)
+        cardButton.grid(column=2)
+
+    def _jailRoll(self):
+        self._handleLog(self._game.jailRoll())
+
+    def _pay(self):
+        self._handleLog(self._game.payJail())
+
+    def _useCard(self):
+        self._handleLog(self._game.useGetOutOfJailFreeCard())
 # END GAME---------------------------------------------------------------------------------
 
     def _displaywinner(self):
@@ -622,33 +651,21 @@ class Monopoly:
 
 
 """
-Pre Break Notes
-
-I'm getting tired of coding right now so here's what you need to do.
-
-You made it so you can select from the build window, but you need to actually implement building.
-
-Ask for the number of houses and make and call a method in game to add that many houses.
-Check to makes sure the money is there first.
-You were working on implementing trading. Finish the check trades function with a loop to make sure 
-all the properties are there and the get out of jail free cards are there. Propagate the results 
-through so that yu can log them. Add a log for when building doesn't work.
-
-
+Trading
+Use tuples and return the entries and variables used in both of the player frames.
+Call get on the tuple entries to build the dictionaries to finally call trade.
+Finish up cases in trade with check trade. I actually think you can just propagate the current 
+returns through.
 Jail
-If the player lands on the Go To Jail tile you will need put them in jail.
-You have to decide what happens in jail. Make it so that they can roll, but only move if they roll 
-a double. They can pay 50 to get out, but must pay before rolling. I don't know how you will do it 
-but after 3 turns force them to pay and then they roll.
-Add something to the player status that shows that they are in jail.
-Make it so they can use get out of jail free cards.
-
 Auctioning
-I think the best way is just, maybe no auctions. You must land on the property and pay the amount
-shown to get it. Or just the plain everyone enter their amount and highest one wins.
+Mortgages
 
 Bells and Whistles
-Colors and prettier buttons. Houses and hotels drawn onto the board. Colors on the board to show 
-who owns a property. The word monopoly on the board. Frames for the controls, log, and player info
-become label frames.
+Colors and prettier buttons. 
+Houses and hotels drawn onto the board.
+Colors on the board to show who owns a property.
+The word monopoly on the board.
+Frames for the controls, log, and player info become label frames.
+Change player info to show difference between jail and just visiting.
+Force the player to answer before they can close a popup
 """

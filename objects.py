@@ -506,6 +506,9 @@ class Player:
     def numTurnsInJail(self):
         return self._turnsInJail
 
+    def leaveJail(self):
+        self._inJail = False
+
 
 class Card:
     """

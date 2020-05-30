@@ -210,8 +210,8 @@ class Game:
         for text, action in zip(texts, actions):
             communityChestCards.append(Card(text, action))
         return communityChestCards
-
 # Players
+
     def _createPlayers(self, players):
         """
             Creates the list of player objects for the game
@@ -223,8 +223,8 @@ class Game:
         for i, name, color in players:
             playerList.append(Player(i, name, color))
         return playerList
-
 # Getters------------------------------------------------------------------------------------
+
     def getPlayers(self):
         """
             Returns a list of dictionaries that represent each player.
@@ -265,20 +265,23 @@ class Game:
         """
         return self._board.getHouseCost(tileID)
 # Game Functionality-------------------------------------------------------------------------
-
 # General
+
     def rollDice(self):
         """
             If the current player has not rolled yet then rolls the dice and moves the player by
             the number of places shown and returns "Success". Returns "Already Rolled" otherwise.
         """
+
         if not self._hasRolled:
-            roll = random.randint(2, 12)
-            self._currPlayer.move(roll)
-            self._hasRolled = True
-            return self._handleTile(roll)
+            return self._move(random.randint(2, 12))
         else:
             return "You already rolled"
+
+    def _move(self, roll):
+        self._currPlayer.move(roll)
+        self._hasRolled = True
+        return self._handleTile(roll)
 
     def buy(self):
         """
@@ -314,9 +317,10 @@ class Game:
             nextPlayerIndex = (self._players.index(self._currPlayer) + 1) % len(self._players)
             self._currPlayer = self._players[nextPlayerIndex]
             self._hasRolled = False
+            if self._currPlayer.inJail():
+                return "In Jail"
             return "Success"
-        else:
-            return "Has Not Rolled"
+        return "Has Not Rolled"
 # Board
 
     def _handleTile(self, roll):
@@ -391,8 +395,8 @@ class Game:
             self._currCommunityChest = (self._currCommunityChest +
                                         1) % len(self._communityChestCards)
             return card.getText()
-
 # Trading
+
     def trade(self, p1Dict, p2Dict):
         if self._checkTrade(p1Dict, p2Dict) == "Good":
             p1 = self._currPlayer
@@ -452,6 +456,7 @@ class Game:
             return f"{p2.getName} doesn't have ${p2Jail} Get Out of Jail Free Cards"
         else:
             return "Good"
+# Rents
 
     def _takeRent(self, roll):
         """
@@ -518,6 +523,7 @@ class Game:
             if self._board.getOwner(self._board.getID(prop)) == owner:
                 total += 1
         return total
+# Building
 
     def build(self, tileID, numHouses):
         """
@@ -546,3 +552,30 @@ class Game:
                 return f"Built {numHouses} houses on {self._board.getName(tileID)}"
         else:
             return f"Cannot Build {numHouses} houses on {self._board.getName(tileID)}"
+# Jail
+
+    def jailRoll(self):
+        dice1 = random.randint(1, 6)
+        dice2 = random.randint(1, 6)
+        if dice1 == dice2:
+            self._currPlayer.leaveJail()
+            return self._move(dice1+dice2)
+        return "You are still in jail"
+
+    def payJail(self):
+        if self._currPlayer.getCash() < 50:
+            name = self._currPlayer.to_dict()["name"]
+            return f"{name} does not have $50"
+        else:
+            self._currPlayer.takeCash(50)
+            self._currPlayer.leaveJail()
+            return "Paid to Leave Jail"
+
+    def useGetOutOfJailFreeCard(self):
+        if self._currPlayer.getNumJailCards() < 1:
+            name = self._currPlayer.to_dict()["name"]
+            return f"{name} does not have any Get Out Of Jail Free Cards"
+        else:
+            self._currPlayer.takeGetOutOfJail()
+            self.leaveJail()
+            return "Used Card to Leave Jail"
