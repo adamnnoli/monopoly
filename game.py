@@ -229,15 +229,18 @@ class Game:
         """
             Returns a list of dictionaries that represent each player.
         """
-        return list(map(lambda player: player.to_dict(), self._players))
+        return list(map(lambda player: player.toDict(), self._players))
 
     def getCurrPlayer(self):
         """
             Returns a dictionary representation of the current player
         """
-        return self._currPlayer.to_dict()
+        return self._currPlayer.toDict()
 
-    def getTileName(self, tileID):
+    def getTile(self, tileID):
+        return self._board.getTile(tileID)
+
+    def getTileID(self, tileName):
         """
             Returns the name of tile with id [tileID]
 
@@ -245,25 +248,8 @@ class Game:
             Requires: Must be of type int
 
         """
-        return self._board.getName(tileID)
-
-    def getTileID(self, tileName):
-        """
-            Returns the id of the tile with name tileName
-
-            Parameter: tileName, the name of tile requested
-            Requires: Must be of type string
-        """
         return self._board.getID(tileName)
 
-    def getHouseCost(self, tileID):
-        """
-            Returns the cost to build a house on the tile with id, tileID
-
-            Parameter: tileID, the id of the tile requested
-            Requires: Must be of type int
-        """
-        return self._board.getHouseCost(tileID)
 # Game Functionality-------------------------------------------------------------------------
 # General
 
@@ -295,16 +281,15 @@ class Game:
             If the player can buy the current tile then they will, I.e. cash is taken and ownership
             given.
         """
-        player = self._currPlayer
-        tileID = player.getLocation()
-        price = self._board.getPrice(tileID)
+        player = self._currPlayer.toDict()
+        tile = self._board.getTile(player["location"])
 
-        if price > player.getCash():
-            f"You don't have enough money to buy {self._board.getName(tileID)}"
+        if tile["price"] > player["cash"]:
+            f"You don't have enough money to buy {tile['name']}"
         else:
-            self._board.setOwner(tileID, player)
-            player.takeCash(price)
-            player.giveProperty(tileID)
+            self._board.setOwner(tile["id"], player)
+            self._currPlayer.takeCash(tile["price"])
+            self._currPlayer.giveProperty(tile["id"])
             self._updateMonopoly()
             return "Buy Success"
 
@@ -324,37 +309,36 @@ class Game:
 # Board
 
     def _handleTile(self, roll):
-        tileID = self._currPlayer.getLocation()
-        name = self._board.getName(tileID)
-        owner = self._board.getOwner(tileID)
-        playerName = self._currPlayer.to_dict()["name"]
-        if self._board.getPrice(tileID) != 0 and owner is None:
+        player = self._currPlayer.toDict()
+        tile = self._board.getTile(player["location"])
+        if tile["price"] != 0 and tile["owner"] is None:
             return "Not Owned"
-        if owner is not None:
-            ownerName = owner.to_dict()["name"]
-            return f"{playerName} paid {self._takeRent(roll)} to {ownerName}"
-        if name == "Chance" or name == "Community Chest":
+        if tile["owner"] is not None:
+            ownerName = tile["owner"].toDict()["name"]
+            return f"{player['name']} paid {self._takeRent(roll)} to {ownerName}"
+        if tile['name'] == "Chance" or tile['name'] == "Community Chest":
             return self._drawCard()
-        if name == "Income Tax":
+        if tile['name'] == "Income Tax":
             self._currPlayer.takeCash(200)
             return "Paid Income Tax"
-        if name == "Luxury Tax":
+        if tile['name'] == "Luxury Tax":
             self._currPlayer.takeCash(100)
             return "Paid Luxury Tax"
-        if name == "Go To Jail":
+        if tile['name'] == "Go To Jail":
             self._currPlayer.goToJail()
 
     def getCurrentTile(self):
         """
             Returns the name of the tile the current player is on.
         """
-        return self._board.getName(self._currPlayer.getLocation())
+        # Get players location from dictionary, get resulting tile dictionary, then get name
+        return self._board.getTile(self._currPlayer.toDict()["location"])["name"]
 
     def _updateMonopoly(self):
         """
             Updates the monopolies on the board if there are any.
         """
-        player = self.getCurrPlayer()
+        player = self._currPlayer.toDict()
         for color, props in self._possMonopolies.items():
             if props <= player["propertyLocations"]:
                 self._board.setMonopoly(player["name"], color)
@@ -564,7 +548,7 @@ class Game:
 
     def payJail(self):
         if self._currPlayer.getCash() < 50:
-            name = self._currPlayer.to_dict()["name"]
+            name = self._currPlayer.toDict()["name"]
             return f"{name} does not have $50"
         else:
             self._currPlayer.takeCash(50)
@@ -573,9 +557,13 @@ class Game:
 
     def useGetOutOfJailFreeCard(self):
         if self._currPlayer.getNumJailCards() < 1:
-            name = self._currPlayer.to_dict()["name"]
+            name = self._currPlayer.toDict()["name"]
             return f"{name} does not have any Get Out Of Jail Free Cards"
         else:
             self._currPlayer.takeGetOutOfJail()
             self.leaveJail()
             return "Used Card to Leave Jail"
+# Mortgage
+
+    def mortgage(self, tileName):
+        pass

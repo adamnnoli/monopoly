@@ -59,55 +59,32 @@ class BoardTile:
         """
         return self._id
 
-    def getName(self):
+    def toDict(self):
         """
-            Returns the name of the tile
+            Returns a dictionary representation of the tile
         """
-        return self._name
-
-    def getPrice(self):
-        """
-            Returns the price of the tile
-        """
-        return self._price
-
-    def getRents(self):
-        """
-            Returns the list of rents of the tile
-        """
-        return self._rents
-
-    def getMortgage(self):
-        """
-            Returns the mortgage amount of the tile
-        """
-        return self._mortgage
-
-    def getHouseCost(self):
-        """
-            Returns the cost to build a house on the tile
-        """
-        return self._houseCost
-
-    def getColor(self):
-        """
-            Returns the color of the tile
-        """
-        return self._houseCost
-
-    def getOwner(self):
-        """
-            Returns the owner of the tile
-        """
-        return self._owner
-
-    def getNumHouses(self):
-        """
-            Returns the number of houses on the tile. 5 houses is a hotel.
-        """
-        return self._numHouses
+        tileDict = {
+            "id": self._id,
+            "name": self._name,
+            "price": self._price,
+            "rents": self._rents,
+            "mortgage": self._mortgage,
+            "houseCost": self._houseCost,
+            "color": self._color,
+            "owner": self._owner,
+            "numHouses": self._numHouses
+        }
+        return tileDict
 
     def build(self, numHouses):
+        """
+            Adds numHouses to the tile. 
+
+            Requires: New total number of houses is at most 5 
+
+            Parameter: numHouses, the number of houses to build
+            Requires: Must be of type int
+        """
         self._numHouses += numHouses
 
     def setOwner(self, owner):
@@ -142,6 +119,9 @@ class Board:
         self._monopolies = {}
 
 # Getters and Setters
+    def getTile(self, tileID):
+        return self._findTile(tileID).toDict()
+
     def getID(self, tileName):
         """
             Returns the id of the tile with tileName
@@ -153,46 +133,6 @@ class Board:
         for tile in self._tiles:
             if tile.getName() == tileName:
                 return tile.getId()
-
-    def getOwner(self, tileID):
-        """
-            Returns the owner of the tile with id tileID
-
-            Parameter: tileID, the id of tile requested
-            Requires: Must be of type int
-
-        """
-        return self._findTile(tileID).getOwner()
-
-    def getPrice(self, tileID):
-        """
-            Returns the price of the tile with id tileID
-
-            Parameter: tileID, the id of tile requested
-            Requires: Must be of type int
-
-        """
-        return self._findTile(tileID).getPrice()
-
-    def getName(self, tileID):
-        """
-            Returns the name of the tile with id tileID
-
-            Parameter: tileID, the id of tile requested
-            Requires: Must be of type int
-
-        """
-        return self._findTile(tileID).getName()
-
-    def getNumHouses(self, tileID):
-        """
-            Returns the number of houses built on the tile with id tileID, 5 houses is a hotel.
-
-            Parameter: tileID, the id of tile requested
-            Requires: Must be of type int
-
-        """
-        return self._findTile(tileID).getNumHouses()
 
     def setOwner(self, tileID, owner):
         """
@@ -224,16 +164,16 @@ class Board:
         """
         self._monopolies[color] = name
 
-    def getHouseCost(self, tileID):
+    def buildHouses(self, tileID, numHouses):
         """
-            Returns the cost to build a house on the tile with id, tileID
+            Adds numHouses to the tile with id tileID
 
             Parameter: tileID, the id of the tile requested
+            Requires: Must be of type int 
+
+            Parameter: numHouses, the number of houses to build
             Requires: Must be of type int
         """
-        return self._findTIle(tileID).getHouseCost()
-
-    def buildHouses(self, tileID, numHouses):
         self._findTile(tileID).build(numHouses)
 
     def _findTile(self, tileID):
@@ -246,16 +186,6 @@ class Board:
         for tile in self._tiles:
             if tile.getId() == tileID:
                 return tile
-
-    def getRent(self, tileID):
-        """
-            Returns the amount of the current rent on the tile with id, tileID
-
-            Parameter: tileID, the id of the tile requested
-            Requires: Must be of type int
-        """
-        tile = self._findTile(tileID)
-        return tile.getRents()[tile.getNumHouses()]
 
 
 class Player:
@@ -304,19 +234,7 @@ class Player:
 
 # Getters and Setters
 
-    def getLocation(self):
-        """
-            Returns the id of the tile that the player is on.
-        """
-        return self._location
-
-    def getCash(self):
-        """
-            Returns the amount of cash the player has.
-        """
-        return self._cash
-
-    def to_dict(self):
+    def toDict(self):
         """
             Returns a dictionary representation of the player.
         """

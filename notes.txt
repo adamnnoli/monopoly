@@ -1,0 +1,20 @@
+Place Where I will keep track of notes, ideas on how to implement things, what to work on 
+etc.
+
+The main idea for app is that there is one, and only one, field for each window that will be made
+in the game.
+
+To-Do:
+1. Finish refactoring code, get rid of unnecessary attributes in all classes
+2. Update documentation to reflect refactored code.
+3. Complete List of Acceptable Logs
+
+
+Acceptable Logs:
+
+Card Logs 
+
+Building Logs 
+Mortgaging Logs
+Auctioning Logs 
+Trading Logs 

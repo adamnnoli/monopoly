@@ -6,7 +6,7 @@
 from tkinter import *
 from consts import *
 from game import Game
-from functools import partial
+
 # Used to Neaten Code
 long = TILE_LONG
 short = TILE_SHORT
@@ -14,7 +14,11 @@ longPlus = [long + i * short for i in range(1, 10)]  # longPlus[i] = long + (i +
 cLength = 2 * long + 9 * short
 
 # Necessary Global Variables
-playerColors = []  # Holds the variables that contain the player colors
+# Holds the variables that contain the player colors [StringVar() List]
+playerColors = []
+
+# Holds the variables that contain trade information [(IntVar, StringVar() List, IntVar) List]
+tradeInfo = []
 
 
 class Monopoly:
@@ -27,16 +31,15 @@ class Monopoly:
         INSTANCE ATTRIBUTES
         _window: the main game window [tkinter.Tk()]
         _welcome: the frame that handles the pre-game set-up [tkinter.Frame]
-        _board: canvas with the game board and pieces drawn on it [tkinter.Canvas]
-        _controls: frame that contains the buttons for player actions [tkinter.Frame]
         _playerInfo: frame that displays the information of the current player [tkinter.Frame]
         _game: the Game object with the current game information [game.Game]
         _gameLog: frame with labels to log responses from the game [tkinter.Frame]
         _askPlayers: the frame displayed when asking the names and colors of players[tkinter.Frame]
-        _buyWindow: the window prompting the user if they want to buy the property they are on[tkinter.Tk()]
-        _tradeWindow: the window that handles trades in the game[tkinter.Tk()]
-        _buildWindow: the window that handles building on properties[tkinter.Tk()]
-        _auctionWindow: the window that handles auctions in the game[tkinter.Tk()]
+        _buyWindow: the window prompting the user if they want to buy the property they are on[tkinter.Toplevel]
+        _tradeWindow: the window that handles trades in the game[tkinter.Toplevel]
+        _buildWindow: the window that handles building on properties[tkinter.Toplevel]
+        _auctionWindow: the window that handles auctions in the game[tkinter.Toplevel]
+        _mortgageWindow: the window that handles mortgaging properties [tkinter.Toplevel]
     """
 
 # START UP----------------------------------------------------------------------------
@@ -48,9 +51,6 @@ class Monopoly:
             the welcome frame takes over from there to implement most functionality
         """
         self._window = Tk()
-        self._showWelcome(self._window)
-        self._board = None
-        self._controls = None
         self._playerInfo = None
         self._game = None
         self._gameLog = None
@@ -59,6 +59,9 @@ class Monopoly:
         self._tradeWindow = None
         self._buildWindow = None
         self._auctionWindow = None
+        self._mortgageWindow = None
+
+        self._showWelcome()
 
     def run(self):
         """
@@ -66,33 +69,30 @@ class Monopoly:
         """
         self._window.mainloop()
 
-    def _showWelcome(self, root):
+    def _showWelcome(self):
         """
             Creates a Welcome window frame and adds it to root.
 
             The welcome window asks how many people are playing, and what they want their names
             and colors to be. Upon clicking start, the window will be destroyed and the main game
             frame will be created.
-
-            Parameter: root, the window that the welcome frame is added to.
-            Requires: Must be of type tkinter.Tk()
         """
         # Frame To Hold Everything
-        self._welcome = Frame(root)
-        self._welcome.grid(row=0, column=0)
+        welcomeFrame = Frame(self._window)
+        welcomeFrame.grid(row=0, column=0)
 
         # Instructions on what to do
-        text = Label(self._welcome, text="How Many People Will Be Playing: ", padx=5)
+        text = Label(welcomeFrame, text="How Many People Will Be Playing: ", padx=5)
         text.grid(row=0, column=0)
 
         # Ask how many players and create next dialogue box to get names and colors
         numPlayers = IntVar()
         maxPlayerList = [x for x in range(1, 5)]
-        askPlayers = OptionMenu(self._welcome, numPlayers, *maxPlayerList,
-                                command=lambda numPlayers: self._showPlayers(numPlayers))
+        askPlayers = OptionMenu(welcomeFrame, numPlayers, *maxPlayerList,
+                                command=lambda numPlayers: self._showPlayers(numPlayers, welcomeFrame))
         askPlayers.grid(row=0, column=1)
 
-    def _showPlayers(self, numPlayers):
+    def _showPlayers(self, numPlayers, welcomeFrame):
         """
             Displays the Player Selection Menu
 
@@ -106,7 +106,7 @@ class Monopoly:
             self._askPlayers.destroy()
 
         # Frame to hold the Selection menu
-        self._askPlayers = Frame(self._welcome)
+        self._askPlayers = Frame(welcomeFrame)
 
         # Create an place widgets in menu
         for i in range(1, numPlayers + 1):
@@ -114,7 +114,7 @@ class Monopoly:
             namei = Entry(self._askPlayers, width=15)
 
             playerIColor = StringVar()
-            # Save Player colors for later
+            # Save Player colors in global variable for later
             playerColors.append(playerIColor)
             colors = ["red", "blue", "green", "yellow", "white", "black", "magenta", "cyan"]
             colori = OptionMenu(self._askPlayers, playerIColor, *colors)
@@ -124,13 +124,13 @@ class Monopoly:
 
         # Create Start Button
         startButton = Button(self._askPlayers, text="Play!",
-                             command=lambda: self._play(self._welcome, self._window, numPlayers))
-        startButton.grid(row=numPlayers+1, column=0, columnspan=numPlayers+1)
+                             command=lambda: self._play(welcomeFrame, numPlayers))
+        startButton.grid(row=numPlayers+1, column=0, columnspan=3)
 
         # Add frame to screen
-        self._askPlayers.grid(row=1, column=0, columnspan=numPlayers+1)
+        self._askPlayers.grid(row=1, column=0, columnspan=2)
 
-    def _play(self, currWindow, root, numPlayers):
+    def _play(self, currWindow, numPlayers):
         """
             Begins the game
 
@@ -139,9 +139,6 @@ class Monopoly:
 
             Parameter: currWindow, the parent widget that has all of the welcome information
             Requires: Must be of type tkinter.frame
-
-            Parameter: root, the parent window where the board and controls will be added to
-            Requires: Must be of type tkinter.Tk()
 
             Parameter: numPlayers, the number of players in the game
             Requires: Must be of type int
@@ -154,7 +151,7 @@ class Monopoly:
         trueNames = []
         for i, name in enumerate(names, start=1):
             if name == "":
-                trueNames.append(f"Player {i}")
+                trueNames.append(f"Player {i}")  # Make Sure Every player has a name
             else:
                 trueNames.append(name)
 
@@ -166,18 +163,17 @@ class Monopoly:
 
         # Clear the root window
         currWindow.destroy()
-
-        # Make the game object and add the board and controls to the root window
+        # Make the game object and add create the frames in the window window
         self._game = Game(players)
-        self._board = self._createBoard(self._window)
-        self._controls = self._createControls(self._window)
-        self._playerInfo = self._createPlayerInfo()
+        self._createBoard()
+        self._createControls()
+        self._createPlayerInfo()
         self._createLog()
 
 # DURING GAME--------------------------------------------------------------------------------
 
 # Board
-    def _createBoard(self, root):
+    def _createBoard(self):
         """
             Creates a canvas that has the board drawn on it and adds it to root.
 
@@ -187,14 +183,13 @@ class Monopoly:
             Parameter: root, the window that the board is drawn on
             Requires: Must be of type tkinter.Tk()
         """
-        self._board = Canvas(root, width=cLength, height=cLength)
-        self._board.create_rectangle(0, 0, cLength, cLength, fill="#c0e2ca")
-        self._board.grid(row=0, column=0, rowspan=3)
-        self._createTop(self._board)
-        self._createLeft(self._board)
-        self._createRight(self._board)
-        self._createBottom(self._board)
-        self._drawPlayers(self._board)
+        board = Canvas(self._window, width=cLength, height=cLength, bg="#c0e2ca")
+        board.grid(row=0, column=0, rowspan=3)
+        self._createTop(board)
+        self._createLeft(board)
+        self._createRight(board)
+        self._createBottom(board)
+        self._drawPlayers(board)
 
     def _createTop(self, cvs):
         """
@@ -271,9 +266,7 @@ class Monopoly:
         cvs.create_rectangle(longPlus[8], longPlus[8], cLength, cLength)
 
 # Controls
-
-# TODO: Add Buttons for Building and Trading, get rid of buy button.
-    def _createControls(self, root):
+    def _createControls(self):
         """
             Creates a frame and adds it to root.
 
@@ -284,39 +277,38 @@ class Monopoly:
             Requires: Must be of type tkinter.Tk()
         """
         # Frame to Hold Buttons
-        self._controls = Frame(root)
-        self._controls.grid(row=0, column=1)
-
+        controls = LabelFrame(self._window, text="Options")
+        controls.grid(row=0, column=1)
         # Roll Dice Button
-        rollDice = Button(self._controls, text="Roll Dice", padx=5, command=self._rollDice)
+        rollDice = Button(controls, text="Roll Dice", padx=5, command=self._rollDice)
         rollDice.grid(row=0, column=0)
 
         # Build Button
-        build = Button(self._controls, text="Build", padx=5, command=self._createBuildWindow)
+        build = Button(controls, text="Build", padx=5, command=self._createBuildWindow)
         build.grid(row=0, column=1)
 
         # Trade Button
-        trade = Button(self._controls, text="Trade", padx=5, command=self._trade)
-        trade.grid(row=1, column=0)
+        trade = Button(controls, text="Trade", padx=5, command=self._createTradeWindow)
+        trade.grid(row=0, column=2)
 
         # End Turn Button
-        endTurn = Button(self._controls, text="End Turn", padx=5, command=self._endTurn)
-        endTurn.grid(row=1, column=1)
+        endTurn = Button(controls, text="End Turn", padx=5, command=self._endTurn)
+        endTurn.grid(row=1, column=0)
+
+        mortgage = Button(controls, text="Mortgage", command=self._createMortgageWindow)
+        mortgage.grid(row=1, column=1)
+
+        quitButton = Button(controls, text="Quit", padx=5)
+        quitButton.grid(row=1, column=2)
 
     def _rollDice(self):
         """
-            Calls Helper Methods in Game to roll the dice and move the players, then redraws the 
+            Calls Helper Methods in Game to roll the dice and move the players, then redraws the
             board and player info frame.
         """
         self._handleLog(self._game.rollDice())
-        self._createBoard(self._window)
+        self._createBoard()
         self._createPlayerInfo()
-
-    def _trade(self):
-        self._createTradeWindow()
-
-    def _build(self):
-        self._createBuildWindow()
 
     def _endTurn(self):
         """
@@ -331,28 +323,27 @@ class Monopoly:
         """
             Creates the Player info frame.
 
-            The frame contains the current player's name, how much money they have, the name of 
+            The frame contains the current player's name, how much money they have, the name of
             the tile they are located on, and a list of the names of the properties they own.
         """
         playerInfo = self._game.getCurrPlayer()
         name = playerInfo["name"]
         cash = playerInfo["cash"]
 
-        tileName = self._game.getTileName(playerInfo["location"])
+        tileName = self._game.getTile(playerInfo["location"])["name"]
 
         if self._playerInfo is not None:
             self._playerInfo.destroy()
 
-        frame = Frame(self._window)
+        frame = LabelFrame(self._window, text="Player Information")
         frame.grid(row=1, column=1)
-
-        nameLabel = Label(frame, text=name).pack()
-        cashLabel = Label(frame, text=cash).pack()
-        locationLabel = Label(frame, text=tileName).pack()
+        nameLabel = Label(frame, text=f"Name: {name}").pack()
+        cashLabel = Label(frame, text=f"Cash: {cash}").pack()
+        locationLabel = Label(frame, text=f"Currently At: {tileName}").pack()
 
         self._playerInfo = frame
-
 # Players
+
     def _drawPlayers(self, board):
         """
             Draws the Players' pieces.
@@ -409,8 +400,8 @@ class Monopoly:
             board.create_rectangle(cLength - long + offset, longPlus[location-32],
                                    cLength - long + offsetPiece, longPlus[location-32] + PIECE_SIZE,
                                    fill=color)
-
 # Game Log
+
     def _createLog(self):
         """
             Creates the Game Log
@@ -457,8 +448,8 @@ class Monopoly:
             self._log(f"{name} used a Get Out of Jail Free Card")
         elif result is not None:
             self._log(result)
-
 # Buying
+
     def _createBuyWindow(self):
         # TODO: this is not done. Make auction buttons work
         self._buyWindow = Toplevel()
@@ -480,7 +471,6 @@ class Monopoly:
         result = self._game.buy()
         self._createPlayerInfo()
         return result
-
 # Trading
 
     def _createTradeWindow(self):
@@ -537,6 +527,8 @@ class Monopoly:
 
         p1Frame.grid(row=1, column=0)
 
+        self._tradeInfo.append((p1CashEntry, props, p1JailEntry))
+
     def _makePlayer2(self, name):
 
         p2Frame = LabelFrame(self._tradeWindow, text="Their Items")
@@ -555,11 +547,11 @@ class Monopoly:
                     prop), player["propertyLocations"]))
         if len(p2PropNames) == 0:
             p2PropNames.append("")
-        p1PropEntry = OptionMenu(p2Frame, props, *p2PropNames)
-        p1PropEntry.grid(row=1, column=1)
+        p2PropEntry = OptionMenu(p2Frame, props, *p2PropNames)
+        p2PropEntry.grid(row=1, column=1)
 
-        p1GetOutJail = Label(p2Frame, text=f"{name} Get Out of Jail Free Cards")
-        p1GetOutJail.grid(row=2, column=0)
+        p2GetOutJail = Label(p2Frame, text=f"{name} Get Out of Jail Free Cards")
+        p2GetOutJail.grid(row=2, column=0)
 
         p2JailEntry = Entry(p2Frame)
         p2JailEntry.grid(row=2, column=1)
@@ -577,7 +569,6 @@ class Monopoly:
         p2Frame = self._tradeWindow.winfo_children()[4]
         print(p1Frame.winfo_children())
         print(p2Frame.winfo_children())
-
 # Building
 
     def _createBuildWindow(self):
@@ -599,9 +590,9 @@ class Monopoly:
     def _askHouses(self, name):
         numHouses = IntVar()
         numHousesLabel = Label(self._buildWindow, text="How Many Houses To Build?")
-        numHousesLabel.grid(row=1, column=0)
-        numHousesEntry = OptionMenu(self._buildWindow, numHouses, 1, 2, 3,
-                                    4, 5, command=lambda numHouses: self._showPrice(name, numHouses))
+        numHousesLabel.grid(row=1)
+        numHousesEntry = OptionMenu(self._buildWindow, numHouses, 1, 2, 3, 4, 5,
+                                    command=lambda numHouses: self._showPrice(name, numHouses))
         numHousesEntry.grid(row=1, column=1)
 
     def _showPrice(self, name, numHouses):
@@ -609,10 +600,10 @@ class Monopoly:
         houseCost = self._game.getHouseCost(self._game.getTileID(name))
         price = houseCost * numHouses
         priceCalcLabel = Label(self._buildWindow, text=f"Total Cost: {price}")
-        priceCalcLabel.grid(row=2, column=0, columnspan=2)
+        priceCalcLabel.grid(row=2, columnspan=2)
         acceptButton = Button(self._buildWindow, text="Accept",
                               command=lambda: self._executeBuild(name, numHouses))
-        acceptButton.grid(row=3, column=0, columnspan=2)
+        acceptButton.grid(row=3, columnspan=2)
 
     def _executeBuild(self, name, numHouses):
         tileID = self._game.getTileID(name)
@@ -623,8 +614,8 @@ class Monopoly:
         # TODO: fill in this function. I don't know how I want to do auctions, maybe just ask each
         # player individually and highest bid wins.
         pass
-
 # Jail
+
     def _createJailWindow(self):
         self._jailWindow = Toplevel()
 
@@ -644,6 +635,29 @@ class Monopoly:
 
     def _useCard(self):
         self._handleLog(self._game.useGetOutOfJailFreeCard())
+# Mortgaging
+
+    def _createMortgageWindow(self):
+        self._mortgageWindow = Toplevel()
+        playerDict = self._game.getCurrPlayer()
+
+        propLabel = Label(self._mortgageWindow, text="Select the property: ")
+        propLabel.grid()
+
+        props = map(self._game.getTileName, playerDict["propertyLocations"])
+        prop = StringVar()
+        propDropdown = OptionMenu(self._mortgageWindow, prop, *props,
+                                  command=lambda prop: self._showMortgageAccept(prop))
+        propDropdown.grid(column=1)
+
+    def _showMortgageAccept(self, propName):
+        price = self._game.getTileByName(propName)["Mortgage"]
+        acceptButton = Button(self._mortgageWindow, text="Accept",
+                              command=lambda propName: self._mortgage(propName))
+        acceptButton.grid(row=2, columnspan=2)
+
+    def _mortage(self, propName):
+        self._handLog(self._game.mortgage(propName))
 # END GAME---------------------------------------------------------------------------------
 
     def _displaywinner(self):
@@ -654,18 +668,42 @@ class Monopoly:
 Trading
 Use tuples and return the entries and variables used in both of the player frames.
 Call get on the tuple entries to build the dictionaries to finally call trade.
-Finish up cases in trade with check trade. I actually think you can just propagate the current 
+Finish up cases in trade with check trade. I actually think you can just propagate the current
 returns through.
+Change of plans, at least a little
 Jail
+Still need to implement the whole 3 turns must pay thing for jail. When they click end turn add to
+the number of turns they are in jail for. Before making the jail window check if they have been
+there for 3 turns and if so just make them pay and then get out.
+
 Auctioning
+Just make a window where each player can enter their bid. Pass a bid tuple or list, ordered based
+on the player, or maybe a player name : bid dictionary. Highest bid pays for and gets the property
+
 Mortgages
+Add a button to controls that creates a mortgage window. Mortgage window has dropdown to select
+property, creates a label to show how much you would get and then an accept button. Add a field to
+tile to show that it is mortgage. Change take rents to make sure the property is not mortgaged
+before collecting.
+Make it so there is another button to un-mortgage. Dropdown and pay as usual.
+Use logging to make sure everything goes well.
+
+Bankruptcy
 
 Bells and Whistles
-Colors and prettier buttons. 
+Colors and prettier buttons.
 Houses and hotels drawn onto the board.
 Colors on the board to show who owns a property.
 The word monopoly on the board.
 Frames for the controls, log, and player info become label frames.
 Change player info to show difference between jail and just visiting.
-Force the player to answer before they can close a popup
+Force the player to answer before they can close a popup.
+    Check to see if the window still exists before allowing the player to do stuff.
+
+You can do styling by making a styles file. Make a class for each style, buttons, options, etc.
+Make the classes subclasses of the appropriate tkinter one and use the class you made instead of
+the tkinter one.
+
+Rewrites
+Remove anywhere that says row=0 or column=0
 """
