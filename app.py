@@ -60,6 +60,7 @@ class Monopoly:
         self._buildWindow = None
         self._auctionWindow = None
         self._mortgageWindow = None
+        self._bankruptcyWindow = None
 
         self._showWelcome()
 
@@ -430,24 +431,65 @@ class Monopoly:
             Parameter: result, the result that might be logged
             Requires: Must be of type string
         """
-        print(result)
-        property = self._game.getCurrentTile()
-        name = self._game.getCurrPlayer()["name"]
-        if result == "Not Owned":
-            self._createBuyWindow()
-        elif result == "Buy Success":
-            self._buyWindow.destroy()
-            self._log(f"{name} bought {property}")
-        elif result == "In Jail":
-            self._createJailWindow()
-        elif result == "Paid to Leave Jail":
-            self._jailWindow.destroy()
-            self._log(f"{name} paid to leave jail")
-        elif result == "Used Card to Leave Jail":
-            self._jailWindow.destroy()
-            self._log(f"{name} used a Get Out of Jail Free Card")
-        elif result is not None:
-            self._log(result)
+        buyLogs = ["Buy", "Buy Success", "Buy Fail"]
+        buildLogs = ["Build Success", "Build Fail"]
+        mortgageLogs = ["Mortgage Success", "Mortgage Interest"]
+        tradeLogs = ["Trade Success", "Trade Fail"]
+        jailLogs = ["Jail", "Jail Success", "Jail Fail"]
+        otherLogs = ["Rent", "Tax", "Roll", "Bankruptcy"]
+
+        if result[0] == "Card" or result[0] == "Auction" or result[0] in otherLogs:
+            self._log(result[1])
+        elif result[0] in buyLogs:
+            self._buyLog(result)
+        elif result[0] in buildLogs:
+            self._buildLog(result)
+        elif result[0] in mortgageLogs:
+            self._mortgageLog(result)
+        elif result[0] in tradeLogs:
+            self._tradeLog(result)
+        elif result[0] in jailLogs:
+            self._jailLog(result)
+        else:
+            print(result)
+
+        def _buyLog(self, result):
+            if result[0] == "Buy":
+                self._createBuyWindow()
+            if result[0] == "Buy Success":
+                self._log(result[1])
+                if self._buyWindow is not None:
+                    self._buyWindow.destroy()
+            if result[0] == "Buy Fail":
+                self._log(result[1])
+
+        def _buildLog(self, result):
+            if result[0] == "Build Success":
+                if self._buildWindow is not None:
+                    self._buildWindow.destroy()
+            self._log(result[1])
+
+        def _mortgageLog(self, result):
+            if result[0] == "Mortgage Success":
+                if self._mortgageWindow is not None:
+                    self._mortgageWindow.destroy()
+            self._log(result[1])
+
+        def _tradeLog(self, result):
+            if result[0] == "Trade Success":
+                if self._tradeWindow is not None:
+                    self._tradeWindow.destroy
+            self._log(result[1])
+
+        def _jailLog(self, result):
+            if result[0] == "Jail":
+                self._createJailWindow()
+            if result[0] == "Jail Success":
+                if self._jailWindow is not None:
+                    self._jailWindow.destroy()
+                self._log(result[1])
+            if result[0] == "Jail Fail":
+                self._log(result[1])
 # Buying
 
     def _createBuyWindow(self):

@@ -11,10 +11,82 @@ To-Do:
 
 
 Acceptable Logs:
+  Idea, make the logs tuples, (Category, Message)
+  If the log is not on this list it cant be used in handle log
 
-Card Logs 
+  Card Logs 
+    (Card, "Card Text") -> Log "Card Text"
 
-Building Logs 
-Mortgaging Logs
-Auctioning Logs 
-Trading Logs 
+  Buying Logs
+    (Buy, Not Owned) -> create window 
+    (BuySuccess, "Player name" bought "tile name") -> log message as is and delete window
+    (BuyFail, "Player name" doesn't have enough money to buy "tile name") -> log message as is keep window 
+
+  Building Logs
+    (BuildSuccess, "Player Name" built "number of houses" on "tile name") -> log message as is and delete window
+    (BuildFail, "Player Name" doesn't have enough money to build "number of houses" on "tile name") -> log message as is
+    (BuildFail, You must build on properties evenly) -> log message as is 
+
+
+  Mortgaging Logs
+    (MortgageSuccess, "Player name" mortgaged "tile name" for "amount") -> log message as is, delete window 
+    (MortgageSuccess, "Player name" paid "amount to unmortgage "tile name") -> log message as is, delete window 
+    (MortgageInterest, "Player name" paid the interest on the mortgage of "tile name") -> log message as is(there shouldn't be a window ) 
+  
+  Auctioning Logs 
+    (Auction, "Player name" won "tile name" at an auction for "amount") ->  -> log message as is
+    Created by clicking no when building, deleted by clicking accept button 
+  
+  Trading Logs 
+    (TradeFail, "Player name" does not own "tile name") -> log message as is 
+    (TradeFail, "Player name" does not have "amount") -> log message as is 
+    (TradeFail, "Player name" does not have "amount" get out of jail free cards) -> log message as is
+    (TradeSuccess, "Player name" traded "amount", "tiles", "number" get out of jail free cards, for
+            "amount", "tiles", "number" get out of jail free cards ) -> log message as is, delete window 
+  
+  Jail Logs
+    (Jail, "Began Turn") -> create window
+    (JailFail, "Player name" rolled doubles three times) -> log message as is
+    (JailFail, "Player name" is now in jail.) -> log message as is 
+    (JailSuccess, "Player name" paid $50 to get out of jail) -> log message as is, delete window
+    (JailSuccess, "Player name" rolled a double to get out of jail) -> log message as is, delete window
+    (JailSuccess, "Player name" use a get out of jail free card)  -> log message as is, delete window 
+    (JailFail, "Player name" does not have $50) -> log message as is 
+    (JailFail, "Player name" does not have a get out of jail free card) -> log message as is
+    (JailSuccess, "Player name" did not roll doubles and is still in jail) -> log message as is, delete window
+    (JailFail, "Player name" was forced to pay $50 to get out of jail) -> log message as is
+  
+  Other Logs 
+    (Rent, "Player name" paid "rent amount" to "other player") -> log message as is
+    (Tax, "Player name" paid $100 in Luxury Tax) -> log message as is 
+    (Tax, "Player name" paid $200 in Income Tax) -> log message as is
+    (Roll, You rolled doubles, roll again)  -> log message as is
+    (Roll, You already rolled)
+    (Bankruptcy, "Player name" became bankrupt and forfeited all assets to "Other Player") -> log message as is 
+
+How Tos:
+  Trading 
+  Bankruptcy
+    If you owe money to another player and don't have the cash open the Bankruptcy window.
+    What happens is that you must sell houses at half the price and mortgage properties until you 
+    have enough. If you don't then the after selling all the houses the other player gets everything
+    Any mortgaged properties must have interested paid to the bank immediately
+    If the money is owed to the bank, same process except the bank gets everything and auctions 
+    everything
+  Mortgaging
+    Make sure mortgaged properties can't collect rent
+    Make sure improved properties can't be mortgaged, must sell houses first
+    Unmortgage at the cost of the mortgage plus 10%
+    Can't have any mortgaged properties if you want to buy a house in the color group
+  Jail 
+    Make sure that the player can't roll if they are in jail, unless through the jail window
+  Other 
+    Change rolling so that if they roll doubles they can roll again 
+    Make sure monopoly properties get double rent, unless there are houses
+    Try to see if you can implement the build evenly rule, all properties must have 1 house before
+    any can move onto two houses
+    When it comes to trading, there can't be any houses on the property. Make it so you can sell 
+    houses at half the price they are bought for. Must sell evenly as you bought evenly
+  Start Up 
+    Make a start up window that shows up before the player selection. This window should show the 
+    rules to the game and will start the game by pressing a play button on the bottom of the window.
