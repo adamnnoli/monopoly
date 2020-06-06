@@ -38,20 +38,20 @@ class Game:
             Parameter: players, a list of tuples containing the ids, names, and colors of the players
             Requires: Must be of type (int, string, string) list
         """
-        self._board = self._createBoard()
+        self.board = self._createBoard()
         cards = self._createCards()
-        self._chanceCards = cards[0]
-        self._communityChestCards = cards[1]
-        self._players = self._createPlayers(players)
-        self._currPlayer = self._players[0]
+        self.chanceCards = cards[0]
+        self.communityChestCards = cards[1]
+        self.players = self._createPlayers(players)
+        self.currPlayer = self._players[0]
 
-        self._hasRolled = False
-        self._currChance = 0
-        self._currCommunityChest = 0
+        self.hasRolled = False
+        self.currChance = 0
+        self.currCommunityChest = 0
         # self._possMonopolies  is set-up when creating Board
 # Board
 
-    def _createBoard(self):
+    def createBoard(self):
         """
             Initializes the board for the game.
 
@@ -67,11 +67,10 @@ class Game:
             for i, tile in enumerate(board["tiles"]):
                 name = tile["name"]
                 price = tile["price"]
-                mortgage = tile["mortgage"]
                 rents = tile["rents"]
                 houseCost = tile["house cost"]
                 color = tile["color"]
-                newTile = BoardTile(i, name, price, rents, mortgage, houseCost, color)
+                newTile = BoardTile(i, name, price, rents, houseCost, color)
                 tiles.append(newTile)
                 if possMonopolies.get(color) is None:
                     possMonopolies[color] = set()
@@ -81,7 +80,7 @@ class Game:
         return Board(tiles)
 # Cards
 
-    def _createCards(self):
+    def createCards(self):
         """
             Initializes the decks of cards for the game.
 
@@ -92,7 +91,7 @@ class Game:
         return [self._createChanceCards(), self._createCommunityChestCards()]
 # Chance
 
-    def _chanceCardTexts(self):
+    def chanceCardTexts(self):
         """
             Returns a list of the texts for every chance card in the game.
         """
@@ -115,37 +114,37 @@ class Game:
 
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
 
-    def _chanceCardActions(self):
+    def chanceCardActions(self):
         """
             Returns a list of the actions for every chance card in the game.
 
             Ordered to match the text of the cards.
         """
         def zero(player): return player.giveCash(100)
-        def one(player): return player.advanceTo("Go", self._board)
-        def two(player): return player.advanceTo("Illinois Ave", self._board)
-        def three(player): return player.advanceTo("St. Charles Place", self._board)
-        def four(player): return player.advanceToNearestUtility(self._board)
-        def five(player): return player.advanceToNearestRailroad(self._board)
+        def one(player): return player.advanceTo("Go", self.board)
+        def two(player): return player.advanceTo("Illinois Ave", self.board)
+        def three(player): return player.advanceTo("St. Charles Place", self.board)
+        def four(player): return player.advanceToNearestUtility(self.board)
+        def five(player): return player.advanceToNearestRailroad(self.board)
         def six(player): return player.giveCash(50)
         def seven(player): return player.giveGetOutOfJail()
         def eight(player): return player.move(-3)
         def nine(player): return player.goToJail()
         def ten(player): return player.makeRepairs(25, 100)
         def eleven(player): return player.takeCash(15)
-        def twelve(player): return player.advanceTo("Reading Railroad", self._board)
-        def thirteen(player): return player.advanceTo("Boardwalk", self._board)
-        def fourteen(player): return player.giveToEach(50, self._players)
+        def twelve(player): return player.advanceTo("Reading Railroad", self.board)
+        def thirteen(player): return player.advanceTo("Boardwalk", self.board)
+        def fourteen(player): return player.giveToEach(50, self.players)
         def fifteen(player): return player.giveCash(150)
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
 
-    def _createChanceCards(self):
+    def createChanceCards(self):
         """
             Returns a list of Card objects for every chance card in the game.
         """
         chanceCards = []
-        texts = self._chanceCardTexts()
-        actions = self._chanceCardActions()
+        texts = self.chanceCardTexts()
+        actions = self.chanceCardActions()
         for text, action in zip(texts, actions):
             chanceCards.append(Card(text, action))
         return chanceCards
@@ -225,20 +224,23 @@ class Game:
         return playerList
 # Getters------------------------------------------------------------------------------------
 
+    def getBoard(self):
+        self.board.toDict()
+
     def getPlayers(self):
         """
             Returns a list of dictionaries that represent each player.
         """
-        return list(map(lambda player: player.toDict(), self._players))
+        return list(map(lambda player: player.toDict(), self.players))
 
     def getCurrPlayer(self):
         """
             Returns a dictionary representation of the current player
         """
-        return self._currPlayer.toDict()
+        return self.currPlayer.toDict()
 
     def getTile(self, tileID):
-        return self._board.getTile(tileID)
+        return self.board.getTile(tileID)
 
     def getTileID(self, tileName):
         """
@@ -248,8 +250,21 @@ class Game:
             Requires: Must be of type int
 
         """
-        return self._board.getID(tileName)
+        return self.board.getID(tileName)
 
+    def getBuildable(self):
+        pass
+
+    def getSellable(self):
+        pass
+
+    def getMortgageable(self):
+        result = []
+        for tileID in self.currPlayer:
+            pass
+
+    def getUnmortgageable(self):
+        pass
 # Game Functionality-------------------------------------------------------------------------
 # General
 

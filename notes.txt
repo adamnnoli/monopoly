@@ -1,15 +1,12 @@
-Place Where I will keep track of notes, ideas on how to implement things, what to work on 
+Place where I will keep track of notes, ideas on how to implement things, what to work on 
 etc.
-
-The main idea for app is that there is one, and only one, field for each window that will be made
-in the game.
-
-To-Do:
-1. Finish refactoring code, get rid of unnecessary attributes in all classes
-2. Update documentation to reflect refactored code.
-3. Complete List of Acceptable Logs
-
-
+TO-DO:
+  1. Fill in functions in objects2 
+  2. Fill in all documentation 
+  3. Fill in all init functions 
+  4. Fill in all getters and setters 
+  5. Complete Game Start Up in retry
+  6. Complete Game Drawings in retry 
 Acceptable Logs:
   Idea, make the logs tuples, (Category, Message)
   If the log is not on this list it cant be used in handle log
@@ -26,6 +23,7 @@ Acceptable Logs:
     (BuildSuccess, "Player Name" built "number of houses" on "tile name") -> log message as is and delete window
     (BuildFail, "Player Name" doesn't have enough money to build "number of houses" on "tile name") -> log message as is
     (BuildFail, You must build on properties evenly) -> log message as is 
+    (BuildSuccess, "Player Name" sold a house on "tile name") -> log message as is, delete window
 
 
   Mortgaging Logs
@@ -34,7 +32,8 @@ Acceptable Logs:
     (MortgageInterest, "Player name" paid the interest on the mortgage of "tile name") -> log message as is(there shouldn't be a window ) 
   
   Auctioning Logs 
-    (Auction, "Player name" won "tile name" at an auction for "amount") ->  -> log message as is
+    (AuctionSuccess, "Player name" won "tile name" at an auction for "amount") ->  -> log message as is
+    (AuctionFail, "Th")
     Created by clicking no when building, deleted by clicking accept button 
   
   Trading Logs 
@@ -61,7 +60,9 @@ Acceptable Logs:
     (Tax, "Player name" paid $100 in Luxury Tax) -> log message as is 
     (Tax, "Player name" paid $200 in Income Tax) -> log message as is
     (Roll, You rolled doubles, roll again)  -> log message as is
-    (Roll, You already rolled)
+    (Roll, You already rolled) -> log message as is 
+    (End Turn, You haven't rolled yet) -> log message as is
+    (Bankruptcy, )
     (Bankruptcy, "Player name" became bankrupt and forfeited all assets to "Other Player") -> log message as is 
 
 How Tos:

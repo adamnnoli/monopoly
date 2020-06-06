@@ -3,7 +3,6 @@
     {
       "name": "Go",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -11,7 +10,6 @@
     {
       "name": "Mediterranean Avenue",
       "price": 60,
-      "mortgage": 30,
       "rents": [2, 10, 30, 90, 160, 250],
       "house cost": 50,
       "color": "brown"
@@ -19,15 +17,12 @@
     {
       "name": "Community Chest",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
     },
     {
       "name": "Baltic Avenue",
-      "price": 60,
-      "mortgage": 30,
       "rents": [4, 20, 60, 180, 320, 450],
       "house cost": 50,
       "color": "brown"
@@ -35,7 +30,6 @@
     {
       "name": "Income Tax",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -43,7 +37,6 @@
     {
       "name": "Reading Railroad",
       "price": 200,
-      "mortgage": 100,
       "rents": [25, 25, 25, 25, 25, 25],
       "house cost": 0,
       "color": "white"
@@ -51,7 +44,6 @@
     {
       "name": "Oriental Avenue",
       "price": 100,
-      "mortgage": 50,
       "rents": [6, 30, 90, 270, 400, 550],
       "house cost": 50,
       "color": "light blue"
@@ -59,7 +51,6 @@
     {
       "name": "Chance",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -67,7 +58,6 @@
     {
       "name": "Vermont Avenue",
       "price": 100,
-      "mortgage": 50,
       "rents": [6, 30, 90, 270, 400, 550],
       "house cost": 50,
       "color": "light blue"
@@ -75,7 +65,6 @@
     {
       "name": "Connecticut Avenue",
       "price": 120,
-      "mortgage": 60,
       "rents": [8, 40, 100, 300, 450, 600],
       "house cost": 50,
       "color": "light blue"
@@ -83,7 +72,6 @@
     {
       "name": "Jail",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -91,7 +79,6 @@
     {
       "name": "St. Charles Place",
       "price": 140,
-      "mortgage": 70,
       "rents": [10, 50, 150, 450, 625, 750],
       "house cost": 100,
       "color": "pink"
@@ -99,7 +86,6 @@
     {
       "name": "Electric Company",
       "price": 150,
-      "mortgage": 75,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -107,7 +93,6 @@
     {
       "name": "States Avenue",
       "price": 140,
-      "mortgage": 70,
       "rents": [10, 50, 150, 450, 625, 750],
       "house cost": 100,
       "color": "pink"
@@ -115,7 +100,6 @@
     {
       "name": "Virginia Avenue",
       "price": 160,
-      "mortgage": 80,
       "rents": [12, 60, 180, 500, 700, 900],
       "house cost": 100,
       "color": "pink"
@@ -123,7 +107,6 @@
     {
       "name": "Pennsylvania Railroad",
       "price": 200,
-      "mortgage": 100,
       "rents": [25, 25, 25, 25, 25, 25],
       "house cost": 0,
       "color": "white"
@@ -131,7 +114,6 @@
     {
       "name": "St. James Place",
       "price": 180,
-      "mortgage": 90,
       "rents": [14, 70, 200, 550, 750, 950],
       "house cost": 100,
       "color": "orange"
@@ -139,7 +121,6 @@
     {
       "name": "Community Chest",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -147,7 +128,6 @@
     {
       "name": "Tennessee Avenue",
       "price": 180,
-      "mortgage": 90,
       "rents": [14, 70, 200, 550, 750, 950],
       "house cost": 100,
       "color": "orange"
@@ -155,7 +135,6 @@
     {
       "name": "New York Avenue",
       "price": 200,
-      "mortgage": 100,
       "rents": [16, 80, 220, 600, 800, 1000],
       "house cost": 100,
       "color": "orange"
@@ -163,7 +142,6 @@
     {
       "name": "Free Parking",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -171,7 +149,6 @@
     {
       "name": "Kentucky Avenue",
       "price": 220,
-      "mortgage": 110,
       "rents": [18, 90, 250, 700, 875, 1050],
       "house cost": 150,
       "color": "red"
@@ -179,7 +156,6 @@
     {
       "name": "Chance",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -187,7 +163,6 @@
     {
       "name": "Indiana Avenue",
       "price": 220,
-      "mortgage": 110,
       "rents": [18, 90, 250, 700, 875, 1050],
       "house cost": 150,
       "color": "red"
@@ -195,7 +170,6 @@
     {
       "name": "Illinois Avenue",
       "price": 240,
-      "mortgage": 120,
       "rents": [20, 100, 300, 750, 925, 1100],
       "house cost": 150,
       "color": "red"
@@ -203,7 +177,6 @@
     {
       "name": "B. & O. Railroad",
       "price": 200,
-      "mortgage": 100,
       "rents": [25, 25, 25, 25, 25, 25],
       "house cost": 0,
       "color": "white"
@@ -211,7 +184,6 @@
     {
       "name": "Atlantic Avenue",
       "price": 260,
-      "mortgage": 130,
       "rents": [22, 110, 330, 800, 975, 1150],
       "house cost": 150,
       "color": "yellow"
@@ -219,7 +191,6 @@
     {
       "name": "Ventor Avenue",
       "price": 260,
-      "mortgage": 130,
       "rents": [22, 110, 330, 800, 975, 1150],
       "house cost": 150,
       "color": "yellow"
@@ -227,7 +198,6 @@
     {
       "name": "Water Works",
       "price": 150,
-      "mortgage": 75,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -235,7 +205,6 @@
     {
       "name": "Marvin Gardens",
       "price": 280,
-      "mortgage": 140,
       "rents": [24, 120, 360, 850, 1025, 1200],
       "house cost": 150,
       "color": "yellow"
@@ -243,7 +212,6 @@
     {
       "name": "Go To Jail",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -251,7 +219,6 @@
     {
       "name": "Pacific Avenue",
       "price": 300,
-      "mortgage": 150,
       "rents": [26, 130, 390, 900, 1100, 1275],
       "house cost": 200,
       "color": "green"
@@ -259,7 +226,6 @@
     {
       "name": "North Carolina Avenue",
       "price": 300,
-      "mortgage": 150,
       "rents": [26, 130, 390, 900, 1100, 1275],
       "house cost": 200,
       "color": "green"
@@ -267,7 +233,6 @@
     {
       "name": "Community Chest",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -275,7 +240,6 @@
     {
       "name": "Pennsylvania Avenue",
       "price": 320,
-      "mortgage": 28,
       "rents": [28, 150, 450, 1000, 1200, 1400],
       "house cost": 200,
       "color": "green"
@@ -283,7 +247,6 @@
     {
       "name": "Short Line",
       "price": 200,
-      "mortgage": 100,
       "rents": [25, 25, 25, 25, 25, 25],
       "house cost": 0,
       "color": "white"
@@ -291,7 +254,6 @@
     {
       "name": "Chance",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -299,7 +261,6 @@
     {
       "name": "Park Place",
       "price": 350,
-      "mortgage": 175,
       "rents": [35, 175, 500, 1100, 1300, 1500],
       "house cost": 200,
       "color": "blue"
@@ -307,7 +268,6 @@
     {
       "name": "Luxury Tax",
       "price": 0,
-      "mortgage": 0,
       "rents": [0, 0, 0, 0, 0, 0],
       "house cost": 0,
       "color": "white"
@@ -315,7 +275,6 @@
     {
       "name": "Boardwalk",
       "price": 400,
-      "mortgage": 200,
       "rents": [50, 200, 600, 1400, 1700, 2000],
       "house cost": 200,
       "color": "blue"

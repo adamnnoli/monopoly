@@ -51,6 +51,7 @@ class Monopoly:
             the welcome frame takes over from there to implement most functionality
         """
         self._window = Tk()
+        self.showWelcome()
         self._playerInfo = None
         self._game = None
         self._gameLog = None
@@ -64,36 +65,51 @@ class Monopoly:
 
         self._showWelcome()
 
+    def showWelcome(self):
+        """
+            Creates the initial Welcome Frame and adds it to the main window.
+
+            Has the title, game rules, and a start button which opens the player selection frame.
+        """
+        welcomeFrame = Frame(self.mainWindow)
+        welcomeFrame.grid(row=0, column=0)
+
+        title = Label(welcomeFrame, text="MONOPOLY")
+        title.grid(row=0, column=0)
+        instructions = self.instructionsFrame(welcomeFrame)
+        instructions.grid()
+
+        start = Button(welcomeFrame, text="Start", command=self.showPlayerSelection)
+
     def run(self):
         """
             Runs the mainloop of the game window.
         """
         self._window.mainloop()
 
-    def _showWelcome(self):
+    def showPlayerSelection(self):
         """
-            Creates a Welcome window frame and adds it to root.
+            Clears the main window and begins the player selection process.
 
-            The welcome window asks how many people are playing, and what they want their names
-            and colors to be. Upon clicking start, the window will be destroyed and the main game
-            frame will be created.
+
         """
-        # Frame To Hold Everything
-        welcomeFrame = Frame(self._window)
-        welcomeFrame.grid(row=0, column=0)
+        self.clear(self.mainWindow)
+
+        selectionFrame = Frame(self.mainWindow)
+        selectionFrame.grid(row=0, column=0)
 
         # Instructions on what to do
-        text = Label(welcomeFrame, text="How Many People Will Be Playing: ", padx=5)
+        text = Label(selectionFrame, text="How Many People Will Be Playing: ", padx=5)
         text.grid(row=0, column=0)
 
         # Ask how many players and create next dialogue box to get names and colors
         numPlayers = IntVar()
         maxPlayerList = [x for x in range(1, 5)]
-        askPlayers = OptionMenu(welcomeFrame, numPlayers, *maxPlayerList,
-                                command=lambda numPlayers: self._showPlayers(numPlayers, welcomeFrame))
+        askPlayers = OptionMenu(selectionFrame, numPlayers, *maxPlayerList,
+                                command=lambda numPlayers: self.showPlayers(numPlayers, selectionFrame))
         askPlayers.grid(row=0, column=1)
 
-    def _showPlayers(self, numPlayers, welcomeFrame):
+    def showPlayers(self, numPlayers, welcomeFrame):
         """
             Displays the Player Selection Menu
 
@@ -163,7 +179,7 @@ class Monopoly:
         players = list(zip(playerIds, trueNames, colors))
 
         # Clear the root window
-        currWindow.destroy()
+        self.clear(self.mainWindow)
         # Make the game object and add create the frames in the window window
         self._game = Game(players)
         self._createBoard()
@@ -174,7 +190,7 @@ class Monopoly:
 # DURING GAME--------------------------------------------------------------------------------
 
 # Board
-    def _createBoard(self):
+    def createBoard(self):
         """
             Creates a canvas that has the board drawn on it and adds it to root.
 
@@ -186,13 +202,13 @@ class Monopoly:
         """
         board = Canvas(self._window, width=cLength, height=cLength, bg="#c0e2ca")
         board.grid(row=0, column=0, rowspan=3)
-        self._createTop(board)
-        self._createLeft(board)
-        self._createRight(board)
-        self._createBottom(board)
-        self._drawPlayers(board)
+        self.createTop(board)
+        self.createLeft(board)
+        self.createRight(board)
+        self.createBottom(board)
+        self.drawPlayers(board)
 
-    def _createTop(self, cvs):
+    def createTop(self, cvs):
         """
             Draws the top row of the monopoly board on cvs.
 
@@ -211,7 +227,7 @@ class Monopoly:
         cvs.create_rectangle(longPlus[7], 0, longPlus[8], long, fill="#e0fc08")
         cvs.create_rectangle(longPlus[8], 0, cLength, long)
 
-    def _createLeft(self, cvs):
+    def createLeft(self, cvs):
         """
             Draws the left side of the monopoly board on cvs. Does not draw free parking or jail
             tiles.
@@ -229,7 +245,7 @@ class Monopoly:
         cvs.create_rectangle(0, longPlus[6], long, longPlus[7], fill="white")
         cvs.create_rectangle(0, longPlus[7], long, longPlus[8], fill="#e64cdb")
 
-    def _createRight(self, cvs):
+    def createRight(self, cvs):
         """
             Draws the right side of the monopoly board on cvs. Does not draw GO or Go to Jail
             tiles.
@@ -247,7 +263,7 @@ class Monopoly:
         cvs.create_rectangle(longPlus[8], longPlus[6], cLength, longPlus[7], fill="black")
         cvs.create_rectangle(longPlus[8], longPlus[7], cLength, longPlus[8], fill="#245ac7")
 
-    def _createBottom(self, cvs):
+    def createBottom(self, cvs):
         """
             Draws the bottom row of the monopoly board on cvs.
 
@@ -265,8 +281,66 @@ class Monopoly:
         cvs.create_rectangle(longPlus[6], longPlus[8], longPlus[7], cLength, fill="#5462ba")
         cvs.create_rectangle(longPlus[7], longPlus[8], longPlus[8], cLength, fill="#574400")
         cvs.create_rectangle(longPlus[8], longPlus[8], cLength, cLength)
+    # Players
 
+    def drawPlayers(self, board):
+        """
+            Draws the Players' pieces.
+        """
+        idsLocsColors = []
+        players = self._game.getPlayers()
+        for player in players:
+            idsLocsColors.append((player["id"], player["location"], player["color"]))
+
+        for id, loc, color in idsLocsColors:
+            self.drawPiece(board, loc, color, (id - 1) * PIECE_SIZE)
+
+    def drawPiece(self, board, location, color, offset):
+        """
+            Draws a square on the board, PIECE_SIZE x PIECE_SIZE, in tile number location,
+            with color color, moved overed from the edge of the board by offset.
+
+            Parameter: board, the board that the piece is drawn on
+            Requires: Must be of type tkinter.Canvas
+
+            Parameter: location, the tile number where the piece will be drawn
+            Requires: Must be of type int
+
+            Parameter: color, the color of the piece
+            Requires: Must be of type string
+
+            Parameter: offset, number of pixels away from board edge the piece will be drawn
+            Requires: Must be of type int
+        """
+        longPiece = long + PIECE_SIZE
+        offsetPiece = offset + PIECE_SIZE
+        if location == 0:
+            board.create_rectangle(cLength - long, cLength - offsetPiece,
+                                   cLength - long + PIECE_SIZE, cLength-offset, fill=color)
+        elif location < 10:
+            board.create_rectangle(cLength - longPlus[location-1], cLength - offsetPiece,
+                                   cLength - longPlus[location-1] + PIECE_SIZE, cLength-offset, fill=color)
+        elif location == 10:
+            board.create_rectangle(offset, cLength-PIECE_SIZE, offsetPiece, cLength, fill=color)
+        elif location < 19:
+            board.create_rectangle(
+                offset, longPlus[18-location], offsetPiece, longPlus[18-location] + PIECE_SIZE, fill=color)
+        elif location == 19:
+            board.create_rectangle(offset, long, offsetPiece, longPiece, fill=color)
+        elif location == 20:
+            board.create_rectangle(long-PIECE_SIZE, offset, long, offset+PIECE_SIZE, fill=color)
+        elif location < 31:
+            board.create_rectangle(longPlus[location-21]-PIECE_SIZE, offset,
+                                   longPlus[location-21], offset+PIECE_SIZE, fill=color)
+        elif location == 31:
+            board.create_rectangle(cLength - long + offset, long, cLength - long + offsetPiece,
+                                   longPiece, fill=color)
+        else:
+            board.create_rectangle(cLength - long + offset, longPlus[location-32],
+                                   cLength - long + offsetPiece, longPlus[location-32] + PIECE_SIZE,
+                                   fill=color)
 # Controls
+
     def _createControls(self):
         """
             Creates a frame and adds it to root.
@@ -343,64 +417,7 @@ class Monopoly:
         locationLabel = Label(frame, text=f"Currently At: {tileName}").pack()
 
         self._playerInfo = frame
-# Players
 
-    def _drawPlayers(self, board):
-        """
-            Draws the Players' pieces.
-        """
-        idsLocsColors = []
-        players = self._game.getPlayers()
-        for player in players:
-            idsLocsColors.append((player["id"], player["location"], player["color"]))
-
-        for id, loc, color in idsLocsColors:
-            self._drawPiece(board, loc, color, (id - 1) * PIECE_SIZE)
-
-    def _drawPiece(self, board, location, color, offset):
-        """
-            Draws a square on the board, PIECE_SIZE x PIECE_SIZE, in tile number location,
-            with color color, moved overed from the edge of the board by offset.
-
-            Parameter: board, the board that the piece is drawn on
-            Requires: Must be of type tkinter.Canvas
-
-            Parameter: location, the tile number where the piece will be drawn
-            Requires: Must be of type int
-
-            Parameter: color, the color of the piece
-            Requires: Must be of type string
-
-            Parameter: offset, number of pixels away from board edge the piece will be drawn
-            Requires: Must be of type int
-        """
-        longPiece = long + PIECE_SIZE
-        offsetPiece = offset + PIECE_SIZE
-        if location == 0:
-            board.create_rectangle(cLength - long, cLength - offsetPiece,
-                                   cLength - long + PIECE_SIZE, cLength-offset, fill=color)
-        elif location < 10:
-            board.create_rectangle(cLength - longPlus[location-1], cLength - offsetPiece,
-                                   cLength - longPlus[location-1] + PIECE_SIZE, cLength-offset, fill=color)
-        elif location == 10:
-            board.create_rectangle(offset, cLength-PIECE_SIZE, offsetPiece, cLength, fill=color)
-        elif location < 19:
-            board.create_rectangle(
-                offset, longPlus[18-location], offsetPiece, longPlus[18-location] + PIECE_SIZE, fill=color)
-        elif location == 19:
-            board.create_rectangle(offset, long, offsetPiece, longPiece, fill=color)
-        elif location == 20:
-            board.create_rectangle(long-PIECE_SIZE, offset, long, offset+PIECE_SIZE, fill=color)
-        elif location < 31:
-            board.create_rectangle(longPlus[location-21]-PIECE_SIZE, offset,
-                                   longPlus[location-21], offset+PIECE_SIZE, fill=color)
-        elif location == 31:
-            board.create_rectangle(cLength - long + offset, long, cLength - long + offsetPiece,
-                                   longPiece, fill=color)
-        else:
-            board.create_rectangle(cLength - long + offset, longPlus[location-32],
-                                   cLength - long + offsetPiece, longPlus[location-32] + PIECE_SIZE,
-                                   fill=color)
 # Game Log
 
     def _createLog(self):
@@ -426,10 +443,12 @@ class Monopoly:
 
     def _handleLog(self, result):
         """
-            Adds an appropriate message to the gameLog if result is not "Success"
+            Handles the returns from functions in the game module
 
-            Parameter: result, the result that might be logged
-            Requires: Must be of type string
+            Will add an appropriate message to the game log and create the appropriate game window.
+
+            Parameter: result, the return value of the function, tuple of category and description
+            Requires: Must be of type (string, string) tuple
         """
         buyLogs = ["Buy", "Buy Success", "Buy Fail"]
         buildLogs = ["Build Success", "Build Fail"]
@@ -508,7 +527,9 @@ class Monopoly:
 
     def _buy(self):
         """
-            Calls Helper Method in game to buy the current property and redraws the player info frame
+            Calls Helper Method in game to buy the current propertyand redraws the player info frame
+
+            Returns the result of the buy attempt.
         """
         result = self._game.buy()
         self._createPlayerInfo()
@@ -705,47 +726,24 @@ class Monopoly:
     def _displaywinner(self):
         pass
 
+# BUTTON FUNCTIONS ---------------------------------------------------------------------------------
+    # Functions that make frames based on dropdowns
+    def showPlayers(self, numPlayers, frame):
+        pass
 
-"""
-Trading
-Use tuples and return the entries and variables used in both of the player frames.
-Call get on the tuple entries to build the dictionaries to finally call trade.
-Finish up cases in trade with check trade. I actually think you can just propagate the current
-returns through.
-Change of plans, at least a little
-Jail
-Still need to implement the whole 3 turns must pay thing for jail. When they click end turn add to
-the number of turns they are in jail for. Before making the jail window check if they have been
-there for 3 turns and if so just make them pay and then get out.
+# HELPERS -----------------------------------------------------------------------------------------
+    def clear(self, window):
+        """
+            Removes all of the children in window
 
-Auctioning
-Just make a window where each player can enter their bid. Pass a bid tuple or list, ordered based
-on the player, or maybe a player name : bid dictionary. Highest bid pays for and gets the property
+            Parameter: window, the window to clear
+            Requires: Must be a tkinter widget
+        """
+        for child in window.winfo_children():
+            child.destroy()
 
-Mortgages
-Add a button to controls that creates a mortgage window. Mortgage window has dropdown to select
-property, creates a label to show how much you would get and then an accept button. Add a field to
-tile to show that it is mortgage. Change take rents to make sure the property is not mortgaged
-before collecting.
-Make it so there is another button to un-mortgage. Dropdown and pay as usual.
-Use logging to make sure everything goes well.
-
-Bankruptcy
-
-Bells and Whistles
-Colors and prettier buttons.
-Houses and hotels drawn onto the board.
-Colors on the board to show who owns a property.
-The word monopoly on the board.
-Frames for the controls, log, and player info become label frames.
-Change player info to show difference between jail and just visiting.
-Force the player to answer before they can close a popup.
-    Check to see if the window still exists before allowing the player to do stuff.
-
-You can do styling by making a styles file. Make a class for each style, buttons, options, etc.
-Make the classes subclasses of the appropriate tkinter one and use the class you made instead of
-the tkinter one.
-
-Rewrites
-Remove anywhere that says row=0 or column=0
-"""
+    def run(self):
+        """
+            Begins the main loop of the game
+        """
+        self.mainWindow.mainloop()

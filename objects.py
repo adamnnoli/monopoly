@@ -15,7 +15,7 @@ class BoardTile:
         to allow actions to be done on the tile such as buying and building.
     """
 
-    def __init__(self, id, name, price, rents, mortgage, houseCost, color):
+    def __init__(self, id, name, price, rents, houseCost, color):
         """
             Creates a single Tile object.
 
@@ -30,10 +30,6 @@ class BoardTile:
             with 0 houses, rents[1] is with 1 house, etc. rents[5] is with hotel
             Precondition: Must be an int list
 
-            Parameter: mortgage, the amount the player would receive if they
-            mortgaged the property. IF the tile is not mortgagable then it must be 0.
-            Precondition: Must be an int
-
             Parameter: houseCost, the cost to buy a house on this property, if
             you cannot build on the tile then it must be 0
             Precondition: Must be an int
@@ -42,37 +38,36 @@ class BoardTile:
             color then it must be "white"
             Precondition: Must be a string
         """
-        self._id = id
-        self._name = name
-        self._price = price
-        self._rents = rents
-        self._mortgage = mortgage
-        self._houseCost = houseCost
-        self._color = color
-        self._owner = None
-        self._numHouses = 0
+        self.id = id
+        self.name = name
+        self.price = price
+        self.rents = rents
+        self.mortgaged = False
+        self.houseCost = houseCost
+        self.color = color
+        self.owner = None
+        self.numHouses = 0
 # Getters and Setters
 
     def getId(self):
         """
             Returns the id of the tile
         """
-        return self._id
+        return self.id
 
     def toDict(self):
         """
             Returns a dictionary representation of the tile
         """
         tileDict = {
-            "id": self._id,
-            "name": self._name,
-            "price": self._price,
-            "rents": self._rents,
-            "mortgage": self._mortgage,
-            "houseCost": self._houseCost,
-            "color": self._color,
-            "owner": self._owner,
-            "numHouses": self._numHouses
+            "id": self.id,
+            "name": self.name,
+            "price": self.price,
+            "rents": self.rents,
+            "houseCost": self.houseCost,
+            "color": self.color,
+            "owner": self.owner,
+            "numHouses": self.numHouses
         }
         return tileDict
 
@@ -85,7 +80,7 @@ class BoardTile:
             Parameter: numHouses, the number of houses to build
             Requires: Must be of type int
         """
-        self._numHouses += numHouses
+        self.numHouses += numHouses
 
     def setOwner(self, owner):
         """
@@ -95,7 +90,7 @@ class BoardTile:
             Requires: Must be of type Player
 
         """
-        self._owner = owner
+        self.owner = owner
 
 
 class Board:
@@ -115,12 +110,12 @@ class Board:
             Requires: Must be of type BoardTile List
 
         """
-        self._tiles = tiles
-        self._monopolies = {}
+        self.tiles = tiles
+        self.monopolies = {}
 
 # Getters and Setters
     def getTile(self, tileID):
-        return self._findTile(tileID).toDict()
+        return self.findTile(tileID).toDict()
 
     def getID(self, tileName):
         """
@@ -144,13 +139,13 @@ class Board:
             Parameter: owner, the new owner of the tile
             Requires: Must be of type Player
         """
-        return self._findTile(tileID).setOwner(owner)
+        return self.findTile(tileID).setOwner(owner)
 
     def getMonopolies(self):
         """
             Returns the dictionary of all of the monopolies owned
         """
-        return self._monopolies
+        return self.monopolies
 
     def setMonopoly(self, name, color):
         """
@@ -162,7 +157,7 @@ class Board:
             Parameter: color, the color of the monopoly owned
             Requires: Must be of type string
         """
-        self._monopolies[color] = name
+        self.monopolies[color] = name
 
     def buildHouses(self, tileID, numHouses):
         """
@@ -174,16 +169,16 @@ class Board:
             Parameter: numHouses, the number of houses to build
             Requires: Must be of type int
         """
-        self._findTile(tileID).build(numHouses)
+        self.findTile(tileID).build(numHouses)
 
-    def _findTile(self, tileID):
+    def findTile(self, tileID):
         """
             Returns the BoardTile object with id tileID
 
             Parameter: tileID, the id of tile requested
             Requires: Must be of type int
         """
-        for tile in self._tiles:
+        for tile in self.tiles:
             if tile.getId() == tileID:
                 return tile
 
@@ -198,15 +193,15 @@ class Player:
 
         INSTANCE ATTRIBUTES:
 
-        _number: the player number [int]
-        _name: the player's name [string]
-        _color: the color of the player's piece [string]
-        _cash: the amount of money the player currently has [int]
-        _location: the id of the tile the player is currently on [int]
-        _propertiesIds: list of the ids of the properties the player owns [int set]
-        _inJail: true if the player is currently in jail[bool]
-        _turnsInJail: the number of turns that the player has been in jail for [int]
-        _numGetOutJail: the number of get out of jail free cards the player has[int]
+        number: the player number [int]
+        name: the player's name [string]
+        color: the color of the player's piece [string]
+        cash: the amount of money the player currently has [int]
+        location: the id of the tile the player is currently on [int]
+        propertiesIds: list of the ids of the properties the player owns [int set]
+        inJail: true if the player is currently in jail[bool]
+        turnsInJail: the number of turns that the player has been in jail for [int]
+        numGetOutJail: the number of get out of jail free cards the player has[int]
     """
 
     def __init__(self, number, name, color):
@@ -222,15 +217,15 @@ class Player:
             Parameter: color, the color of the player's piece.
             Requires: Must be a string
         """
-        self._number = number
-        self._name = name
-        self._color = color
-        self._cash = STARTING_CASH
-        self._location = 0
-        self._propertiesIds = set()
-        self._inJail = False
-        self._turnsInJail = 0
-        self._numGetOutJail = 0
+        self.number = number
+        self.name = name
+        self.color = color
+        self.cash = STARTING_CASH
+        self.location = 0
+        self.propertiesIds = set()
+        self.inJail = False
+        self.turnsInJail = 0
+        self.numGetOutJail = 0
 
 # Getters and Setters
 
@@ -239,12 +234,12 @@ class Player:
             Returns a dictionary representation of the player.
         """
         dict = {
-            "id": self._number,
-            "name": self._name,
-            "color": self._color,
-            "cash": self._cash,
-            "location": self._location,
-            "propertyLocations": self._propertiesIds
+            "id": self.number,
+            "name": self.name,
+            "color": self.color,
+            "cash": self.cash,
+            "location": self.location,
+            "propertyLocations": self.propertiesIds
         }
         return dict
 
@@ -256,10 +251,10 @@ class Player:
             Parameter: places, the number of spaces to move the player
             Requires: Must be of type int
         """
-        self._location += places
-        if self._location >= 39:
-            self._cash += 200
-            self._location %= 39
+        self.location += places
+        if self.location >= 39:
+            self.cash += 200
+            self.location %= 39
 
     def takeCash(self, amount):
         """
@@ -268,7 +263,7 @@ class Player:
             Parameter: amount, the amount to reduce the cash by  
             Requires: Must be of type int
         """
-        self._cash -= amount
+        self.cash -= amount
 
     def giveCash(self, amount):
         """
@@ -277,7 +272,7 @@ class Player:
             Parameter: amount, the amount to increase the cash by
             Requires: Must be of type int
         """
-        self._cash += amount
+        self.cash += amount
 
     def giveProperty(self, tileID):
         """
@@ -286,7 +281,7 @@ class Player:
             Parameter: tileID, the id of the property to be given
             Requires: Must be of type int
         """
-        self._propertiesIds.add(tileID)
+        self.propertiesIds.add(tileID)
 
     def takeProperty(self, tileID):
         """
@@ -295,7 +290,7 @@ class Player:
             Parameter: tileID, the id of the property to be given
             Requires: Must be of type int
         """
-        self._propertiesIds.discard(tileID)
+        self.propertiesIds.discard(tileID)
 
     def advanceTo(self, tileName, board):
         """
@@ -308,9 +303,9 @@ class Player:
             Requires: Must be of type Board
         """
         tileLoc = board.getID(tileName)
-        if self._location > tileLoc:
+        if self.location > tileLoc:
             self.giveCash(200)
-        self._location = tileLoc
+        self.location = tileLoc
 
     def giveToEach(self, amount, players):
         """
