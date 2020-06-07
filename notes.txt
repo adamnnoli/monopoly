@@ -4,8 +4,9 @@ TO-DO:
   2. Fill in all documentation 
   3. Fill in all init functions 
   4. Fill in all getters and setters 
-  5. Complete Game Start Up in retry
-  6. Complete Game Drawings in retry 
+  5. Fill in all objects2 class functions
+  6. Complete Game Start Up in retry
+  7. Complete Game Drawings in retry 
 Acceptable Logs:
   Idea, make the logs tuples, (Category, Message)
   If the log is not on this list it cant be used in handle log

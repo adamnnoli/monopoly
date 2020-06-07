@@ -183,7 +183,6 @@ class Player:
             Uses a Get Out Of Jail Free Card to reset the player's jail status
         """
         pass
-
 # Card Functions
     def advanceTo(self, tileName):
         """
