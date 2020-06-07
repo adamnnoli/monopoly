@@ -1,7 +1,6 @@
 Place where I will keep track of notes, ideas on how to implement things, what to work on 
 etc.
 TO-DO:
-  1. Fill in functions in objects2 
   2. Fill in all documentation 
   3. Fill in all init functions 
   4. Fill in all getters and setters 

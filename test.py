@@ -2,6 +2,15 @@ class Game2:
     # INITIALIZATION -----------------------------------------------------------------------------------
     def __init__(self):
         pass
+
+    def createBoard(self):
+        pass
+
+    def createCards(self):
+        pass
+
+    def createPlayers(self):
+        pass
 # GETTERS AND SETTERS ------------------------------------------------------------------------------
 
     def getBoard(self):
@@ -73,11 +82,30 @@ class Game2:
             pass
 # HELPERS
 
-    def _handleTile(self):
-        pass
+    # Init Helpers
+        def advanceToRailRoadCard(self, player):
+            pass
 
-    def _drawCard(self):
-        pass
+        def advanceToUtilityCard(self, player):
+            pass
+    # Rolling Helpers
 
-    def _takeRent(self):
-        pass
+        def _handleTile(self):
+            pass
+
+        def _drawCard(self):
+            pass
+
+        def _takeRent(self):
+            pass
+    # Jail Helpers
+
+        def _goToJail(self):
+            pass
+
+        def _forceJail(self):
+            pass
+    # Trade Helpers
+
+        def _checkTrade(self):
+            pass
