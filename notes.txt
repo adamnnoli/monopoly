@@ -7,6 +7,9 @@ TO-DO:
   5. Fill in all objects2 class functions
   6. Complete Game Start Up in retry
   7. Complete Game Drawings in retry 
+
+  New Idea for logs If a function needs to return multiple logs, have it return a list of logs
+  Make it so that each log can just be handled individually
 Acceptable Logs:
   Idea, make the logs tuples, (Category, Message)
   If the log is not on this list it cant be used in handle log

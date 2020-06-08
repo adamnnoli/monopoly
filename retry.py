@@ -94,3 +94,5 @@ class Monopoly2:
     def _jail(self):
         pass
   # Bankruptcy
+    def _bankruptcy(self):
+        pass

@@ -214,29 +214,35 @@ class Game2:
 # HELPERS
 
     # Init Helpers
-        def advanceToRailRoadCard(self, player):
-            pass
+    def advanceToRailRoadCard(self, player):
+        """
+            Advances player to the nearest railroad if it is owned the pays the owner double the
+            amount owed. 
 
-        def advanceToUtilityCard(self, player):
-            pass
-    # Rolling Helpers
+            Returns:
+        """
+        pass
 
-        def _handleTile(self):
-            pass
+    def advanceToUtilityCard(self, player):
+        pass
+# Rolling Helpers
 
-        def _drawCard(self):
-            pass
+    def _handleTile(self):
+        pass
 
-        def _takeRent(self):
-            pass
-    # Jail Helpers
+    def _drawCard(self):
+        pass
 
-        def _goToJail(self):
-            pass
+    def _takeRent(self):
+        pass
+# Jail Helpers
 
-        def _forceJail(self):
-            pass
-    # Trade Helpers
+    def _goToJail(self):
+        pass
 
-        def _checkTrade(self):
-            pass
+    def _forceJail(self):
+        pass
+# Trade Helpers
+
+    def _checkTrade(self):
+        pass
