@@ -8,8 +8,25 @@ TO-DO:
   6. Complete Game Start Up in retry
   7. Complete Game Drawings in retry 
 
-  New Idea for logs If a function needs to return multiple logs, have it return a list of logs
-  Make it so that each log can just be handled individually
+New Idea for logs If a function needs to return multiple logs, have it return a list of logs
+Make it so that each log can just be handled individually
+  
+Problem: Handle tile might call draw card, draw card might have to move the player and thus call handle tile, 
+or it might move the player and not have to call handle tile(advanceToRailroad/utility makes their own logs)
+Solution:
+  Handle tile starts with a blank list []
+  Draw Card is called, says advance to Illinois Avenue, add its text to draw cards log list -> []["Advance to Illinois Avenue"]
+  Advance calls handle tile which has its own list of logs when it returns -> []["Advance to Illinois Avenue"][handleLog2]
+  Concatenate all logs so the first handle tile just has one log list of logs -> ["Advance to Illinois", "Paid Rent", "buy",...]
+  In handleLogList, for each log handle log 
+  What this entails:
+    Card functions need to return logs, maybe just return handle tile of the action 
+    Need a handle log list in app 
+    Functions in app call functions in game, but not the other way around, so I guess handle logs 
+    will be the function and will have either take in both single and lists of logs and check or 
+    only lists 
+
+
 Acceptable Logs:
   Idea, make the logs tuples, (Category, Message)
   If the log is not on this list it cant be used in handle log

@@ -1,6 +1,12 @@
 class Game2:
     # INITIALIZATION -----------------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, players):
+        """
+            Creates a Game Object with the players given 
+
+            Parameter: players, a list of tuples with the player information (id,name,color)
+            Requires: Must be of type int, string, string tuple
+        """
         pass
 
     def createBoard(self):
@@ -98,6 +104,11 @@ class Game2:
 # GAME FUNCTIONALITY -------------------------------------------------------------------------------
     # Rolling
         def roll(self):
+            """
+                If the current player can roll, rolls the dice and moves the player's piece,
+                returning a list of logs appropriate based on the result of this action.
+                If the current player cannot roll, returns a log with that message.
+            """
             pass
     # Building
 
@@ -105,7 +116,7 @@ class Game2:
             """
                 Tries to build a house on the tile with name, tileName.
 
-                Returns: the appropriate log depending on the outcome of the attempt
+                Returns: A Build Success log if the house was a built, a Build Fail log otherwise
 
                 Parameter: tileName, the name of the tile to build on
                 Requires: Must be of type string
@@ -119,7 +130,7 @@ class Game2:
             """
                 Sells a house on the tile with name, tileName
 
-                Returns: ("Build Success", "{Player Name} sold a house on {tileName}")
+                Returns: A Build Success log
 
                 Parameter: tileName, the name of the tile to sell from
                 Requires: Must be of type string
@@ -132,10 +143,11 @@ class Game2:
 
         def trade(self, p1Trade, p2Trade):
             """
-                If player 1 owns all of the items specified in p1Trade and player 2 owns all of the
-                items specified in p2Trade, the players will transfer ownership of the items to 
-                each other. and the Trade Success log will be returned.
-                If not the appropriate log that details what a player is missing will be returned
+                Attempts to have the current player trade the items in p1Trade for the items in 
+                p2Trade with the player that has name p2Dict["name"]
+
+                Returns: A Trade Fail log if one of the players is missing an item, a Trade Success
+                log otherwise
 
                 Parameter: p1Trade, the dictionary specifying what player 1 gives to player 2
                 Requires: Must be of type dict
@@ -151,7 +163,7 @@ class Game2:
                 Sets the status of the tile with name, tileName to mortgaged, giving the player
                 the proceeds
 
-                Returns: ("Mortgage Success", "{Player name} mortgaged {tile name} for {amount}")
+                Returns: A Mortgage Success Log 
 
                 Parameter: tileName, the name of the tile to mortgage
                 Requires: Must be of type string
@@ -162,7 +174,8 @@ class Game2:
             """
                 Attempts to unmortgage the tile with name tileName
 
-                Returns: A log appropriate based on the result of the attempt 
+                Returns: A Mortgage Success log if the player had enough cash, A Mortgage Fail log
+                otherwise 
 
                 Parameter: tileName, the name of the tile to unmortgage
                 Requires: Must be of type string
@@ -173,6 +186,8 @@ class Game2:
         def quit(self):
             """
                 Removes the current player from the game, forfeiting all assets to the bank
+
+                Returns: A Quit Log
             """
             pass
     # Jail
@@ -181,7 +196,8 @@ class Game2:
             """
                 Attempts to pay $50 to remove the current player from jail
 
-                Returns: A log appropriate based on the result of the attempt
+                Returns: A Jail Success log if the player had enough money, A Jail Fail log
+                otherwise
             """
             pass
 
@@ -190,8 +206,7 @@ class Game2:
                 Rolls the dice, if the result is a double, removes the current player from jail
                 and moves them the amount rolled, returning a list of logs with the log of leaving
                 jail and the log from rolling the dice
-                If the result is not a double returns:
-                    ("Jail Success", "{Player name} did not roll doubles and is still in jail")
+                If the result is not a double returns A Jail Success Log
             """
             pass
 
@@ -199,7 +214,8 @@ class Game2:
             """
                 Attempts to use a Get Out Of Jail Free Card to remove the current player to jail.
 
-                Returns: A log appropriate based on the result of the attempt
+                Returns: A Jail Success Log if the player had a Get Out of Jail Free Card, a Jail
+                Fail Log otherwise
             """
             pass
     # End Turn
@@ -219,30 +235,70 @@ class Game2:
             Advances player to the nearest railroad if it is owned the pays the owner double the
             amount owed. 
 
-            Returns:
+            Returns: A Buy log if the tile is unowned and a Rent log otherwise
         """
         pass
 
     def advanceToUtilityCard(self, player):
+        """
+            Advances player to the nearest utility if it is owned rolls the dice and pays the owner 
+            10x the number rolled. 
+
+            Returns: A Buy log if the tile is unowned and a Rent log otherwise 
+        """
         pass
 # Rolling Helpers
 
     def _handleTile(self):
+        """
+            Calls the necessary functions and performs the necessary actions to be executed when 
+            the current player lands on the current tile.
+
+            Returns: A list of appropriate logs
+        """
         pass
 
     def _drawCard(self):
+        """
+            If the current player is on a chance card tile, draws the current chance card, if the 
+            current player is on a community chest card tile, draws the current community chest
+            card.
+
+            Returns: A list of logs, the first being the log for the card text, the rest of the list
+            is the logs that arise from executing the card action
+        """
         pass
 
     def _takeRent(self):
+        """
+            Pays rent owed to the owner of the current tile.
+
+            Returns: A list TODO: finish this, should it be you have negative money and when you 
+            declare your assets go to the bank or is it that the player gets your money or your 
+            assets.
+        """
         pass
 # Jail Helpers
 
     def _goToJail(self):
+        """
+            Sends the current player to jail
+        """
         pass
 
     def _forceJail(self):
+        """
+            Forces the player to pay 50 dollars to get out of jail.
+
+            Returns: A Jail Fail log if the player was able to pay, a Bankruptcy log otherwise.
+        """
         pass
 # Trade Helpers
 
     def _checkTrade(self):
+        """
+            Verifies that the current player owns everything in the p1Dict, and the player with name
+            p2Dict["name"] has everything in p2Dict.
+            Returns: A Trade Fail log if one of the players is missing something, None otherwise
+        """
         pass
