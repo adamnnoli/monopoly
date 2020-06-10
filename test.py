@@ -85,10 +85,29 @@ class Game2:
             Returns a list of the names of properties that the current player can build a house
             or hotel on
 
-            The player can build a house on the property if building would not break the build
-            evenly rule and the property is not mortgaged
+            The player can build a house on the property if
+                They own the property
+                They have a monopoly on the properties color group
+                Building a house would not break the build evenly rule
+                The property is not mortgaged
         """
-        pass
+        playerMonopolies = {}
+        playerName = self.currentPlayer.toDict()["name"]
+        for colorGroup, owner in self.board.getMonopolies().items():
+            if owner == playerName:
+                playerMonopolies[colorGroup] = 5
+
+        ownedTiles = self._getOwnedTiles()
+        for tile in ownedTiles:
+            if tile["color"] in playerMonopolies:
+                if playerMonopolies[tile["color"]] > tile["numHouses"]:
+                    playerMonopolies[tile["color"]] = tile["numHouses"]
+        
+        result = []
+        for tile in ownedTiles:
+            if tile["numHouses"] == playerMonopolies[tile["color"]]:
+                result.append(tile["name"])
+        return result
 
     def getSellable(self):
         """
@@ -97,19 +116,43 @@ class Game2:
             The player can sell a house on the property if there is at least one house, and selling 
             a house would not break the build evenly rule
         """
-        pass
+        playerMonopolies = {}
+        playerName = self.currentPlayer.toDict()["name"]
+        for colorGroup, owner in self.board.getMonopolies().items():
+            if owner == playerName:
+                playerMonopolies[colorGroup] = 5
+
+        ownedTiles = self._getOwnedTiles()
+        for tile in ownedTiles:
+            if tile["color"] in playerMonopolies:
+                if playerMonopolies[tile["color"]] < tile["numHouses"]:
+                    playerMonopolies[tile["color"]] = tile["numHouses"]
+        
+        result = []
+        for tile in ownedTiles:
+            if tile["numHouses"] == playerMonopolies[tile["color"]]:
+                result.append(tile["name"])
+        return result
 
     def getMortgageable(self):
         """
             Returns a list of the names of properties that the current player can mortgage
         """
-        pass
+        result = []
+        for tile in self._getOwnedTiles():
+            if not tile["mortgaged"]:
+                result.append(tile["name"])
+        return result
 
     def getUnmortgageable(self):
         """
             Returns a list of the names of properties that the current player can unmortgage
         """
-        pass
+        result = []
+        for tile in self._getOwnedTiles():
+            if tile["mortgaged"]:
+                result.append(tile["name"])
+        return result
 
 # GAME FUNCTIONALITY -------------------------------------------------------------------------------
     # Rolling
@@ -312,3 +355,11 @@ class Game2:
             Returns: A Trade Fail log if one of the players is missing something, None otherwise
         """
         pass
+
+# Build and Mortgage Helpers
+    def _getOwnedTiles(self):
+        """
+            Returns a list of dictionaries representing every tile that the current player owns
+        """
+        return list(map(lambda propName: self.board.getTile(self.board.getTileId(propName)),
+                        self.currentPlayer.toDict(["properties"])))

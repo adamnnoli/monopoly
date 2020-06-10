@@ -2,9 +2,7 @@ Place where I will keep track of notes, ideas on how to implement things, what t
 etc.
 TO-DO:
   2. Fill in all documentation 
-  3. Fill in all init functions 
   4. Fill in all getters and setters 
-  5. Fill in all objects2 class functions
   6. Complete Game Start Up in retry
   7. Complete Game Drawings in retry 
 
@@ -111,3 +109,14 @@ How Tos:
   Start Up 
     Make a start up window that shows up before the player selection. This window should show the 
     rules to the game and will start the game by pressing a play button on the bottom of the window.
+
+
+get buildable
+  Need a tuple list of all monopolies the player has and the minimum number of houses built on a tile
+  in that color group for each
+  start with dictionary of all monopolies and the name of the player that has them 
+  filter out the ones that are not owned by the player make dict of colorGrops player has monopoly
+  on and number of houses on each, initialize to 5 
+  for tileDict in player's owned tiles 
+  if tileColor set monopoly color at tileColor to tileNumHouses
+  for tileDict in player
