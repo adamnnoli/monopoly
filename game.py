@@ -1,7 +1,7 @@
-from objects2 import *
+from objects import *
 
 
-class Game2:
+class Game:
     # INITIALIZATION -----------------------------------------------------------------------------------
     def __init__(self, players):
         """

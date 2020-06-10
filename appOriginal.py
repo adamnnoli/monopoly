@@ -21,7 +21,7 @@ playerColors = []
 tradeInfo = []
 
 
-class Monopoly:
+class MonopolyOriginal:
     """
         The Main Class for the game.
 

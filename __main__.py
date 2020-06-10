@@ -9,7 +9,7 @@
         consts.py   (the application constants)f
 """
 
-from retry import *
+from app import *
 
-game = Monopoly2()
+game = Monopoly()
 game.run()

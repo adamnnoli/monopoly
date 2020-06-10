@@ -11,7 +11,7 @@ import os
 from functools import reduce
 
 
-class Game:
+class GameOriginal:
     """
         A Class to Contain the main Game objects
 

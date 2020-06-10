@@ -14,4 +14,6 @@ STARTING_CASH = 1500
 PIECE_SIZE = 25
 
 
-WELCOME_MESSAGE = "Welcome to Monopoly!\n"
+WELCOME_MESSAGE = ("Welcome to Monopoly!\n"
+                  
+                  )

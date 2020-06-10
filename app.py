@@ -2,7 +2,7 @@ from tkinter import *
 from consts import *
 
 
-class Monopoly2:
+class Monopoly:
     # START UP ---------------------------------------------------------------------------------------
     def __init__(self):
         """
