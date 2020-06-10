@@ -12,3 +12,6 @@ STARTING_CASH = 1500
 
 # Length of one side of a game piece
 PIECE_SIZE = 25
+
+
+WELCOME_MESSAGE = "Welcome to Monopoly!\n"

@@ -1,54 +1,41 @@
-"""
-    Objects Module for Monopoly
-
-    This module contains the class information for all of the objects used in the
-    game.
-"""
 from consts import *
 
 
-class BoardTile:
-    """
-        A Class to Represent a tile on the board.
-
-        Contains all of the information related to that tile and contains methods
-        to allow actions to be done on the tile such as buying and building.
-    """
-
-    def __init__(self, id, name, price, rents, houseCost, color):
+class Tile:
+    # Initialization
+    def __init__(self, tileId, name, price, rents, houseCost, color):
         """
-            Creates a single Tile object.
+            Creates a single Tile Object 
 
-            Parameter: id, the number of the tile, starts at 0 for Go increase by 1
-            for every tile over.
-            Precondition: Must be an int
+            Parameter: tileId, the id of the tile 
+            Requires: Must be of type int 
 
-            Parameter: price, the price to buy the tile.
-            Precondition: Must be an int
+            Parameter: name, the name of the tile
+            Requires: Must be of type string
 
-            Parameter: rents, A list of rents for the property. rents[0] is the rents
-            with 0 houses, rents[1] is with 1 house, etc. rents[5] is with hotel
-            Precondition: Must be an int list
+            Parameter: price, the price to buy the tile, 0 if unbuyable
+            Requires: Must be of type int
 
-            Parameter: houseCost, the cost to buy a house on this property, if
-            you cannot build on the tile then it must be 0
-            Precondition: Must be an int
+            Parameter: rents, rents[i] is the rent owed with i houses
+            Requires: Must be of type int list 
 
-            Parameter: color, the color of the tile. If the tile does not have a
-            color then it must be "white"
-            Precondition: Must be a string
+            Parameter: houseCost, the cost to buy a house on the tile, 0 if unbuildable
+            Requires: Must be of type int
+
+            Parameter: color, the color of the tile
+            Requires: Must be of type string            
         """
-        self.id = id
+        self.id = tileId
         self.name = name
         self.price = price
         self.rents = rents
-        self.mortgaged = False
         self.houseCost = houseCost
         self.color = color
-        self.owner = None
         self.numHouses = 0
-# Getters and Setters
+        self.mortgaged = False
+        self.owner = None
 
+    # Getters and Setters
     def getId(self):
         """
             Returns the id of the tile
@@ -66,278 +53,289 @@ class BoardTile:
             "rents": self.rents,
             "houseCost": self.houseCost,
             "color": self.color,
-            "owner": self.owner,
-            "numHouses": self.numHouses
+            "numHouses": self.numHouses,
+            "mortgaged": self.mortgaged,
+            "owner": self.owner
         }
         return tileDict
 
-    def build(self, numHouses):
+    def setOwner(self, newOwner):
         """
-            Adds numHouses to the tile. 
+            Sets the owner of the tile to newOwner.
 
-            Requires: New total number of houses is at most 5 
-
-            Parameter: numHouses, the number of houses to build
-            Requires: Must be of type int
-        """
-        self.numHouses += numHouses
-
-    def setOwner(self, owner):
-        """
-            Sets the owner of tile to owner.
-
-            Parameter: owner, the new owner of the tile
+            Parameter: newOwner, the new owner of the tile
             Requires: Must be of type Player
-
         """
-        self.owner = owner
+        self.owner = newOwner
+
+    def setMortgage(self):
+        """
+            Reverses the mortgaged property of the tile, if it is currently mortgaged will
+            unmortgaged, if currently unmortgaged, will mortgage
+        """
+        self.mortgaged = not self.mortgaged
+    # Functionality
+
+    def build(self):
+        """
+            Adds 1 house to the tile
+        """
+        self.numHouses += 1
+
+    def sell(self):
+        """
+            Removes 1 houses from the tile
+
+            Requires: Tile must have at least 1 house
+        """
+        self.numHouses -= 1
 
 
 class Board:
-    """
-        Represents the game board as a list of BoardTiles.
-
-        INSTANCE ATTRIBUTES:
-        _tiles: the list of BoardTiles in the game [BoardTile list]
-        _monopolies: dictionary of all of the monopolies owned [string:string dict]
-    """
-
-    def __init__(self, tiles):
+    def __init(self):
         """
-            Creates a single Board Object
+            Creates a single Board object with the tiles given 
 
-            Parameter: tiles, the list of tiles on the board
-            Requires: Must be of type BoardTile List
-
+            Parameter: tiles, a list of the tiles on the board
+            Requires: Must be of type Tile list
         """
         self.tiles = tiles
         self.monopolies = {}
 
-# Getters and Setters
-    def getTile(self, tileID):
-        return self.findTile(tileID).toDict()
-
-    def getID(self, tileName):
+    def toDict(self):
         """
-            Returns the id of the tile with tileName
+            Returns a dictionary representation of every tile on the board
+        """
+        return list(map(Tile.toDict, self.tiles))
+
+    def getTile(self, tileId):
+        """
+            Returns a dictionary representation of the tile with id, tileId
+
+            Parameter: tileId, the id of the tile requested
+            Requires: Must be of type int
+        """
+        return self._findTile(tileId).toDict()
+
+    def getTileId(self, tileName):
+        """
+            Returns the id of the tile with name, tileName
 
             Parameter: tileName, the name of the tile requested
             Requires: Must be of type string
-
         """
-        for tile in self._tiles:
-            if tile.getName() == tileName:
-                return tile.getId()
+        for tile in self.tiles:
+            if tile.toDict()["name"] == tileName:
+                return tile.toDict()["id"]
 
-    def setOwner(self, tileID, owner):
+    def getTileObject(self, tileId):
         """
-            Returns the owner of the tile with id tileID
+            Returns the tile object with id tileId
 
-            Parameter: tileID, the id of tile requested
+            Parameter: tileId, the id of the tile requested
             Requires: Must be of type int
-
-            Parameter: owner, the new owner of the tile
-            Requires: Must be of type Player
         """
-        return self.findTile(tileID).setOwner(owner)
+        self._findTile(tileId)
 
     def getMonopolies(self):
         """
-            Returns the dictionary of all of the monopolies owned
+            Returns a dictionary of color: player.name pairs where player name has a monopoly on 
+            color group
         """
         return self.monopolies
 
-    def setMonopoly(self, name, color):
+    def setMonopoly(self, colorGroup, playerName):
         """
-            Sets the owner of the monopoly of the color tiles, to name 
+            Sets the monopoly of color group to playerName
 
-            Parameter: name, the name of the monopoly owner
+            Parameter: colorGroup, the color group of the new monopoly
+            Requires: Must be of type string 
+
+            Parameter: playerName, the name of the player that has the new monopoly
             Requires: Must be of type string
-
-            Parameter: color, the color of the monopoly owned
-            Requires: Must be of type string
         """
-        self.monopolies[color] = name
+        self.monopolies[colorGroup] = playerName
 
-    def buildHouses(self, tileID, numHouses):
+    def _findTile(self, tileId):
         """
-            Adds numHouses to the tile with id tileID
+            Returns the tile object with id, tileId
 
-            Parameter: tileID, the id of the tile requested
-            Requires: Must be of type int 
-
-            Parameter: numHouses, the number of houses to build
-            Requires: Must be of type int
-        """
-        self.findTile(tileID).build(numHouses)
-
-    def findTile(self, tileID):
-        """
-            Returns the BoardTile object with id tileID
-
-            Parameter: tileID, the id of tile requested
+            Parameter: tileId, the id of the tile requested
             Requires: Must be of type int
         """
         for tile in self.tiles:
-            if tile.getId() == tileID:
+            if tile.toDict()["id"] == tileId:
                 return tile
 
 
 class Player:
-    """
-        A class to represent a player in the game.
-
-        Contains all of the information about an individual player and contains
-        the necessary methods to move them around the board, add or subtract money,
-        and give or take properties.
-
-        INSTANCE ATTRIBUTES:
-
-        number: the player number [int]
-        name: the player's name [string]
-        color: the color of the player's piece [string]
-        cash: the amount of money the player currently has [int]
-        location: the id of the tile the player is currently on [int]
-        propertiesIds: list of the ids of the properties the player owns [int set]
-        inJail: true if the player is currently in jail[bool]
-        turnsInJail: the number of turns that the player has been in jail for [int]
-        numGetOutJail: the number of get out of jail free cards the player has[int]
-    """
-
-    def __init__(self, number, name, color):
+    def __init__(self, playerId, playerName, color):
         """
-            Creates a single player object.
+            Creates a single Player object 
 
-            Parameter: number, the number of the player. I.e player 1, 2, etc.
-            Requires: Must be an int
+            Parameter: playerId, the id of the player
+            Requires: Must be of type int
 
-            Parameter: name, the player's name
+            Parameter: playerName, the name of the player
             Requires: Must be of type string
 
-            Parameter: color, the color of the player's piece.
-            Requires: Must be a string
+            Parameter: color, the color of the player's piece
+            Requires: Must be of type string
         """
-        self.number = number
-        self.name = name
+        self.id = playerId
+        self.name = playerName
         self.color = color
-        self.cash = STARTING_CASH
         self.location = 0
-        self.propertiesIds = set()
+        self.cash = STARTING_CASH
+        self.properties = set()
         self.inJail = False
-        self.turnsInJail = 0
-        self.numGetOutJail = 0
+        self.numTurnsInJail = 0
+        self.jailCards = 0
 
-# Getters and Setters
+#Getters and Setters
 
     def toDict(self):
         """
-            Returns a dictionary representation of the player.
+            Returns a dictionary representation of the player
         """
-        dict = {
-            "id": self.number,
+        playerDict = {
+            "id": self.id,
             "name": self.name,
             "color": self.color,
+            "location": Board.getTile(self.location)["name"],
             "cash": self.cash,
-            "location": self.location,
-            "propertyLocations": self.propertiesIds
+            "properties": self.properties,
+            "inJail": self.inJail,
+            "numTurnsInJail": self.numTurnsInJail,
+            "jailCards": self.jailCards
         }
-        return dict
+        return playerDict
+# Main Functionality
 
-# Actions
-    def move(self, places):
+    def move(self, spaces):
         """
-            Moves the player over by [places] spaces.
+            Moves the player forward by spaces
 
-            Parameter: places, the number of spaces to move the player
+            Parameter: spaces, the number of spaces to move by
             Requires: Must be of type int
         """
-        self.location += places
-        if self.location >= 39:
-            self.cash += 200
-            self.location %= 39
-
-    def takeCash(self, amount):
-        """
-            Reduces the player's cash by amount.
-
-            Parameter: amount, the amount to reduce the cash by  
-            Requires: Must be of type int
-        """
-        self.cash -= amount
+        self.location += spaces
 
     def giveCash(self, amount):
         """
-            Increase the player's cash by amount.
+            Adds amount to the player's cash 
 
-            Parameter: amount, the amount to increase the cash by
+            Parameter: amount, the amount to give the player
             Requires: Must be of type int
         """
         self.cash += amount
 
-    def giveProperty(self, tileID):
+    def takeCash(self, amount):
         """
-            Gives the player the property with id tileID.
+            Takes amount from the player's cash 
 
-            Parameter: tileID, the id of the property to be given
+            Parameter: amount, the amount to give the player
             Requires: Must be of type int
         """
-        self.propertiesIds.add(tileID)
+        self.cash -= amount
 
-    def takeProperty(self, tileID):
+    def giveProperty(self, tileId):
         """
-            Takes the property with id tileID from player
+            Gives the player the tile with id, tileId
 
-            Parameter: tileID, the id of the property to be given
+            Parameter: tileId, the id of the tile to give
             Requires: Must be of type int
         """
-        self.propertiesIds.discard(tileID)
+        self.properties.add(Board.getTile(tileId)["name"])
 
-    def advanceTo(self, tileName, board):
+    def takeProperty(self, tileId):
         """
-            Advances the player to the tile with name tileName.
+            Takes the tile with id, tileId, from the player 
 
-            Parameter: tileName, the name of tile to advance to
+            Parameter: tileId, the id of the tile to take
+            Requires: Must be of type int
+        """
+        self.properties.discard(Board.getTile(tileId)["name"])
+
+    def goToJail(self):
+        """
+            Sends the player to jail and sets their status as in jail
+
+            Requires: the player must not be in jail
+        """
+        self.inJail = True
+
+    def endTurnInJail(self):
+        """
+            Increments the number of turns the player has spent in jail
+
+            Requires: the player must be in jail
+        """
+        self.numTurnsInJail += 1
+
+    def leaveJail(self):
+        """
+            Resets the player's jail status
+
+            Requires: the player must be in jail
+        """
+        self.inJail = False
+        self.numTurnsInJail = 0
+
+    def useJailCard(self):
+        """
+            Uses a Get Out Of Jail Free Card to reset the player's jail status
+
+            Requires: the player has at least 1 Get Out Of Jail Free Card
+        """
+        self.inJail = False
+        self.numTurnsInJail = 0
+        self.jailCards -= 1
+# Card Functions
+
+    def advanceTo(self, tileName):
+        """
+            Moves the player forward until they reach tile with name, tileName
+
+            Parameter: tileName, the name of the tile to go to
             Requires: Must be of type string
-
-            Parameter: board, the game board that the tile is on
-            Requires: Must be of type Board
         """
-        tileLoc = board.getID(tileName)
-        if self.location > tileLoc:
+        tileLocation = Board.getTileId(tileName)
+        if tileLocation < self.location:
             self.giveCash(200)
-        self.location = tileLoc
+        self.location = tileLocation
 
     def giveToEach(self, amount, players):
         """
-            Gives every player in players amount of cash.
+            Gives amount of cash to every player in players 
 
-            Parameter: amount, the amount to give each players
+            Parameter: amount, the amount of cash to give
             Requires: Must be of type int 
 
-            Parameter: players, the list of players to give cash
+            Parameter: players, the list of players to give cash to
             Requires: Must be of type Player list
         """
         for player in players:
             player.giveCash(amount)
-        self.takeCash(amount * len(players))
+            self.takeCash(amount)
 
     def takeFromEach(self, amount, players):
         """
-            Takes amount from every player in players.
+            Takes amount of cash from every player in players 
 
-            Parameter: amount, the amount to give each players
+            Parameter: amount, the amount of cash to take
             Requires: Must be of type int 
 
-            Parameter: players, the list of players to give cash
+            Parameter: players, the list of players to take cash from
             Requires: Must be of type Player list
         """
         for player in players:
             player.takeCash(amount)
-        self.giveCash(amount * len(players))
+            self.giveCash(amount)
 
     def makeRepairs(self, perHouse, perHotel):
         """
-            Pays perHouse for every house owned and perHotel for every hotel owned.
+            Pays perHouse for every house owned and perHotel for every hotel owned
 
             Parameter: perHouse, the amount to pay for each house owned
             Requires: Must be of type int
@@ -348,8 +346,8 @@ class Player:
         numHouses = 0
         numHotels = 0
 
-        for tileID in self._propertiesIds:
-            housesOnProperty = Board.getNumHouses(tileID)
+        for tileName in self.properties:
+            housesOnProperty = Board.getTile(Board.getTileId(tileName))["numHouses"]
             if housesOnProperty == 5:
                 numHotels += 1
             else:
@@ -358,103 +356,65 @@ class Player:
         self.takeCash(perHouse * numHouses)
         self.takeCash(perHotel * numHotels)
 
-    def goToJail(self):
+    def advanceToNearestRailroad(self):
         """
-            Moves the player to the Jail tile and sets their status as in Jail
+            Moves the player forward until they reach the nearest railroad
         """
-        self._location = 10
-        self._inJail = True
-
-    def giveGetOutOfJail(self):
-        """
-            Gives the player 1 get out of jail free card.
-        """
-        self._numGetOutJail += 1
-
-    def takeGetOutOfJail(self):
-        """
-            Takes 1 get out of jail free card from the player.
-        """
-        self._numGetOutJail -= 1
-
-    def advanceToNearestUtility(self, board):
-        """
-            Advances the player to the nearest utility.
-
-            Parameter: board, the game board the player is on
-            Requires: Must be of type Board
-        """
-        electricCompLoc = board.getID("Electric Company")
-        waterWorksLoc = board.getID("Water Works")
-
-        if self._location > waterWorksLoc or self._location < electricCompLoc:
-            self.advanceTo("Electric Company", board)
-        else:
-            self.advanceTo("Water Works", board)
-
-    def advanceToNearestRailroad(self, board):
-        """
-            Advances the player to the nearest railroad.
-
-            Parameter: board, the game board the player is on
-            Requires: Must be of type Board
-        """
-        readingLoc = board.getID("Reading Railrod")
-        pennsylvaniaLoc = board.getID("Pennsylvania Railroad")
-        bAndOLoc = board.getID("B. & O. Railroad")
-        shortLoc = board.getID("Short Line")
+        readingLoc = Board.getTileId("Reading Railrod")
+        pennsylvaniaLoc = Board.getTileId("Pennsylvania Railroad")
+        bAndOLoc = Board.getTileId("B. & O. Railroad")
+        shortLoc = Board.getTileId("Short Line")
 
         if self._location < readingLoc or self._location > shortLoc:
-            self.advanceTo("Reading Railroad", board)
+            self.advanceTo("Reading Railroad")
         elif self._location < pennsylvaniaLoc:
-            self.advanceTo("Pennsylvania Railroad", board)
+            self.advanceTo("Pennsylvania Railroad")
         elif self._location < bAndOLoc:
-            self.advanceTo("B. & O. Railroad", board)
+            self.advanceTo("B. & O. Railroad")
         else:
             self.advanceTo("Short Line")
 
-    def inJail(self):
-        return self._inJail
+    def advanceToNearestUtility(self):
+        """
+            Moves the player forward until they reach the nearest utility
+        """
+        electricCompLoc = Board.getTileId("Electric Company")
+        waterWorksLoc = Board.getTileId("Water Works")
 
-    def numTurnsInJail(self):
-        return self._turnsInJail
+        if self._location > waterWorksLoc or self._location < electricCompLoc:
+            self.advanceTo("Electric Company")
+        else:
+            self.advanceTo("Water Works")
 
-    def leaveJail(self):
-        self._inJail = False
+    def giveJailCard(self):
+        """
+            Gives the player 1 Get Out of Jail Free Card
+        """
+        self.jailCards += 1
 
 
 class Card:
-    """
-        A class to represent a Community Chest Card
-
-        Contains all of the information that the card holds.
-
-        INSTANCE ATTRIBUTES:
-        _text: the text on the card
-        _action: the function to be executed when the card is drawn.
-    """
-
     def __init__(self, text, action):
         """
-            Creates a single Chance Card.
+            Creates a single Card object with the text and action give 
 
             Parameter: text, the text on the card
-            Requires: Must be of type string
+            Requires: Must be of type string 
 
-            Parameter: action, the action to be executed when the card is drawn
+            Parameter: action, the action to be executed once the card is drawn
             Requires: Must be of type function
         """
-        self._text = text
-        self._action = action
+        self.text = text
+        self.action = action
 
     def getText(self):
         """
-            Returns: The text of the chance card
+            Returns the text on the card
         """
-        return self._text
+        return self.text
 
     def getAction(self):
         """
-            Returns: The action of the chance card
+            Returns the action to be executed if the card is drawn
         """
-        return self._action
+        return self.action
