@@ -7,7 +7,9 @@ class Monopoly2:
         """
             Creates a Single Monopoly Object and begins the game
         """
-        pass
+        self.mainWindow = Tk()
+        self.mainWindow.mainloop()
+        self.showWelcome()
 
     def showWelcome(self):
         """

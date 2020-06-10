@@ -1,3 +1,6 @@
+from objects2 import *
+
+
 class Game2:
     # INITIALIZATION -----------------------------------------------------------------------------------
     def __init__(self, players):
@@ -5,9 +8,16 @@ class Game2:
             Creates a Game Object with the players given 
 
             Parameter: players, a list of tuples with the player information (id,name,color)
-            Requires: Must be of type int, string, string tuple
+            Requires: Must be of type (int, string, string) list
         """
-        pass
+        self.board = self.createBoard()
+        self.chanceCards = self.createChanceCards()
+        self.communityChestCard = self.createCommunityChestCards
+        self.players = self.createPlayers()
+        self.currentPlayer = self.player[0]
+        self.currentChanceIndex = 0
+        self.currentCommunityChestIndex = 0
+        self.hasRolled = False
 
     def createBoard(self):
         """
@@ -38,7 +48,7 @@ class Game2:
         """
             Returns a dictionary representation of every tile on the board
         """
-        pass
+        return self.board.toDict()
 
     def getTile(self, tileId):
         """
@@ -47,7 +57,7 @@ class Game2:
             Parameter: tileId, the id of the tile requested
             Requires: Must be of type int
         """
-        pass
+        return self.board.getTile(tileId)
 
     def getTileId(self, tileName):
         """
@@ -56,19 +66,19 @@ class Game2:
             Parameter: tileName, the name of the tile requested
             Requires: Must be of type string
         """
-        pass
+        return self.board.getTileId(tileName)
 
     def getCurrentPlayer(self):
         """
             Returns a dictionary representation of the player whose turn it is
         """
-        pass
+        return self.currentPlayer.toDict()
 
     def getPlayers(self):
         """
             Returns a list of dictionaries representing every player in the game
         """
-        pass
+        return list(map(lambda player: player.toDict(), self.players))
 
     def getBuildable(self):
         """
