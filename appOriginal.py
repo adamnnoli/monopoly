@@ -89,9 +89,7 @@ class MonopolyOriginal:
 
     def showPlayerSelection(self):
         """
-            Clears the main window and begins the player selection process.
-
-
+            Clears the main window and begins the player selection process
         """
         self.clear(self.mainWindow)
 

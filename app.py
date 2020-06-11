@@ -1,5 +1,6 @@
 from tkinter import *
 from consts import *
+from win32.win32api import GetSystemMetrics
 
 
 class Monopoly:
@@ -9,6 +10,13 @@ class Monopoly:
             Creates a Single Monopoly Object and begins the game
         """
         self.mainWindow = Tk()
+        width = GAME_WIDTH
+        height = GAME_HEIGHT
+        screenWidth = GetSystemMetrics(0)
+        screenHeight = GetSystemMetrics(1)
+        windowX = int((screenWidth-width)/2)
+        windowY = int((screenHeight-height)/2)
+        self.mainWindow.geometry(f"{width}x{height}+{windowX}+{windowY}")
         self.showWelcome()
 
     def showWelcome(self):
@@ -16,22 +24,27 @@ class Monopoly:
             Adds the Welcome Frame containing the rules to the mainWindow
         """
         welcomeFrame = Frame(self.mainWindow)
-        welcomeFrame.pack()
+        welcomeFrame.grid()
 
         title = Label(welcomeFrame, text="Monopoly")
-        title.pack()
+        title.grid(row=0, column=0)
 
-        welcomeMessage = Label(welcomeFrame, text=WELCOME_MESSAGE)
-        welcomeMessage.pack()
+        rules = Text(welcomeFrame)
+        rules.insert(END, WELCOME_MESSAGE)
+        rules.grid(row=1, column=0)
+        rules.config(state=DISABLED)
 
         startButton = Button(welcomeFrame, text="Start", command=self.showPlayerSelection)
-        startButton.pack()
+        startButton.grid(row=2, column=0)
 
     def showPlayerSelection(self):
         """
             Clears the mainWindow and adds the player selection frame
         """
-        pass
+        self._clear(self.mainWindow)
+        
+        selectionFrame= Frame(self.mainWindow)
+        selectionFrame.grid()
 
     def play(self):
         """
@@ -222,4 +235,7 @@ class Monopoly:
     def _bankruptcy(self):
         """
         """
+        pass
+
+    def _clear(self, window):
         pass

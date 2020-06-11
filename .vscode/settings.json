@@ -9,7 +9,9 @@
     "unbuyable",
     "unmortgageable",
     "ventor",
-    "winfo"
+    "winfo",
+    "yscrollcommand",
+    "yview"
   ],
   "python.pythonPath": "C:\\ProgramData\\Anaconda3\\python.exe"
 }
