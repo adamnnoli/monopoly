@@ -353,15 +353,15 @@ class MonopolyOriginal:
         controls = LabelFrame(self._window, text="Options")
         controls.grid(row=0, column=1)
         # Roll Dice Button
-        rollDice = Button(controls, text="Roll Dice", padx=5, command=self._rollDice)
+        rollDice = Button(controls, text="Roll Dice", padx=5, command=self._roll)
         rollDice.grid(row=0, column=0)
 
         # Build Button
-        build = Button(controls, text="Build", padx=5, command=self._createBuildWindow)
+        build = Button(controls, text="Build", padx=5, command=self._build)
         build.grid(row=0, column=1)
 
         # Trade Button
-        trade = Button(controls, text="Trade", padx=5, command=self._createTradeWindow)
+        trade = Button(controls, text="Trade", padx=5, command=self._trade)
         trade.grid(row=0, column=2)
 
         # End Turn Button

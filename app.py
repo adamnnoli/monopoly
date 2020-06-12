@@ -118,6 +118,8 @@ class Monopoly:
             log to the mainWindow
         """
         self._clear(self.mainWindow)
+        self.drawBoard()
+        self.createControls()
 
     def run(self):
         self.mainWindow.mainloop()
@@ -128,13 +130,40 @@ class Monopoly:
             Adds a canvas to the mainWindow with the board drawn on it, drawing every tile, player,
             house, and hotel, with detailing showing mortgage and owner statuses of each tile.
         """
-        pass
+        board = Canvas(self.mainWindow, width=longPlus[9] +
+                       TILE_LONG, height=longPlus[9]+TILE_LONG, bg="#c0e2ca")
+        for tile in self.game.getBoard():
+            self._drawTile(tile, board)
+        board.grid(row=0, column=0, rowspan=3)
 
     def createControls(self):
         """
             Adds a frame with all of the buttons of possible game actions to the mainWindow
         """
-        pass
+        controlFrame = Frame(self.mainWindow)
+        controlFrame.grid(row=0, column=1)
+
+        # Roll Dice Button
+        rollDice = Button(controlFrame, text="Roll Dice", padx=5, command=self._roll)
+        rollDice.grid(row=0, column=0)
+
+        # Build Button
+        build = Button(controlFrame, text="Build", padx=5, command=self._build)
+        build.grid(row=0, column=1)
+
+        # Trade Button
+        trade = Button(controlFrame, text="Trade", padx=5, command=self._trade)
+        trade.grid(row=0, column=2)
+
+        # End Turn Button
+        endTurn = Button(controlFrame, text="End Turn", padx=5, command=self._endTurn)
+        endTurn.grid(row=1, column=0)
+
+        mortgage = Button(controlFrame, text="Mortgage", command=self._mortage)
+        mortgage.grid(row=1, column=1)
+
+        quitButton = Button(controlFrame, text="Quit", padx=5, command=self._quit)
+        quitButton.grid(row=1, column=2)
 
     def createPlayerInfo(self):
         """
@@ -166,10 +195,72 @@ class Monopoly:
         x = topLeft[0]
         y = topLeft[1]
 
-        color = self._trueColor(tileDict["color"])
-        ownerColor = self._trueColor(tileDict["owner"].toDict()["color"])
+        color = self._toHex(tileDict["color"])
+        if tileDict["owner"] is not None:
+            ownerColor = self._toHex(tileDict["owner"].toDict()["color"])
+        else:
+            ownerColor = "#ffffff"
         if tileDict["id"] in bigs:
-            cvs.create_rectangle(x, y, x + longPlus[0], y + longPlus[0])
+            cvs.create_rectangle(x, y, x + longPlus[0], y + longPlus[0], fill=color)
+        elif tileDict["id"] in range(1, 10) or tileDict["id"] in range(21, 30):
+            cvs.create_rectangle(x, y, x + TILE_SHORT, y + longPlus[0], fill=color)
+        elif tileDict["id"] in range(11, 20) or tileDict["id"] in range(31, 40):
+            cvs.create_rectangle(x, y, x + longPlus[0], y + TILE_SHORT, fill=color)
+
+    def _getTopLeft(self, tileId):
+        """
+            Returns an (x,y) representing the coordinates of the top-left corner of the tile with 
+            id tileId
+
+            Parameter: tileId, the id of the tile requested
+            Requires: Must be of type int
+        """
+        if tileId < 10:
+            return (longPlus[9-tileId], longPlus[9])
+        elif tileId < 20:
+            return (0, longPlus[19-tileId])
+        elif tileId == 20:
+            return (0, 0)
+        elif tileId < 31:
+            return (longPlus[tileId-21], 0)
+        elif tileId < 40:
+            return (longPlus[9], longPlus[tileId-31])
+        else:
+            return "Invalid tileId"
+
+    def _toHex(self, color):
+        """
+            Returns a hex color code that matches color, changes white to the color of the monopoly
+            board
+
+            Parameter: color, the color requested
+            Requires: Must be of type string
+        """
+        color = color.upper()
+        if color == "RED":
+            return "#ff0000"
+        if color == "BLUE":
+            return "#0000ff"
+        if color == "GREEN":
+            return "#00ff00"
+        if color == "YELLOW":
+            return "#ffff00"
+        if color == "CYAN":
+            return "#00ffff"
+        if color == "MAGENTA":
+            return "#ff00ff"
+        if color == "WHITE":
+            return "#c0e2ca"
+        if color == "BLACK":
+            return "#000000"
+        if color == "BROWN":
+            return "#8b4513"
+        if color == "LIGHT BLUE":
+            return "#add8e6"
+        if color == "PINK":
+            return "#ffc0cb"
+        if color == "ORANGE":
+            return "#ffa500"
 
   # Roll
 

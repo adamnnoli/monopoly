@@ -5,7 +5,7 @@ import random
 
 
 class Game:
-    # INITIALIZATION -----------------------------------------------------------------------------------
+# INITIALIZATION -----------------------------------------------------------------------------------
     def __init__(self, players):
         """
             Creates a Game Object with the players given 
