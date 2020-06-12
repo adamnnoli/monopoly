@@ -70,7 +70,7 @@ class GameOriginal:
                 rents = tile["rents"]
                 houseCost = tile["house cost"]
                 color = tile["color"]
-                newTile = BoardTile(i, name, price, rents, houseCost, color)
+                newTile = Tile(i, name, price, rents, houseCost, color)
                 tiles.append(newTile)
                 if possMonopolies.get(color) is None:
                     possMonopolies[color] = set()

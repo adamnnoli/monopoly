@@ -92,7 +92,7 @@ class Tile:
 
 
 class Board:
-    def __init(self):
+    def __init__(self, tiles):
         """
             Creates a single Board object with the tiles given 
 

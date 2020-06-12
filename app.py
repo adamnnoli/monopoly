@@ -1,6 +1,9 @@
-from tkinter import *
 from consts import *
+from game import *
+from tkinter import *
 from win32.win32api import GetSystemMetrics
+
+longPlus = [TILE_LONG + i * TILE_SHORT for i in range(0, 10)]
 
 
 class Monopoly:
@@ -24,7 +27,7 @@ class Monopoly:
             Adds the Welcome Frame containing the rules to the mainWindow
         """
         welcomeFrame = Frame(self.mainWindow)
-        welcomeFrame.grid()
+        welcomeFrame.grid(row=0, column=0)
 
         title = Label(welcomeFrame, text="Monopoly")
         title.grid(row=0, column=0)
@@ -42,24 +45,79 @@ class Monopoly:
             Clears the mainWindow and adds the player selection frame
         """
         self._clear(self.mainWindow)
-        
-        selectionFrame= Frame(self.mainWindow)
-        selectionFrame.grid()
 
-    def play(self):
-        """
-            Begins the Game with the player information given 
+        selectionFrame = Frame(self.mainWindow)
+        selectionFrame.grid(row=0, column=0)
 
-            Parameter: playerInfo, the list of the id, names, and colors of the players in the game
-            Requires: Must be of type (int, string, string )list
+        text = Label(selectionFrame, text="How Many People Will Be Playing: ", padx=5)
+        text.grid(row=0, column=0)
+
+        playersFrame = Frame(selectionFrame)
+        playersFrame.grid(row=1, column=0, columnspan=2)
+
+        playerInfo = []
+
+        def showPlayers(numPlayers):
+            """
+                Populates playersFrame with a label, entry box, and dropdown for each player to
+                select their name and color.
+
+                Adds play button to playersFrame to begin the game
+
+                Note: Using a closure because otherwise playersFrame and playerInfo would need to 
+                be attributes
+            """
+            self._clear(playersFrame)
+            playerInfo = []
+            for i in range(1, numPlayers + 1):
+                texti = Label(playersFrame, text=f"Player {i}:", padx=5)
+                namei = Entry(playersFrame, width=15)
+
+                playerIColor = StringVar()
+                # Save Player colors in global variable for later
+                playerInfo.append((namei, playerIColor))
+                colors = ["red", "blue", "green", "yellow", "white", "black", "magenta", "cyan"]
+                colori = OptionMenu(playersFrame, playerIColor, *colors)
+                texti.grid(row=i, column=0)
+                namei.grid(row=i, column=1)
+                colori.grid(row=i, column=2)
+
+            # Create Start Button
+            startButton = Button(playersFrame, text="Play!", command=lambda: self.play(playerInfo))
+            startButton.grid(row=numPlayers+1, column=0, columnspan=3)
+
+        # Ask how many players and create next dialogue box to get names and colors
+        numPlayers = IntVar()
+        maxPlayerList = [x for x in range(1, 5)]
+        askPlayers = OptionMenu(selectionFrame, numPlayers, *maxPlayerList,
+                                command=lambda numPlayers: showPlayers(numPlayers))
+        askPlayers.grid(row=0, column=1)
+
+    def play(self, playerInfo):
         """
-        pass
+            Begins the Game with the player information given
+
+            Parameter: playerInfo, the list of the variables containing the names, and colors of
+            the players in the game
+            Requires: Must be of type (StringVar, StringVar) list
+        """
+        players = []
+        for playerId, nameColor in enumerate(playerInfo):
+            name = nameColor[0].get()
+            # Make sure every player has a name
+            if name == "":
+                name = f"Player {playerId}"
+            players.append((playerId, name, nameColor[1].get()))
+
+        self.game = Game(players)
+        self.draw()
 
     def draw(self):
         """
-            Draws the board and playerInfo frame to the mainWindow
+            Clears the mainWindow and draws the board, playerInfo frame, controls frame, and game 
+            log to the mainWindow
         """
-        pass
+        self._clear(self.mainWindow)
 
     def run(self):
         self.mainWindow.mainloop()
@@ -96,14 +154,23 @@ class Monopoly:
 
 # HELPERS ------------------------------------------------------------------------------------------
   # Board
-    def _drawTile(self, tileDict):
+    def _drawTile(self, tileDict, cvs):
         """
             Draws a tile with the information in tileDict to the board canvas
 
             Parameter: tileDict, the dictionary containing the tile information
-            Requires: Must be of type dict 
+            Requires: Must be of type dict
         """
-        pass
+        bigs = [0, 10, 20, 30]
+        topLeft = self._getTopLeft(tileDict["id"])
+        x = topLeft[0]
+        y = topLeft[1]
+
+        color = self._trueColor(tileDict["color"])
+        ownerColor = self._trueColor(tileDict["owner"].toDict()["color"])
+        if tileDict["id"] in bigs:
+            cvs.create_rectangle(x, y, x + longPlus[0], y + longPlus[0])
+
   # Roll
 
     def _roll(self):
@@ -118,7 +185,7 @@ class Monopoly:
         """
             Command of build button in controls
 
-            Asks if the player would like to build or sell and opens the appropriate window 
+            Asks if the player would like to build or sell and opens the appropriate window
         """
         pass
 
@@ -209,7 +276,7 @@ class Monopoly:
         """
             Command of help button in controls
 
-            Creates a Top Level displaying the rules of the Game 
+            Creates a Top Level displaying the rules of the Game
         """
         pass
   # Log
@@ -236,6 +303,11 @@ class Monopoly:
         """
         """
         pass
+ # General
 
     def _clear(self, window):
-        pass
+        """
+            Clears window by destroying all of its children.
+        """
+        for child in window.winfo_children():
+            child.destroy()

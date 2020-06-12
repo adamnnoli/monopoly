@@ -1,4 +1,7 @@
+import json
 from objects import *
+import os
+import random
 
 
 class Game:
@@ -13,8 +16,8 @@ class Game:
         self.board = self.createBoard()
         self.chanceCards = self.createChanceCards()
         self.communityChestCard = self.createCommunityChestCards
-        self.players = self.createPlayers()
-        self.currentPlayer = self.player[0]
+        self.players = self.createPlayers(players)
+        self.currentPlayer = self.players[0]
         self.currentChanceIndex = 0
         self.currentCommunityChestIndex = 0
         self.hasRolled = False
@@ -23,25 +26,47 @@ class Game:
         """
             Returns the Board object for the game
         """
-        pass
+        possMonopolies = {}
+        tiles = []
+        with open(os.getcwd() + "\monopoly\\board.json") as boardJson:
+            board = json.load(boardJson)
+            for i, tile in enumerate(board["tiles"]):
+                newTile = Tile(i, tile["name"], tile["price"], tile["rents"],
+                               tile["house cost"], tile["color"])
+                tiles.append(newTile)
+                if possMonopolies.get(tile["color"]) is None:
+                    possMonopolies[tile["color"]] = set()
+                possMonopolies[tile["color"]].add(i)
+        del possMonopolies["white"]
+        self.possMonopolies = possMonopolies
+        return Board(tiles)
 
     def createChanceCards(self):
         """
             Returns a list of Card objects representing the chance cards in the game
         """
-        pass
+        result = []
+        for text, action in zip(self._chanceCardTexts(), self._chanceCardActions()):
+            result.append(Card(text, action))
+        return result
 
     def createCommunityChestCards(self):
         """
             Returns a list of Card objects representing the community chest cards in the game
         """
-        pass
+        result = []
+        for text, action in zip(self._communityChestCardTexts(), self._communityChestCardActions()):
+            result.append(Card(text, action))
+        return result
 
-    def createPlayers(self):
+    def createPlayers(self, players):
         """
             Returns a list of Player objects representing the players in the game
+
+            Parameter: players, list of the id, name, and color for each player
+            Requires: Must be of type int, string, string list
         """
-        pass
+        return list(map(lambda player: Player(player[0], player[1], player[2]), players))
 # GETTERS AND SETTERS ------------------------------------------------------------------------------
 
     def getBoard(self):
@@ -102,7 +127,7 @@ class Game:
             if tile["color"] in playerMonopolies:
                 if playerMonopolies[tile["color"]] > tile["numHouses"]:
                     playerMonopolies[tile["color"]] = tile["numHouses"]
-        
+
         result = []
         for tile in ownedTiles:
             if tile["numHouses"] == playerMonopolies[tile["color"]]:
@@ -127,7 +152,7 @@ class Game:
             if tile["color"] in playerMonopolies:
                 if playerMonopolies[tile["color"]] < tile["numHouses"]:
                     playerMonopolies[tile["color"]] = tile["numHouses"]
-        
+
         result = []
         for tile in ownedTiles:
             if tile["numHouses"] == playerMonopolies[tile["color"]]:
@@ -283,7 +308,110 @@ class Game:
 # HELPERS
 
     # Init Helpers
-    def advanceToRailRoadCard(self, player):
+    def _chanceCardTexts(self):
+        """
+            Returns a list of the texts for every chance card in the game.
+        """
+        zero = "You have won a crossword competition. Collect $100."
+        one = "Advance To Go. Collect $200"
+        two = "Advance to Illinois Ave. If you pass Go, collect $200."
+        three = "Advance to St. Charles Place. If you pass Go, collect $200."
+        four = "Advance to nearest Utility. If unowned, you may buy it from the Bank. If owned, throw dice and pay owner a total 10 times the amount thrown."
+        five = "Advance to the nearest Railroad and pay owner twice the rental to which they is otherwise entitled. If Railroad is unowned, you may buy it from the Bank. "
+        six = "Bank pays you dividend of $50."
+        seven = "Get out of Jail Free. This card may be kept until needed, or traded/sold."
+        eight = "Go Back Three Spaces."
+        nine = "Go to Jail. Do not pass GO, do not collect $200."
+        ten = "Make general repairs on all your property: For each house pay $25, For each hotel pay $100."
+        eleven = "Pay poor tax of $15 "
+        twelve = "Take a trip to Reading Railroad. If you pass Go, collect $200."
+        thirteen = "Take a walk on the Boardwalk."
+        fourteen = "You have been elected Chairman of the Board. Pay each player $50."
+        fifteen = "Your building and loan matures. Collect $150."
+
+        return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
+
+    def _chanceCardActions(self):
+        """
+            Returns a list of the actions for every chance card in the game.
+
+            Ordered to match the text of the cards.
+        """
+        def zero(player): return player.giveCash(100)
+        def one(): return self._advanceTo("Go")
+        def two(): return self._advanceTo("Illinois Ave")
+        def three(): return self._advanceTo("St. Charles Place")
+        def four(): return self._advanceToNearestUtility()
+        def five(): return self._advanceToNearestRailroad()
+        def six(player): return player.giveCash(50)
+        def seven(player): return player.giveGetOutOfJail()
+        def eight(): return self._move(-3)
+        def nine(player): return player.goToJail()
+        def ten(player): return player.makeRepairs(25, 100)
+        def eleven(player): return player.takeCash(15)
+        def twelve(): return self._advanceTo("Reading Railroad")
+        def thirteen(): return self._advanceTo("Boardwalk")
+        def fourteen(player): return player.giveToEach(50, self.players)
+        def fifteen(player): return player.giveCash(150)
+        return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
+
+    def _communityChestCardTexts(self):
+        """
+            Returns an array with all of the texts for the Community Chest Cards
+        """
+        zero = "Advance to Go."
+        one = "Bank error in your favor. Collect $200."
+        two = "Doctor's fees. Pay $50."
+        three = "From sale of stock you get $50."
+        four = "Get Out of Jail Free. This card may be kept until needed or sold/traded."
+        five = "Go to Jail.Do not pass Go, Do not collect $200."
+        six = "Grand Opera Night. Collect $50 from every player for opening night seats."
+        seven = "Holiday Fund matures. Collect $100."
+        eight = "Income tax refund. Collect $20."
+        nine = "It's your birthday. Collect $10 from every player."
+        ten = "Life insurance matures – Collect $100"
+        eleven = "Hospital Fees. Pay $50."
+        twelve = "School fees. Pay $50."
+        thirteen = "Receive $25 consultancy fee."
+        fourteen = "You are assessed for street repairs: Pay $40 per house and $115 per hotel you own."
+        fifteen = "You have won second prize in a beauty contest. Collect $10."
+        sixteen = "You inherit $100."
+        return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen]
+
+    def _communityChestCardActions(self):
+        """
+            Returns an array with all of the actions for the Community Chest Cards.
+
+            Order matches the order of the Community Chest Card Texts
+        """
+        def zero(player): return self._advanceTo("Go")
+        def one(player): return player.giveCash(200)
+        def two(player): return player.takeCash(50)
+        def three(player): return player.giveCash(50)
+        def four(player): return player.giveGetOutOfJail()
+        def five(player): return player.goToJail()
+        def six(player): return player.takeFromEach(50, self.players)
+        def seven(player): return player.giveCash(100)
+        def eight(player): return player.giveCash(20)
+        def nine(player): return player.takeFromEach(10, self.players)
+        def ten(player): return player.giveCash(100)
+        def eleven(player): return player.takeCash(50)
+        def twelve(player): return player.takeCash(50)
+        def thirteen(player): return player.giveCash(50)
+        def fourteen(player): return player.makeRepair(40, 115)
+        def fifteen(player): return player.giveCash(10)
+        def sixteen(player): return player.giveCash(100)
+        return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen]
+
+    def _advanceTo(self, tileName):
+        """
+            Advaces the current player to the tile with name, tileName.
+
+            Returns: A Buy log if the tile is unowned and a Rent log otherwise
+        """
+        pass
+
+    def _advanceToNearestRailRoad(self):
         """
             Advances player to the nearest railroad if it is owned the pays the owner double the
             amount owed. 
@@ -292,12 +420,21 @@ class Game:
         """
         pass
 
-    def advanceToUtilityCard(self, player):
+    def _advanceToNearestUtility(self):
         """
             Advances player to the nearest utility if it is owned rolls the dice and pays the owner 
             10x the number rolled. 
 
             Returns: A Buy log if the tile is unowned and a Rent log otherwise 
+        """
+        pass
+
+    def _move(self, spaces):
+        """
+            Moves the current player spaces places. And handles the effects on landing on the new
+            tile.
+
+            Returns: A list of logs associated with landing on the new tile.
         """
         pass
 # Rolling Helpers

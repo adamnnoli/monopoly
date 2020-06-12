@@ -23,6 +23,7 @@
     },
     {
       "name": "Baltic Avenue",
+      "price": 60,
       "rents": [4, 20, 60, 180, 320, 450],
       "house cost": 50,
       "color": "brown"
