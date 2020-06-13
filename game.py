@@ -5,7 +5,7 @@ import random
 
 
 class Game:
-# INITIALIZATION -----------------------------------------------------------------------------------
+    # INITIALIZATION -----------------------------------------------------------------------------------
     def __init__(self, players):
         """
             Creates a Game Object with the players given 
@@ -21,6 +21,7 @@ class Game:
         self.currentChanceIndex = 0
         self.currentCommunityChestIndex = 0
         self.hasRolled = False
+        self.numDoublesRolled = 0
 
     def createBoard(self):
         """
@@ -181,13 +182,26 @@ class Game:
 
 # GAME FUNCTIONALITY -------------------------------------------------------------------------------
     # Rolling
-        def roll(self):
-            """
-                If the current player can roll, rolls the dice and moves the player's piece,
-                returning a list of logs appropriate based on the result of this action.
-                If the current player cannot roll, returns a log with that message.
-            """
-            pass
+    def roll(self):
+        """
+            If the current player can roll, rolls the dice and moves the player's piece,
+            returning a list of logs appropriate based on the result of this action.
+            If the current player cannot roll, returns a log with that message.
+        """
+        if self.hasRolled:
+            return ("Roll", "You already rolled")
+        if self.currentPlayer.toDict()["inJail"]:
+            return ("Roll", "You are in Jail")
+        else:
+            dice1 = random.randint(1, 6)
+            dice2 = random.randint(1, 6)
+            if dice1 != dice2:
+                self.hasRolled = True
+            else:
+                self.numDoubledRolls += 1
+            self.currentPlayer.move(dice1+dice2)
+            self._handleTile()
+
     # Building
 
         def build(self, tileName):
@@ -338,19 +352,19 @@ class Game:
             Ordered to match the text of the cards.
         """
         def zero(player): return player.giveCash(100)
-        def one(): return self._advanceTo("Go")
-        def two(): return self._advanceTo("Illinois Ave")
-        def three(): return self._advanceTo("St. Charles Place")
-        def four(): return self._advanceToNearestUtility()
-        def five(): return self._advanceToNearestRailroad()
+        def one(player): return self._advanceTo("Go")
+        def two(player): return self._advanceTo("Illinois Ave")
+        def three(player): return self._advanceTo("St. Charles Place")
+        def four(player): return self._advanceToNearestUtility()
+        def five(player): return self._advanceToNearestRailroad()
         def six(player): return player.giveCash(50)
         def seven(player): return player.giveGetOutOfJail()
-        def eight(): return self._move(-3)
+        def eight(player): return self._move(-3)
         def nine(player): return player.goToJail()
         def ten(player): return player.makeRepairs(25, 100)
         def eleven(player): return player.takeCash(15)
-        def twelve(): return self._advanceTo("Reading Railroad")
-        def thirteen(): return self._advanceTo("Boardwalk")
+        def twelve(player): return self._advanceTo("Reading Railroad")
+        def thirteen(player): return self._advanceTo("Boardwalk")
         def fourteen(player): return player.giveToEach(50, self.players)
         def fifteen(player): return player.giveCash(150)
         return [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen]
@@ -436,7 +450,9 @@ class Game:
 
             Returns: A list of logs associated with landing on the new tile.
         """
-        pass
+        self.currentPlayer.move(spaces)
+        self._handleTile
+
 # Rolling Helpers
 
     def _handleTile(self):
@@ -446,7 +462,16 @@ class Game:
 
             Returns: A list of appropriate logs
         """
-        pass
+        tile = self.board.getTile(self.currentPlayer.toDict()["location"])
+
+        if tile["name"] == "Chance" or tile["name"] == "Community Chest":
+            return self._drawCard()
+        if tile["name"] == "Income Tax" or tile["name"] == "Luxury Tax":
+            return self._takeTax()
+        if tile["owner"] is not None and not tile["mortgaged"]:
+            return self._takeRent()
+        else:
+            return ("Buy", "Not Owned")
 
     def _drawCard(self):
         """
@@ -457,7 +482,23 @@ class Game:
             Returns: A list of logs, the first being the log for the card text, the rest of the list
             is the logs that arise from executing the card action
         """
-        pass
+        tileName = self.board.getTile(self.currentPlayer.toDict()["location"])["name"]
+
+        if tileName == "Chance":
+            card = self.chanceCards[self.currentChanceIndex]
+            self.currentChanceIndex = (self.currentChanceIndex + 1) % len(self.chanceCards)
+            logs = [("Chance", card.getText())]
+            actionReturn = card.getAction()(self.currentPlayer)
+            logs.append(actionReturn)
+            return logs
+        if tileName == "Community Chest":
+            card = self.communityChestCards[self.currentCommunityChestIndex]
+            self.currentCommunityChestIndex = (
+                self.currentCommunityChestIndex + 1) % len(self.CommunityChestCards)
+            logs = [("Chance", card.getText())]
+            actionReturn = card.getAction()(self.currentPlayer)
+            logs.append(actionReturn)
+            return logs
 
     def _takeRent(self):
         """
@@ -467,6 +508,9 @@ class Game:
             declare your assets go to the bank or is it that the player gets your money or your 
             assets.
         """
+        pass
+
+    def _takeTax(self):
         pass
 # Jail Helpers
 

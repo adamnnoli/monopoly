@@ -102,7 +102,7 @@ class Monopoly:
             Requires: Must be of type (StringVar, StringVar) list
         """
         players = []
-        for playerId, nameColor in enumerate(playerInfo):
+        for playerId, nameColor in enumerate(playerInfo, start=1):
             name = nameColor[0].get()
             # Make sure every player has a name
             if name == "":
@@ -174,7 +174,7 @@ class Monopoly:
         """
         playerInfoFrame = Frame(self.mainWindow)
         playerInfoFrame.grid(row=1, column=1)
-        
+
         playerInfo = self.game.getCurrentPlayer()
         name = playerInfo["name"]
         cash = playerInfo["cash"]
@@ -328,7 +328,8 @@ class Monopoly:
             Command of roll button in controls
             Calls handle log of the result of the roll function in Game
         """
-        pass
+        self._handleLogs(self.game.roll())
+        self.draw()
   #  Build
 
     def _build(self):
