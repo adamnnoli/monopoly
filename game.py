@@ -8,7 +8,7 @@ class Game:
     # INITIALIZATION -----------------------------------------------------------------------------------
     def __init__(self, players):
         """
-            Creates a Game Object with the players given 
+            Creates a Game Object with the players given
 
             Parameter: players, a list of tuples with the player information (id,name,color)
             Requires: Must be of type (int, string, string) list
@@ -139,7 +139,7 @@ class Game:
         """
             Returns a list of the names of properties that the current player can sell a house from
 
-            The player can sell a house on the property if there is at least one house, and selling 
+            The player can sell a house on the property if there is at least one house, and selling
             a house would not break the build evenly rule
         """
         playerMonopolies = {}
@@ -202,123 +202,126 @@ class Game:
             self.currentPlayer.move(dice1+dice2)
             self._handleTile()
 
+    # Buying
+    def buy(self):
+        pass
     # Building
 
-        def build(self, tileName):
-            """
-                Tries to build a house on the tile with name, tileName.
+    def build(self, tileName):
+        """
+            Tries to build a house on the tile with name, tileName.
 
-                Returns: A Build Success log if the house was a built, a Build Fail log otherwise
+            Returns: A Build Success log if the house was a built, a Build Fail log otherwise
 
-                Parameter: tileName, the name of the tile to build on
-                Requires: Must be of type string
+            Parameter: tileName, the name of the tile to build on
+            Requires: Must be of type string
 
-                Requires: Building must not break the build evenly rule, the tile must not be 
-                mortgaged
-            """
-            pass
+            Requires: Building must not break the build evenly rule, the tile must not be
+            mortgaged
+        """
+        pass
 
-        def sell(self):
-            """
-                Sells a house on the tile with name, tileName
+    def sell(self):
+        """
+            Sells a house on the tile with name, tileName
 
-                Returns: A Build Success log
+            Returns: A Build Success log
 
-                Parameter: tileName, the name of the tile to sell from
-                Requires: Must be of type string
+            Parameter: tileName, the name of the tile to sell from
+            Requires: Must be of type string
 
-                Requires: Selling must not break the build evenly rule, the tile must have at least
-                one house
-            """
-            pass
+            Requires: Selling must not break the build evenly rule, the tile must have at least
+            one house
+        """
+        pass
     # Trading
 
-        def trade(self, p1Trade, p2Trade):
-            """
-                Attempts to have the current player trade the items in p1Trade for the items in 
-                p2Trade with the player that has name p2Dict["name"]
+    def trade(self, p1Trade, p2Trade):
+        """
+            Attempts to have the current player trade the items in p1Trade for the items in 
+            p2Trade with the player that has name p2Dict["name"]
 
-                Returns: A Trade Fail log if one of the players is missing an item, a Trade Success
-                log otherwise
+            Returns: A Trade Fail log if one of the players is missing an item, a Trade Success
+            log otherwise
 
-                Parameter: p1Trade, the dictionary specifying what player 1 gives to player 2
-                Requires: Must be of type dict
+            Parameter: p1Trade, the dictionary specifying what player 1 gives to player 2
+            Requires: Must be of type dict
 
-                Parameter: p2Trade, the dictionary specifying what player 2 gives to player 1
-                Requires: Must be of type dict
-            """
-            pass
+            Parameter: p2Trade, the dictionary specifying what player 2 gives to player 1
+            Requires: Must be of type dict
+        """
+        pass
     # Mortgaging
 
-        def mortgage(self, tileName):
-            """
-                Sets the status of the tile with name, tileName to mortgaged, giving the player
-                the proceeds
+    def mortgage(self, tileName):
+        """
+            Sets the status of the tile with name, tileName to mortgaged, giving the player
+            the proceeds
 
-                Returns: A Mortgage Success Log 
+            Returns: A Mortgage Success Log 
 
-                Parameter: tileName, the name of the tile to mortgage
-                Requires: Must be of type string
-            """
-            pass
+            Parameter: tileName, the name of the tile to mortgage
+            Requires: Must be of type string
+        """
+        pass
 
-        def unmortgage(self, tileName):
-            """
-                Attempts to unmortgage the tile with name tileName
+    def unmortgage(self, tileName):
+        """
+            Attempts to unmortgage the tile with name tileName
 
-                Returns: A Mortgage Success log if the player had enough cash, A Mortgage Fail log
-                otherwise 
+            Returns: A Mortgage Success log if the player had enough cash, A Mortgage Fail log
+            otherwise 
 
-                Parameter: tileName, the name of the tile to unmortgage
-                Requires: Must be of type string
-            """
-            pass
+            Parameter: tileName, the name of the tile to unmortgage
+            Requires: Must be of type string
+        """
+        pass
     # Quitting
 
-        def quit(self):
-            """
-                Removes the current player from the game, forfeiting all assets to the bank
+    def quit(self):
+        """
+            Removes the current player from the game, forfeiting all assets to the bank
 
-                Returns: A Quit Log
-            """
-            pass
+            Returns: A Quit Log
+        """
+        pass
     # Jail
 
-        def payJail(self):
-            """
-                Attempts to pay $50 to remove the current player from jail
+    def payJail(self):
+        """
+            Attempts to pay $50 to remove the current player from jail
 
-                Returns: A Jail Success log if the player had enough money, A Jail Fail log
-                otherwise
-            """
-            pass
+            Returns: A Jail Success log if the player had enough money, A Jail Fail log
+            otherwise
+        """
+        pass
 
-        def rollJail(self):
-            """
-                Rolls the dice, if the result is a double, removes the current player from jail
-                and moves them the amount rolled, returning a list of logs with the log of leaving
-                jail and the log from rolling the dice
-                If the result is not a double returns A Jail Success Log
-            """
-            pass
+    def rollJail(self):
+        """
+            Rolls the dice, if the result is a double, removes the current player from jail
+            and moves them the amount rolled, returning a list of logs with the log of leaving
+            jail and the log from rolling the dice
+            If the result is not a double returns A Jail Success Log
+        """
+        pass
 
-        def cardJail(self):
-            """
-                Attempts to use a Get Out Of Jail Free Card to remove the current player to jail.
+    def cardJail(self):
+        """
+            Attempts to use a Get Out Of Jail Free Card to remove the current player to jail.
 
-                Returns: A Jail Success Log if the player had a Get Out of Jail Free Card, a Jail
-                Fail Log otherwise
-            """
-            pass
+            Returns: A Jail Success Log if the player had a Get Out of Jail Free Card, a Jail
+            Fail Log otherwise
+        """
+        pass
     # End Turn
 
-        def endTurn(self):
-            """
-                Attempts to end the current player's turn and begin the next player's turn 
+    def endTurn(self):
+        """
+            Attempts to end the current player's turn and begin the next player's turn 
 
-                Returns: A log appropriate based on the result of the attempt
-            """
-            pass
+            Returns: A log appropriate based on the result of the attempt
+        """
+        pass
 # HELPERS
 
     # Init Helpers
@@ -543,4 +546,4 @@ class Game:
             Returns a list of dictionaries representing every tile that the current player owns
         """
         return list(map(lambda propName: self.board.getTile(self.board.getTileId(propName)),
-                        self.currentPlayer.toDict(["properties"])))
+                        self.currentPlayer.toDict()["properties"]))

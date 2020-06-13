@@ -330,6 +330,32 @@ class Monopoly:
         """
         self._handleLogs(self.game.roll())
         self.draw()
+  # Buy
+
+    def _createBuyWindow(self):
+        """
+            Creates a TopLevel Window asking the player if they would like to buy the property they
+            are currently on. 
+        """
+        self._buyWindow = Toplevel()
+
+        name = self.game.getTile(self.game.getCurrentPlayer()["location"])["name"]
+        text = Label(self._buyWindow, text=f"Buy {name}?")
+        text.grid(row=0, column=0, columnspan=2)
+
+        yesBtn = Button(self._buyWindow, text="Yes", command=self._buy)
+        yesBtn.grid(row=1, column=0)
+
+        noBtn = Button(self._buyWindow, text="No", command=self._auction)
+        noBtn.grid(row=1, column=1)
+
+    def _buy(self):
+        """
+            Command of the Yes Button in the Buy Window
+
+            Calls handle log of the result of the buy function in game
+        """
+        self._handleLogs(self.game.buy())
   #  Build
 
     def _build(self):
@@ -338,19 +364,45 @@ class Monopoly:
 
             Asks if the player would like to build or sell and opens the appropriate window
         """
-        pass
+        self._buildWindow = Toplevel()
+        text = Label(self._buildWindow, text="What would you like to do?")
+        text.grid(row=0, column=0, columnspan=2)
+
+        buildButton = Button(self._buildWindow, text="Build", command=self._createBuildWindow)
+        buildButton.grid(row=1, column=0)
+
+        sellButton = Button(self._buildWindow, text="Sell", command=self._createSellWindow)
+        sellButton.grid(row=1, column=1)
 
     def _createBuildWindow(self):
         """
-            Creates a Top Level which allows the current player to build a house on a property
+            Clears the build window and adds a frame which allows the current player to build
+            a house on a property
         """
-        pass
+        self._clear(self._buildWindow)
+
+        frame = Frame(self._buildWindow)
+
+        def _showPrice():
+            pass
+        propName = StringVar()
+        text = Label(frame, text="Select Property: ")
+        text.grid(row=0, column=0)
+        availableProps = self.game.getBuildable()
+        availableProps = [""] if availableProps == [] else availableProps
+        props = OptionMenu(frame, propName, *availableProps, command=_showPrice)
+        props.grid(row=0, column=1)
+
+        frame.grid(row=0, column=0)
 
     def _createSellWindow(self):
         """
-            Creates a Top Level which allows the current player to sell a house on a property
+            Clears the build window and adds a frame which allows the current player to sell
+            a house on a property
         """
-        pass
+        text = Label(self._buildAskWindow, text="Select Property: ")
+        propName = StringVar()
+        props = OptionMenu(self._buildAskWindow, propName, *self.game.getBuildable())
   # Trade
 
     def _trade(self):
@@ -440,7 +492,9 @@ class Monopoly:
             Parameter: logs, the list of logs to log
             Requires: Must be of type (string, string) list
         """
-        pass
+        for log in logs:
+            if log[0] == "Buy":
+                self._createBuyWindow
   # Jail
 
     def _jail(self):
