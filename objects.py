@@ -202,7 +202,7 @@ class Player:
             "id": self.id,
             "name": self.name,
             "color": self.color,
-            "location": Board.getTile(self.location)["name"],
+            "location": self.location,
             "cash": self.cash,
             "properties": self.properties,
             "inJail": self.inJail,

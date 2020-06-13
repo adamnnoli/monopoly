@@ -120,6 +120,8 @@ class Monopoly:
         self._clear(self.mainWindow)
         self.drawBoard()
         self.createControls()
+        self.createPlayerInfo()
+        self.createGameLog()
 
     def run(self):
         self.mainWindow.mainloop()
@@ -135,6 +137,7 @@ class Monopoly:
         for tile in self.game.getBoard():
             self._drawTile(tile, board)
         board.grid(row=0, column=0, rowspan=3)
+        self._drawPlayers(board)
 
     def createControls(self):
         """
@@ -169,7 +172,18 @@ class Monopoly:
         """
             Adds a frame with the stats of the current player to the mainWindow
         """
-        pass
+        playerInfoFrame = Frame(self.mainWindow)
+        playerInfoFrame.grid(row=1, column=1)
+        
+        playerInfo = self.game.getCurrentPlayer()
+        name = playerInfo["name"]
+        cash = playerInfo["cash"]
+
+        tileName = self.game.getTile(playerInfo["location"])["name"]
+
+        nameLabel = Label(playerInfoFrame, text=f"Name: {name}").pack()
+        cashLabel = Label(playerInfoFrame, text=f"Cash: {cash}").pack()
+        locationLabel = Label(playerInfoFrame, text=f"Currently At: {tileName}").pack()
 
     def createGameLog(self):
         """
@@ -185,27 +199,38 @@ class Monopoly:
   # Board
     def _drawTile(self, tileDict, cvs):
         """
-            Draws a tile with the information in tileDict to the board canvas
+            Draws a tile with the information in tileDict to cvs
 
             Parameter: tileDict, the dictionary containing the tile information
             Requires: Must be of type dict
-        """
-        bigs = [0, 10, 20, 30]
-        topLeft = self._getTopLeft(tileDict["id"])
-        x = topLeft[0]
-        y = topLeft[1]
 
-        color = self._toHex(tileDict["color"])
+            Parameter: cvs, the canvas to draw the tile on
+            Requires: Must be of type tk.Canvas
+        """
+        x = self._getTopLeft(tileDict["id"])[0]  # Get Coordinates
+        y = self._getTopLeft(tileDict["id"])[1]
+
+        color = self._toHex(tileDict["color"])  # Fill Color
+
+        # Outline Color
         if tileDict["owner"] is not None:
             ownerColor = self._toHex(tileDict["owner"].toDict()["color"])
         else:
-            ownerColor = "#ffffff"
-        if tileDict["id"] in bigs:
-            cvs.create_rectangle(x, y, x + longPlus[0], y + longPlus[0], fill=color)
+            ownerColor = "#000000"
+
+        # Dash to Show Mortgaged
+        dashPattern = (1, 1) if tileDict["mortgaged"] else None
+
+        # Draw the tile
+        if tileDict["id"] in [0, 10, 20, 30]:
+            cvs.create_rectangle(x, y, x + longPlus[0], y + longPlus[0],
+                                 fill=color, outline=ownerColor, dash=dashPattern)
         elif tileDict["id"] in range(1, 10) or tileDict["id"] in range(21, 30):
-            cvs.create_rectangle(x, y, x + TILE_SHORT, y + longPlus[0], fill=color)
+            cvs.create_rectangle(x, y, x + TILE_SHORT, y + longPlus[0],
+                                 fill=color, outline=ownerColor, dash=dashPattern)
         elif tileDict["id"] in range(11, 20) or tileDict["id"] in range(31, 40):
-            cvs.create_rectangle(x, y, x + longPlus[0], y + TILE_SHORT, fill=color)
+            cvs.create_rectangle(x, y, x + longPlus[0], y + TILE_SHORT,
+                                 fill=color, outline=ownerColor, dash=dashPattern)
 
     def _getTopLeft(self, tileId):
         """
@@ -262,6 +287,40 @@ class Monopoly:
         if color == "ORANGE":
             return "#ffa500"
 
+    def _drawPlayers(self, cvs):
+        """
+            Draws every player to the canvas, cvs 
+
+            Parameter: cvs, the canvas to draw to
+            Requires: Must be of type tk.Canvas
+        """
+        for playerNumber, player in enumerate(self.game.getPlayers(), start=1):
+            color = None if player["color"] is None else self._toHex(player["color"])
+            x = self._getPlayerTopLeft(playerNumber, player["location"])[0]
+            y = self._getPlayerTopLeft(playerNumber, player["location"])[1]
+            cvs.create_rectangle(x, y, x+PIECE_SIZE, y+PIECE_SIZE, fill=color)
+
+    def _getPlayerTopLeft(self, playerNumber, tileId):
+        """
+            Returns the (x,y) representing the top-left corner of the piece of the player
+            with number playerNumber on the tile with id tileId
+
+            Parameter: playerNumber, the id of the player(Player 1, Player 2, etc.)
+            Requires: Must be of type int
+
+            Parameter: tileId, the id of the tile the player is currently on
+            Requires: Must be of type int
+        """
+        cLength = 2 * TILE_LONG + 9 * TILE_SHORT
+        offset = playerNumber * PIECE_SIZE
+        if playerNumber < 10:
+            return (longPlus[9-tileId], cLength-offset)
+        elif playerNumber < 20:
+            return (offset, longPlus[19-tileId])
+        elif playerNumber < 30:
+            return (longPlus[tileId-20]-PIECE_SIZE, offset)
+        elif playerNumber < 40:
+            return (cLength-offset, longPlus[tileId-30]-PIECE_SIZE)
   # Roll
 
     def _roll(self):
