@@ -64,7 +64,7 @@ class Monopoly:
 
                 Adds play button to playersFrame to begin the game
 
-                Note: Using a closure because otherwise playersFrame and playerInfo would need to 
+                Note: Using a closure because otherwise playersFrame and playerInfo would need to
                 be attributes
             """
             self._clear(playersFrame)
@@ -114,7 +114,7 @@ class Monopoly:
 
     def draw(self):
         """
-            Clears the mainWindow and draws the board, playerInfo frame, controls frame, and game 
+            Clears the mainWindow and draws the board, playerInfo frame, controls frame, and game
             log to the mainWindow
         """
         self._clear(self.mainWindow)
@@ -234,7 +234,7 @@ class Monopoly:
 
     def _getTopLeft(self, tileId):
         """
-            Returns an (x,y) representing the coordinates of the top-left corner of the tile with 
+            Returns an (x,y) representing the coordinates of the top-left corner of the tile with
             id tileId
 
             Parameter: tileId, the id of the tile requested
@@ -289,7 +289,7 @@ class Monopoly:
 
     def _drawPlayers(self, cvs):
         """
-            Draws every player to the canvas, cvs 
+            Draws every player to the canvas, cvs
 
             Parameter: cvs, the canvas to draw to
             Requires: Must be of type tk.Canvas
@@ -335,7 +335,7 @@ class Monopoly:
     def _createBuyWindow(self):
         """
             Creates a TopLevel Window asking the player if they would like to buy the property they
-            are currently on. 
+            are currently on.
         """
         self._buyWindow = Toplevel()
 
@@ -462,7 +462,8 @@ class Monopoly:
 
             Handles the log of the end turn function in Game
         """
-        pass
+        self._handleLogs(self.game.endTurn())
+        self.draw()
   # Quit
 
     def _quit(self):
@@ -484,6 +485,16 @@ class Monopoly:
         pass
   # Log
 
+    def _log(self, text):
+        """
+            Adds a label with text to the gameLog
+
+            Parameter: text, the text to be logged
+            Requires: Must be of type string
+        """
+        label = Label(self.gameLog, text=text)
+        label.grid(row=self.gameLog.grid_size()[1]+1)
+
     def _handleLogs(self, logs):
         """
             Performs the necessary actions associated with each log in logs.
@@ -492,10 +503,68 @@ class Monopoly:
             Parameter: logs, the list of logs to log
             Requires: Must be of type (string, string) list
         """
+        if logs is None:
+            return
+        buyLogs = ["Buy", "Buy Success", "Buy Fail"]
+        buildLogs = ["Build Success", "Build Fail"]
+        mortgageLogs = ["Mortgage Success", "Mortgage Interest"]
+        tradeLogs = ["Trade Success", "Trade Fail"]
+        jailLogs = ["Jail", "Jail Success", "Jail Fail"]
+        otherLogs = ["Rent", "Tax", "Roll", "Bankruptcy"]
+
         for log in logs:
-            if log[0] == "Buy":
-                self._createBuyWindow
-  # Jail
+            if log[0] == "Card" or log[0] == "Auction" or log[0] in otherLogs:
+                self._log(log[1])
+            elif log[0] in buyLogs:
+                self._buyLog(log)
+            elif log[0] in buildLogs:
+                self._buildLog(log)
+            elif log[0] in mortgageLogs:
+                self._mortgageLog(log)
+            elif log[0] in tradeLogs:
+                self._tradeLog(log)
+            elif log[0] in jailLogs:
+                self._jailLog(log)
+        else:
+            print(log)
+
+    def _buyLog(self, result):
+        if result[0] == "Buy":
+            self._createBuyWindow()
+        if result[0] == "Buy Success":
+            self._log(result[1])
+            if self._buyWindow is not None:
+                self._buyWindow.destroy()
+        if result[0] == "Buy Fail":
+            self._log(result[1])
+
+    def _buildLog(self, result):
+        if result[0] == "Build Success":
+            if self._buildWindow is not None:
+                self._buildWindow.destroy()
+        self._log(result[1])
+
+    def _mortgageLog(self, result):
+        if result[0] == "Mortgage Success":
+            if self._mortgageWindow is not None:
+                self._mortgageWindow.destroy()
+        self._log(result[1])
+
+    def _tradeLog(self, result):
+        if result[0] == "Trade Success":
+            if self._tradeWindow is not None:
+                self._tradeWindow.destroy
+        self._log(result[1])
+
+    def _jailLog(self, result):
+        if result[0] == "Jail":
+            self._createJailWindow()
+        if result[0] == "Jail Success":
+            if self._jailWindow is not None:
+                self._jailWindow.destroy()
+            self._log(result[1])
+        if result[0] == "Jail Fail":
+            self._log(result[1])
 
     def _jail(self):
         """

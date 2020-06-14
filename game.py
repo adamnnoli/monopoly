@@ -204,6 +204,10 @@ class Game:
 
     # Buying
     def buy(self):
+        """
+            If the current player can buy the current tile, takes the cash necessary and transfers
+            ownership returning a Buy Success log, if not returns a Buy Fail log
+        """
         pass
     # Building
 
@@ -321,7 +325,11 @@ class Game:
 
             Returns: A log appropriate based on the result of the attempt
         """
-        pass
+        if not self.hasRolled:
+            return ("Roll", "You haven't rolled yet.")
+        nextPlayerIndex = (self.players.index(self.currentPlayer) + 1) % len(self.players)
+        self.currentPlayer = self.players[nextPlayerIndex]
+        self.hasRolled = False
 # HELPERS
 
     # Init Helpers
