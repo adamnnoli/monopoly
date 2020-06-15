@@ -1,27 +1,26 @@
-Place where I will keep track of notes, ideas on how to implement things, what to work on 
-etc.
-TO-DO:
-  2. Fill in all documentation 
-  6. Complete Game Start Up in retry
-  7. Complete Game Drawings in retry 
+To-Do 
+  You were working on handle logs and end turns and that region of stuff. You were also working on 
+  buying and building 
 
-New Idea for logs If a function needs to return multiple logs, have it return a list of logs
-Make it so that each log can just be handled individually
-  
-Problem: Handle tile might call draw card, draw card might have to move the player and thus call handle tile, 
-or it might move the player and not have to call handle tile(advanceToRailroad/utility makes their own logs)
-Solution:
-  Handle tile starts with a blank list []
-  Draw Card is called, says advance to Illinois Avenue, add its text to draw cards log list -> []["Advance to Illinois Avenue"]
-  Advance calls handle tile which has its own list of logs when it returns -> []["Advance to Illinois Avenue"][handleLog2]
-  Concatenate all logs so the first handle tile just has one log list of logs -> ["Advance to Illinois", "Paid Rent", "buy",...]
-  In handleLogList, for each log handle log 
-  What this entails:
-    Card functions need to return logs, maybe just return handle tile of the action 
-    Need a handle log list in app 
-    Functions in app call functions in game, but not the other way around, so I guess handle logs 
-    will be the function and will have either take in both single and lists of logs and check or 
-    only lists 
+  Next Time you are here this is what I recommend doing 
+  0. Fix drawing, change to be more like
+  1. Focus on getting all logs implemented, don't worry about making functions return them yet, just 
+  set up the handle log function and functions you already made to handle every log in the game
+  2. Then go through and design every window in the game, don't fill in any functions yet, just stub 
+  in what you need for the button and drop down commands
+  3. Then focus on getting rolling and landing on tiles working, implement the logs with pay taxes 
+  and drawing cards. This means getting multiple logs truly working 
+  4. Then get ending turns working. Implement the features needed to make jail work with what you 
+  have. 
+  This should keep you busy for long enough, but while I am here let me outline my ideas for 
+  everything else.
+  5. Then get jail working, fill in the functions you stubbed in before and make sure it all works
+  6. Then get buying and building finished. Finsih the functions you have stubbed in and make sure 
+  it all works
+  7. If you got building done, mortgaging should be easy to do 
+  8. Get trading done, the check trades will be tough, but you can get through it.
+  9. Get auctioning working 
+  10. Figure out what to do with Bankruptcy and ending the game
 
 
 Acceptable Logs:
@@ -50,7 +49,7 @@ Acceptable Logs:
   
   Auctioning Logs 
     (AuctionSuccess, "Player name" won "tile name" at an auction for "amount") ->  -> log message as is
-    (AuctionFail, "Th")
+    (AuctionFail, "There was tie")
     Created by clicking no when building, deleted by clicking accept button 
   
   Trading Logs 
@@ -82,39 +81,3 @@ Acceptable Logs:
     (Bankruptcy, )
     (Bankruptcy, "Player name" became bankrupt and forfeited all assets to "Other Player") -> log message as is 
 
-How Tos:
-  Trading 
-  Bankruptcy
-    If you owe money to another player and don't have the cash open the Bankruptcy window.
-    What happens is that you must sell houses at half the price and mortgage properties until you 
-    have enough. If you don't then the after selling all the houses the other player gets everything
-    Any mortgaged properties must have interested paid to the bank immediately
-    If the money is owed to the bank, same process except the bank gets everything and auctions 
-    everything
-  Mortgaging
-    Make sure mortgaged properties can't collect rent
-    Make sure improved properties can't be mortgaged, must sell houses first
-    Unmortgage at the cost of the mortgage plus 10%
-    Can't have any mortgaged properties if you want to buy a house in the color group
-  Jail 
-    Make sure that the player can't roll if they are in jail, unless through the jail window
-  Other 
-    Change rolling so that if they roll doubles they can roll again 
-    Make sure monopoly properties get double rent, unless there are houses
-    Try to see if you can implement the build evenly rule, all properties must have 1 house before
-    any can move onto two houses
-    When it comes to trading, there can't be any houses on the property. Make it so you can sell 
-    houses at half the price they are bought for. Must sell evenly as you bought evenly
-  Start Up 
-    Make a start up window that shows up before the player selection. This window should show the 
-    rules to the game and will start the game by pressing a play button on the bottom of the window.
-
-
-Welcome Message
-                                      Welcome to Monopoly!
-  The objective of the game is to become the wealthiest player.
-  When it is your turn, roll the dice. Your piece will move for you. If you land on a new property,
-  you can buy it from the bank. If you don't want to buy it then there will be an auction.
-  On your turn you can do 
- 
-Help Message

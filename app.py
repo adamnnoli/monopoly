@@ -20,6 +20,8 @@ class Monopoly:
         windowX = int((screenWidth-width)/2)
         windowY = int((screenHeight-height)/2)
         self.mainWindow.geometry(f"{width}x{height}+{windowX}+{windowY}")
+        self._playerInfo = None
+        self.gameLog = None
         self.showWelcome()
 
     def showWelcome(self):
@@ -127,6 +129,13 @@ class Monopoly:
         self.mainWindow.mainloop()
 # GAME PLAY ----------------------------------------------------------------------------------------
 
+    def redraw(self):
+        """
+            Redraws the board and playerInfo Frame
+        """
+        self.drawBoard()
+        self.createPlayerInfo()
+
     def drawBoard(self):
         """
             Adds a canvas to the mainWindow with the board drawn on it, drawing every tile, player,
@@ -172,6 +181,8 @@ class Monopoly:
         """
             Adds a frame with the stats of the current player to the mainWindow
         """
+        if self._playerInfo is not None:
+            self._playerInfo.destroy()
         playerInfoFrame = Frame(self.mainWindow)
         playerInfoFrame.grid(row=1, column=1)
 
@@ -185,11 +196,16 @@ class Monopoly:
         cashLabel = Label(playerInfoFrame, text=f"Cash: {cash}").pack()
         locationLabel = Label(playerInfoFrame, text=f"Currently At: {tileName}").pack()
 
+        self._playerInfo = playerInfoFrame
+
     def createGameLog(self):
         """
             Adds a frame with all of the logs to the mainWindow
         """
-        pass
+        if self.gameLog is not None:
+            self.gameLog.destroy()
+        self.gameLog = Frame(self.mainWindow)
+        self.gameLog.grid(row=2, column=1)
 
 # END GAME -----------------------------------------------------------------------------------------
     def showWinner(self):
@@ -215,6 +231,7 @@ class Monopoly:
         # Outline Color
         if tileDict["owner"] is not None:
             ownerColor = self._toHex(tileDict["owner"].toDict()["color"])
+            ownerColor = "#ffffff" if ownerColor == GAME_BOARD_COLOR else ownerColor
         else:
             ownerColor = "#000000"
 
@@ -224,13 +241,13 @@ class Monopoly:
         # Draw the tile
         if tileDict["id"] in [0, 10, 20, 30]:
             cvs.create_rectangle(x, y, x + longPlus[0], y + longPlus[0],
-                                 fill=color, outline=ownerColor, dash=dashPattern)
+                                 fill=color, outline=ownerColor, dash=dashPattern, width=2)
         elif tileDict["id"] in range(1, 10) or tileDict["id"] in range(21, 30):
             cvs.create_rectangle(x, y, x + TILE_SHORT, y + longPlus[0],
-                                 fill=color, outline=ownerColor, dash=dashPattern)
+                                 fill=color, outline=ownerColor, dash=dashPattern, width=2)
         elif tileDict["id"] in range(11, 20) or tileDict["id"] in range(31, 40):
             cvs.create_rectangle(x, y, x + longPlus[0], y + TILE_SHORT,
-                                 fill=color, outline=ownerColor, dash=dashPattern)
+                                 fill=color, outline=ownerColor, dash=dashPattern, width=2)
 
     def _getTopLeft(self, tileId):
         """
@@ -275,7 +292,7 @@ class Monopoly:
         if color == "MAGENTA":
             return "#ff00ff"
         if color == "WHITE":
-            return "#c0e2ca"
+            return GAME_BOARD_COLOR
         if color == "BLACK":
             return "#000000"
         if color == "BROWN":
@@ -296,6 +313,7 @@ class Monopoly:
         """
         for playerNumber, player in enumerate(self.game.getPlayers(), start=1):
             color = None if player["color"] is None else self._toHex(player["color"])
+            color = "#ffffff" if color == GAME_BOARD_COLOR else color
             x = self._getPlayerTopLeft(playerNumber, player["location"])[0]
             y = self._getPlayerTopLeft(playerNumber, player["location"])[1]
             cvs.create_rectangle(x, y, x+PIECE_SIZE, y+PIECE_SIZE, fill=color)
@@ -313,13 +331,13 @@ class Monopoly:
         """
         cLength = 2 * TILE_LONG + 9 * TILE_SHORT
         offset = playerNumber * PIECE_SIZE
-        if playerNumber < 10:
+        if tileId < 10:
             return (longPlus[9-tileId], cLength-offset)
-        elif playerNumber < 20:
+        elif tileId < 20:
             return (offset, longPlus[19-tileId])
-        elif playerNumber < 30:
+        elif tileId < 30:
             return (longPlus[tileId-20]-PIECE_SIZE, offset)
-        elif playerNumber < 40:
+        elif tileId < 40:
             return (cLength-offset, longPlus[tileId-30]-PIECE_SIZE)
   # Roll
 
@@ -329,7 +347,7 @@ class Monopoly:
             Calls handle log of the result of the roll function in Game
         """
         self._handleLogs(self.game.roll())
-        self.draw()
+        self.redraw()
   # Buy
 
     def _createBuyWindow(self):
@@ -463,7 +481,7 @@ class Monopoly:
             Handles the log of the end turn function in Game
         """
         self._handleLogs(self.game.endTurn())
-        self.draw()
+        self.redraw()
   # Quit
 
     def _quit(self):
@@ -481,6 +499,19 @@ class Monopoly:
             Command of help button in controls
 
             Creates a Top Level displaying the rules of the Game
+        """
+        pass
+  # Auction
+
+    def _auction(self, propName):
+        """
+            Called when a player is bankrupt and owes money to the bank or when a player refuses
+            to buy a property
+
+            Creates a Top Level asking every remaining player what their bid on property is.
+
+            Parameter: propName, the name of the property being auctioned
+            Requires: Must be of type string
         """
         pass
   # Log
@@ -503,7 +534,8 @@ class Monopoly:
             Parameter: logs, the list of logs to log
             Requires: Must be of type (string, string) list
         """
-        if logs is None:
+        print(logs)
+        if logs is None or logs == []:
             return
         buyLogs = ["Buy", "Buy Success", "Buy Fail"]
         buildLogs = ["Build Success", "Build Fail"]
@@ -525,8 +557,8 @@ class Monopoly:
                 self._tradeLog(log)
             elif log[0] in jailLogs:
                 self._jailLog(log)
-        else:
-            print(log)
+            else:
+                print(log)
 
     def _buyLog(self, result):
         if result[0] == "Buy":

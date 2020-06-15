@@ -135,7 +135,7 @@ class Board:
             Parameter: tileId, the id of the tile requested
             Requires: Must be of type int
         """
-        self._findTile(tileId)
+        return self._findTile(tileId)
 
     def getMonopolies(self):
         """
@@ -220,6 +220,9 @@ class Player:
             Requires: Must be of type int
         """
         self.location += spaces
+        if self.location > 39:
+            self.location % 39
+            self.cash += 200 
 
     def giveCash(self, amount):
         """
@@ -293,14 +296,17 @@ class Player:
         self.jailCards -= 1
 # Card Functions
 
-    def advanceTo(self, tileName):
+    def advanceTo(self, tileName, board):
         """
             Moves the player forward until they reach tile with name, tileName
 
             Parameter: tileName, the name of the tile to go to
             Requires: Must be of type string
+
+            Parameter: board, the board that the player is on
+            Requires: Must be of type Board
         """
-        tileLocation = Board.getTileId(tileName)
+        tileLocation = board.getTileId(tileName)
         if tileLocation < self.location:
             self.giveCash(200)
         self.location = tileLocation

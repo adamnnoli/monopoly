@@ -16,6 +16,7 @@ PIECE_SIZE = 25
 GAME_WIDTH = 1050
 GAME_HEIGHT = 700
 
+GAME_BOARD_COLOR = "#c0e2ca"
 
 WELCOME_MESSAGE = """Welcome to Monopoly!
 The object of the game is to become the last player standing by forcing all other players to become bankrupt.

@@ -15,7 +15,7 @@ class Game:
         """
         self.board = self.createBoard()
         self.chanceCards = self.createChanceCards()
-        self.communityChestCard = self.createCommunityChestCards
+        self.communityChestCards = self.createCommunityChestCards()
         self.players = self.createPlayers(players)
         self.currentPlayer = self.players[0]
         self.currentChanceIndex = 0
@@ -188,19 +188,27 @@ class Game:
             returning a list of logs appropriate based on the result of this action.
             If the current player cannot roll, returns a log with that message.
         """
+        logs = []
         if self.hasRolled:
-            return ("Roll", "You already rolled")
+            logs.append(("Roll", "You already rolled"))
+            return logs
         if self.currentPlayer.toDict()["inJail"]:
-            return ("Roll", "You are in Jail")
+            logs.append(("Roll", "You are in Jail"))
+            return logs
         else:
             dice1 = random.randint(1, 6)
             dice2 = random.randint(1, 6)
             if dice1 != dice2:
                 self.hasRolled = True
             else:
-                self.numDoubledRolls += 1
+                self.numDoublesRolled += 1
+                logs.append(("Roll", "You rolled doubles, roll again"))
             self.currentPlayer.move(dice1+dice2)
-            self._handleTile()
+            result = self._handleTile()
+            if result is None:
+                return logs
+            else:
+                return (logs + result)
 
     # Buying
     def buy(self):
@@ -208,7 +216,14 @@ class Game:
             If the current player can buy the current tile, takes the cash necessary and transfers
             ownership returning a Buy Success log, if not returns a Buy Fail log
         """
-        pass
+        currentPlayer = self.currentPlayer.toDict()
+        currentTile = self.board.getTile(currentPlayer["location"])
+        if (currentTile["owner"] is None) and currentTile["price"] < currentPlayer["cash"]:
+            self.board.getTileObject(currentPlayer["location"]).setOwner(self.currentPlayer)
+            self.currentPlayer.takeCash(currentTile["price"])
+            return [("Buy Success", f"{currentPlayer['name']} bought {currentTile['name']}")]
+        else:
+            return [("Buy Fail", f"{currentPlayer['name']} cannot buy {currentTile['name']}")]
     # Building
 
     def build(self, tileName):
@@ -326,7 +341,7 @@ class Game:
             Returns: A log appropriate based on the result of the attempt
         """
         if not self.hasRolled:
-            return ("Roll", "You haven't rolled yet.")
+            return [("Roll", "You haven't rolled yet.")]
         nextPlayerIndex = (self.players.index(self.currentPlayer) + 1) % len(self.players)
         self.currentPlayer = self.players[nextPlayerIndex]
         self.hasRolled = False
@@ -432,9 +447,10 @@ class Game:
         """
             Advaces the current player to the tile with name, tileName.
 
-            Returns: A Buy log if the tile is unowned and a Rent log otherwise
+            Returns: A list of logs associated with landing on the new tile
         """
-        pass
+        self.currentPlayer.advanceTo(tileName, self.board)
+        return self._handleTile()
 
     def _advanceToNearestRailRoad(self):
         """
@@ -456,14 +472,9 @@ class Game:
 
     def _move(self, spaces):
         """
-            Moves the current player spaces places. And handles the effects on landing on the new
-            tile.
-
-            Returns: A list of logs associated with landing on the new tile.
+            Moves the current player spaces places. Awards cash if the current player passed GO
         """
         self.currentPlayer.move(spaces)
-        self._handleTile
-
 # Rolling Helpers
 
     def _handleTile(self):
@@ -481,8 +492,8 @@ class Game:
             return self._takeTax()
         if tile["owner"] is not None and not tile["mortgaged"]:
             return self._takeRent()
-        else:
-            return ("Buy", "Not Owned")
+        if tile["owner"] is None and tile["price"] > 0:
+            return [("Buy", "Not Owned")]
 
     def _drawCard(self):
         """
@@ -498,17 +509,20 @@ class Game:
         if tileName == "Chance":
             card = self.chanceCards[self.currentChanceIndex]
             self.currentChanceIndex = (self.currentChanceIndex + 1) % len(self.chanceCards)
-            logs = [("Chance", card.getText())]
+            logs = [("Card", card.getText())]
             actionReturn = card.getAction()(self.currentPlayer)
-            logs.append(actionReturn)
+            if actionReturn is not None:
+                logs.append(actionReturn)
             return logs
+
         if tileName == "Community Chest":
             card = self.communityChestCards[self.currentCommunityChestIndex]
             self.currentCommunityChestIndex = (
-                self.currentCommunityChestIndex + 1) % len(self.CommunityChestCards)
-            logs = [("Chance", card.getText())]
+                self.currentCommunityChestIndex + 1) % len(self.communityChestCards)
+            logs = [("Card", card.getText())]
             actionReturn = card.getAction()(self.currentPlayer)
-            logs.append(actionReturn)
+            if actionReturn is not None:
+                logs.append(actionReturn)
             return logs
 
     def _takeRent(self):
@@ -522,7 +536,20 @@ class Game:
         pass
 
     def _takeTax(self):
-        pass
+        currentPlayer = self.currentPlayer.toDict()
+        tileName = self.board.getTile(currentPlayer["location"])["name"]
+        if tileName == "Income Tax":
+            if currentPlayer["cash"] < 200:
+                return [("Bankruptcy", "You owe $200 to the Bank")]
+            else:
+                self.currentPlayer.takeCash(200)
+                return [("Tax", f"{currentPlayer['name']} paid $200 in Income Tax")]
+        if tileName == "Luxury Tax":
+            if currentPlayer["cash"] < 100:
+                return [("Bankruptcy", "You owe $100 to the Bank")]
+            else:
+                self.currentPlayer.takeCash(100)
+                return [("Tax", f"{currentPlayer['name']} paid $100 in Luxury Tax")]
 # Jail Helpers
 
     def _goToJail(self):
