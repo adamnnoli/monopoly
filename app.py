@@ -19,7 +19,8 @@ class Monopoly:
         screenHeight = GetSystemMetrics(1)
         windowX = int((screenWidth-width)/2)
         windowY = int((screenHeight-height)/2)
-        self.mainWindow.geometry(f"{width}x{height}+{windowX}+{windowY}")
+        # self.mainWindow.geometry(f"0x0+{windowX}+{windowY}")
+        self.mainWindow.configure(bg="#08ff8c")
         self._playerInfo = None
         self.gameLog = None
         self.showWelcome()
@@ -29,7 +30,7 @@ class Monopoly:
             Adds the Welcome Frame containing the rules to the mainWindow
         """
         welcomeFrame = Frame(self.mainWindow)
-        welcomeFrame.grid(row=0, column=0)
+        welcomeFrame.grid(row=0, column=0, sticky=N+E+S+W)
 
         title = Label(welcomeFrame, text="Monopoly")
         title.grid(row=0, column=0)
@@ -37,7 +38,9 @@ class Monopoly:
         rules = Text(welcomeFrame)
         rules.insert(END, WELCOME_MESSAGE)
         rules.grid(row=1, column=0)
-        rules.config(state=DISABLED)
+        rules.config(state=DISABLED, width=100)
+        rules.tag_add("title", 0.0, 19.0)
+        rules.tag_config("title", justify=CENTER)
 
         startButton = Button(welcomeFrame, text="Start", command=self.showPlayerSelection)
         startButton.grid(row=2, column=0)
@@ -152,30 +155,29 @@ class Monopoly:
         """
             Adds a frame with all of the buttons of possible game actions to the mainWindow
         """
-        controlFrame = Frame(self.mainWindow)
+        controlFrame = LabelFrame(self.mainWindow, text="Controls", labelanchor='n')
         controlFrame.grid(row=0, column=1)
 
-        # Roll Dice Button
-        rollDice = Button(controlFrame, text="Roll Dice", padx=5, command=self._roll)
+        rollDice = Button(controlFrame, text="Roll Dice", padx=5, command=self._roll, bg="#03c2fc")
         rollDice.grid(row=0, column=0)
 
-        # Build Button
-        build = Button(controlFrame, text="Build", padx=5, command=self._build)
+        build = Button(controlFrame, text="Build", padx=13, command=self._build, bg="#03c2fc")
         build.grid(row=0, column=1)
 
-        # Trade Button
-        trade = Button(controlFrame, text="Trade", padx=5, command=self._trade)
+        trade = Button(controlFrame, text="Trade", padx=5, command=self._trade, bg="#03c2fc")
         trade.grid(row=0, column=2)
 
-        # End Turn Button
-        endTurn = Button(controlFrame, text="End Turn", padx=5, command=self._endTurn)
+        endTurn = Button(controlFrame, text="End Turn", padx=5, command=self._endTurn, bg="#03c2fc")
         endTurn.grid(row=1, column=0)
 
-        mortgage = Button(controlFrame, text="Mortgage", command=self._mortage)
+        mortgage = Button(controlFrame, text="Mortgage", command=self._mortage, bg="#03c2fc")
         mortgage.grid(row=1, column=1)
 
-        quitButton = Button(controlFrame, text="Quit", padx=5, command=self._quit)
+        quitButton = Button(controlFrame, text="Quit", padx=9, command=self._quit, bg="red")
         quitButton.grid(row=1, column=2)
+
+        helpButton = Button(controlFrame, text="Help", padx=5, command=self._help, bg="#03c2fc")
+        helpButton.grid(row=2, column=1)
 
     def createPlayerInfo(self):
         """
@@ -545,7 +547,8 @@ class Monopoly:
         mortgageLogs = ["Mortgage Success", "Mortgage Interest"]
         tradeLogs = ["Trade Success", "Trade Fail"]
         jailLogs = ["Jail", "Jail Success", "Jail Fail"]
-        otherLogs = ["Rent", "Tax", "Roll", "Bankruptcy"]
+        bankruptcyLogs = ["Bankruptcy Player", "Bankruptcy Bank"]
+        otherLogs = ["Rent", "Tax", "Roll"]
 
         for log in logs:
             if log[0] == "Card" or log[0] == "Auction" or log[0] in otherLogs:
@@ -560,10 +563,20 @@ class Monopoly:
                 self._tradeLog(log)
             elif log[0] in jailLogs:
                 self._jailLog(log)
+            elif log[0] in bankruptcyLogs:
+                self._bankruptcyLog(log)
             else:
                 print(log)
 
     def _buyLog(self, result):
+        """
+            Creates a Top Level displaying the players options if result is a Buy log, closes
+            the Top Level buy window and logs the message in result if result is a Buy Success
+            log, and logs the message in result if result is a Buy Fail log
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string, string); Must be a Buy, Buy Success, or Buy Fail log
+        """
         if result[0] == "Buy":
             self._createBuyWindow()
         if result[0] == "Buy Success":
@@ -574,24 +587,53 @@ class Monopoly:
             self._log(result[1])
 
     def _buildLog(self, result):
+        """
+            Logs the message in result, closes the Top Level build window if result is a Build
+            Success log
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string,string); Must be a Build Success or Build Fail log
+        """
         if result[0] == "Build Success":
             if self._buildWindow is not None:
                 self._buildWindow.destroy()
         self._log(result[1])
 
     def _mortgageLog(self, result):
+        """
+            Logs the message in result, closes the Top Level mortgage window if result is a Mortgage
+            Success log
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string,string); Must be a Mortgage Success or Mortgage Fail log
+        """
         if result[0] == "Mortgage Success":
             if self._mortgageWindow is not None:
                 self._mortgageWindow.destroy()
         self._log(result[1])
 
     def _tradeLog(self, result):
+        """
+            Logs the message in result, closes the Top Level trade window if result is a Trade
+            Success log
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string,string); Must be a Trade Success or Trade Fail log
+        """
         if result[0] == "Trade Success":
             if self._tradeWindow is not None:
                 self._tradeWindow.destroy
         self._log(result[1])
 
     def _jailLog(self, result):
+        """
+            Creates a Top Level displaying the players options if result is a Jail log, closes
+            the Top Level jail window and logs the message in result if result is a Jail Success
+            log, and logs the message in result if result is a Jail Fail log
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string, string); Must be a Jail, Jail Success, or Jail Fail log
+        """
         if result[0] == "Jail":
             self._createJailWindow()
         if result[0] == "Jail Success":
@@ -600,6 +642,20 @@ class Monopoly:
             self._log(result[1])
         if result[0] == "Jail Fail":
             self._log(result[1])
+
+    def _bankruptcyLog(self, result):
+        """
+            Creates the appropriate Top level window to display the players options depending on
+            if result is a Bankruptcy Player or Bankruptcy Bank log
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string, string); Must either be a Bankruptcy Player or 
+                Bankruptcy Bank log
+        """
+        if result[0] == "Bankruptcy Player":
+            self._createPlayerBankruptcyWindow()
+        else:
+            self._createBankBankruptcyWindow()
 
     def _jail(self):
         """
