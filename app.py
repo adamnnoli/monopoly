@@ -418,9 +418,13 @@ class Monopoly:
             Clears the build window and adds a frame which allows the current player to sell
             a house on a property
         """
+        def _showPrice():
+            pass
         text = Label(self._buildAskWindow, text="Select Property: ")
         propName = StringVar()
-        props = OptionMenu(self._buildAskWindow, propName, *self.game.getBuildable())
+        availableProps = self.game.getSellable()
+        availableProps = [""] if availableProps == [] else availableProps
+        props = OptionMenu(self._buildAskWindow, propName, *availableProps, command=_showPrice)
   # Trade
 
     def _trade(self):
@@ -534,7 +538,6 @@ class Monopoly:
             Parameter: logs, the list of logs to log
             Requires: Must be of type (string, string) list
         """
-        print(logs)
         if logs is None or logs == []:
             return
         buyLogs = ["Buy", "Buy Success", "Buy Fail"]

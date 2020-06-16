@@ -553,11 +553,17 @@ class Game:
         """
             Pays rent owed to the owner of the current tile.
 
-            Returns: A list TODO: finish this, should it be you have negative money and when you 
-            declare your assets go to the bank or is it that the player gets your money or your 
-            assets.
+            Returns: A rent log if the current player can pay the rent, a Bankruptcy log otherwise
         """
-        pass
+        currentPlayer = self.currentPlayer.toDict()
+        tile = self.board.getTile(currentPlayer["location"])
+        rentOwed = tile["rents"][tile["numHouses"]]
+        if rentOwed > currentPlayer["cash"]:
+            return [("Bankruptcy", f"You owe {rentOwed} to {tile['owner'].toDict()['name']}")]
+        else:
+            self.currentPlayer.takeCash(rentOwed)
+            tile['owner'].giveCash(rentOwed)
+            return [('Rent', f"{currentPlayer['name']} paid ${rentOwed} to {tile['owner'].toDict()['name']}")]
 
     def _takeTax(self):
         currentPlayer = self.currentPlayer.toDict()
