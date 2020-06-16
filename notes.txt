@@ -3,7 +3,6 @@ To-Do
   buying and building 
 
   Next Time you are here this is what I recommend doing 
-  0. Fix drawing, change to be more like
   1. Focus on getting all logs implemented, don't worry about making functions return them yet, just 
   set up the handle log function and functions you already made to handle every log in the game
   2. Then go through and design every window in the game, don't fill in any functions yet, just stub 

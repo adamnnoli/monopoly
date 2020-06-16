@@ -459,7 +459,20 @@ class Game:
 
             Returns: A Buy log if the tile is unowned and a Rent log otherwise
         """
-        pass
+        readingLoc = self.board.getTileId("Reading Railrod")
+        pennsylvaniaLoc = self.board.getTileId("Pennsylvania Railroad")
+        bAndOLoc = self.board.getTileId("B. & O. Railroad")
+        shortLoc = self.board.getTileId("Short Line")
+        currentLocation = self.currentPlayer.toDict()["location"]
+
+        if currentLocation < readingLoc or currentLocation > shortLoc:
+            return self._advanceTo("Reading Railroad")
+        elif currentLocation < pennsylvaniaLoc:
+            return self._advanceTo("Pennsylvania Railroad")
+        elif currentLocation < bAndOLoc:
+            return self._advanceTo("B. & O. Railroad")
+        else:
+            return self._advanceTo("Short Line")
 
     def _advanceToNearestUtility(self):
         """
@@ -468,7 +481,14 @@ class Game:
 
             Returns: A Buy log if the tile is unowned and a Rent log otherwise 
         """
-        pass
+        electricCompLoc = self.board.getTileId("Electric Company")
+        waterWorksLoc = self.board.getTileId("Water Works")
+        currentLocation = self.currentPlayer.toDict()["location"]
+
+        if currentLocation > waterWorksLoc or currentLocation < electricCompLoc:
+            return self._advanceTo("Electric Company")
+        else:
+            return self._advanceTo("Water Works")
 
     def _move(self, spaces):
         """

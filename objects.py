@@ -362,36 +362,6 @@ class Player:
         self.takeCash(perHouse * numHouses)
         self.takeCash(perHotel * numHotels)
 
-    def advanceToNearestRailroad(self):
-        """
-            Moves the player forward until they reach the nearest railroad
-        """
-        readingLoc = Board.getTileId("Reading Railrod")
-        pennsylvaniaLoc = Board.getTileId("Pennsylvania Railroad")
-        bAndOLoc = Board.getTileId("B. & O. Railroad")
-        shortLoc = Board.getTileId("Short Line")
-
-        if self._location < readingLoc or self._location > shortLoc:
-            self.advanceTo("Reading Railroad")
-        elif self._location < pennsylvaniaLoc:
-            self.advanceTo("Pennsylvania Railroad")
-        elif self._location < bAndOLoc:
-            self.advanceTo("B. & O. Railroad")
-        else:
-            self.advanceTo("Short Line")
-
-    def advanceToNearestUtility(self):
-        """
-            Moves the player forward until they reach the nearest utility
-        """
-        electricCompLoc = Board.getTileId("Electric Company")
-        waterWorksLoc = Board.getTileId("Water Works")
-
-        if self._location > waterWorksLoc or self._location < electricCompLoc:
-            self.advanceTo("Electric Company")
-        else:
-            self.advanceTo("Water Works")
-
     def giveJailCard(self):
         """
             Gives the player 1 Get Out of Jail Free Card

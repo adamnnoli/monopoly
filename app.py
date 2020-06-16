@@ -334,9 +334,9 @@ class Monopoly:
         if tileId < 10:
             return (longPlus[9-tileId], cLength-offset)
         elif tileId < 20:
-            return (offset, longPlus[19-tileId])
+            return (offset-PIECE_SIZE, longPlus[19-tileId])
         elif tileId < 30:
-            return (longPlus[tileId-20]-PIECE_SIZE, offset)
+            return (longPlus[tileId-20]-PIECE_SIZE, offset-PIECE_SIZE)
         elif tileId < 40:
             return (cLength-offset, longPlus[tileId-30]-PIECE_SIZE)
   # Roll
