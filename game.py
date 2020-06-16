@@ -224,6 +224,7 @@ class Game:
         if (currentTile["owner"] is None) and currentTile["price"] < currentPlayer["cash"]:
             self.board.getTileObject(currentPlayer["location"]).setOwner(self.currentPlayer)
             self.currentPlayer.takeCash(currentTile["price"])
+            self.currentPlayer.giveProperty(currentPlayer["location"],self.board)
             return [("Buy Success", f"{currentPlayer['name']} bought {currentTile['name']}")]
         else:
             return [("Buy Fail", f"{currentPlayer['name']} cannot buy {currentTile['name']}")]
@@ -383,7 +384,7 @@ class Game:
         """
         def zero(player): return player.giveCash(100)
         def one(player): return self._advanceTo("Go")
-        def two(player): return self._advanceTo("Illinois Ave")
+        def two(player): return self._advanceTo("Illinois Avenue")
         def three(player): return self._advanceTo("St. Charles Place")
         def four(player): return self._advanceToNearestUtility()
         def five(player): return self._advanceToNearestRailroad()
@@ -553,30 +554,35 @@ class Game:
         """
             Pays rent owed to the owner of the current tile.
 
-            Returns: A rent log if the current player can pay the rent, a Bankruptcy log otherwise
+            Returns: A rent log if the current player can pay the rent, a Bankruptcy Player log otherwise
         """
         currentPlayer = self.currentPlayer.toDict()
         tile = self.board.getTile(currentPlayer["location"])
         rentOwed = tile["rents"][tile["numHouses"]]
         if rentOwed > currentPlayer["cash"]:
-            return [("Bankruptcy", f"You owe {rentOwed} to {tile['owner'].toDict()['name']}")]
+            return [("Bankruptcy Player", f"You owe {rentOwed} to {tile['owner'].toDict()['name']}")]
         else:
             self.currentPlayer.takeCash(rentOwed)
             tile['owner'].giveCash(rentOwed)
             return [('Rent', f"{currentPlayer['name']} paid ${rentOwed} to {tile['owner'].toDict()['name']}")]
 
     def _takeTax(self):
+        """
+            Takes the appropriate amount of tax from the current player
+
+            Returns: A tax log if the player can pay the tax, a Bankruptcy Bank log otherwise
+        """
         currentPlayer = self.currentPlayer.toDict()
         tileName = self.board.getTile(currentPlayer["location"])["name"]
         if tileName == "Income Tax":
             if currentPlayer["cash"] < 200:
-                return [("Bankruptcy", "You owe $200 to the Bank")]
+                return [("Bankruptcy Bank", "You owe $200 to the Bank")]
             else:
                 self.currentPlayer.takeCash(200)
                 return [("Tax", f"{currentPlayer['name']} paid $200 in Income Tax")]
         if tileName == "Luxury Tax":
             if currentPlayer["cash"] < 100:
-                return [("Bankruptcy", "You owe $100 to the Bank")]
+                return [("Bankruptcy Bank", "You owe $100 to the Bank")]
             else:
                 self.currentPlayer.takeCash(100)
                 return [("Tax", f"{currentPlayer['name']} paid $100 in Luxury Tax")]
@@ -586,7 +592,7 @@ class Game:
         """
             Sends the current player to jail
         """
-        pass
+        self.currentPlayer.goToJail()
 
     def _forceJail(self):
         """
@@ -594,7 +600,11 @@ class Game:
 
             Returns: A Jail Fail log if the player was able to pay, a Bankruptcy log otherwise.
         """
-        pass
+        if self.currentPlayer.toDict()["cash"] >= 50:
+            self.currentPlayer.takeCash(50)
+            self.currentPlayer.leaveJail()
+        else:
+            return [("Bankruptcy Bank", "You owe $50 to the Bank")]
 # Trade Helpers
 
     def _checkTrade(self):
@@ -611,4 +621,4 @@ class Game:
             Returns a list of dictionaries representing every tile that the current player owns
         """
         return list(map(lambda propName: self.board.getTile(self.board.getTileId(propName)),
-                        self.currentPlayer.toDict()["properties"]))
+                        self.currentPlayer.toDict()["properties"])) 

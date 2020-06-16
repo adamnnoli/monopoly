@@ -242,23 +242,29 @@ class Player:
         """
         self.cash -= amount
 
-    def giveProperty(self, tileId):
+    def giveProperty(self, tileId,board):
         """
             Gives the player the tile with id, tileId
 
             Parameter: tileId, the id of the tile to give
             Requires: Must be of type int
-        """
-        self.properties.add(Board.getTile(tileId)["name"])
 
-    def takeProperty(self, tileId):
+            Parameter: board, the board the tile is on
+            Requires: Must be of type Board
+        """
+        self.properties.add(board.getTile(tileId)["name"])
+
+    def takeProperty(self, tileId,board):
         """
             Takes the tile with id, tileId, from the player 
 
             Parameter: tileId, the id of the tile to take
             Requires: Must be of type int
+
+            Parameter: board, the board the tile is on
+            Requires: Must be of type Board
         """
-        self.properties.discard(Board.getTile(tileId)["name"])
+        self.properties.discard(board.getTile(tileId)["name"])
 
     def goToJail(self):
         """
@@ -266,6 +272,7 @@ class Player:
 
             Requires: the player must not be in jail
         """
+        self.location = 10
         self.inJail = True
 
     def endTurnInJail(self):
