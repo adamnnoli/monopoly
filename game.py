@@ -202,6 +202,9 @@ class Game:
                 self.hasRolled = True
             else:
                 self.numDoublesRolled += 1
+                if self.numDoublesRolled >= 3:
+                    self._goToJail()
+                    return [("Roll", "You rolled 3 doubles in a row, Go To Jail")]
                 logs.append(("Roll", "You rolled doubles, roll again"))
             self.currentPlayer.move(dice1+dice2)
             result = self._handleTile()
@@ -345,6 +348,7 @@ class Game:
         nextPlayerIndex = (self.players.index(self.currentPlayer) + 1) % len(self.players)
         self.currentPlayer = self.players[nextPlayerIndex]
         self.hasRolled = False
+        self.numDoublesRolled = 0
 # HELPERS
 
     # Init Helpers
