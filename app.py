@@ -464,14 +464,16 @@ class Monopoly:
             the appropriate window
         """
         self._mortgageWindow = Toplevel()
-        question = Label(self._mortgageWindow, text="Mortgage or Unmortgage")
+        mainFrame = Frame(self._mortgageWindow)
+        mainFrame.grid(row=0, column=0)
+        question = Label(mainFrame, text="Mortgage or Unmortgage")
         question.grid(row=0, column=0, columnspan=2)
 
-        mortgageButton = Button(self._mortgageWindow, text="Mortgage",
+        mortgageButton = Button(mainFrame, text="Mortgage",
                                 command=self._createMortgageWindow)
         mortgageButton.grid(row=1, column=0)
 
-        unmortgageButton = Button(self._mortgageWindow, text="Unmortgage",
+        unmortgageButton = Button(mainFrame, text="Unmortgage",
                                   command=self._createUnmortgageWindow)
         unmortgageButton.grid(row=1, column=1)
 
@@ -479,8 +481,10 @@ class Monopoly:
         """
             Creates a Top Level which allows the current player to mortgage a property
         """
+        if len(self._mortgageWindow.winfo_children()) > 1:
+            self._mortgageWindow.winfo_children()[1].destroy()
         mortgageFrame = Frame(self._mortgageWindow)
-        mortgageFrame.grid(row=2, column=0, columnspan=2)
+        mortgageFrame.grid(row=1, column=0, columnspan=2)
 
         askProperty = Label(mortgageFrame, text="Select Property:")
         askProperty.grid(row=0, column=0)
@@ -504,6 +508,8 @@ class Monopoly:
         """
             Creates a Top Level which allows the current player to unmortgage a property
         """
+        if len(self._mortgageWindow.winfo_children()) > 1:
+            self._mortgageWindow.winfo_children()[1].destroy()
         unmortgageFrame = Frame(self._mortgageWindow)
         unmortgageFrame.grid(row=2, column=0, columnspan=2)
 
@@ -511,20 +517,22 @@ class Monopoly:
         askProperty.grid(row=0, column=0)
 
         propName = StringVar()
-        unmortgageable = [""] if self.game.getUnmortgageable() == [] else self.game.getUnmortgageable()
+        unmortgageable = [""] if self.game.getUnmortgageable(
+        ) == [] else self.game.getUnmortgageable()
 
         def _showPrice(propName):
             tile = self.game.getTile(self.game.getTileId(propName))
             priceLabel = Label(unmortgageFrame, text=f"Principal: ${int(tile['price']/2)}")
             priceLabel.grid(row=1, column=0)
-            interestLabel = Label(unmortgageFrame,text=f"Interest: ${int(.1*tile['price'])}")
-            interestLabel.grid(row=1,column=1)
-            Label(unmortgageFrame,text=f"Total: ${int(tile['price']*1.1)}")
+            interestLabel = Label(unmortgageFrame, text=f"Interest: ${int(.1*tile['price'])}")
+            interestLabel.grid(row=1, column=1)
+            Label(unmortgageFrame, text=f"Total: ${int(tile['price']*1.1)}")
             acceptButton = Button(unmortgageFrame, text="Accept",
                                   command=lambda: self.game.unmortgage(propName))
             acceptButton.grid(row=2, column=0, columnspan=2)
 
-        askPropertyDropdown = OptionMenu(unmortgageFrame, propName, *unmortgageable, command=_showPrice)
+        askPropertyDropdown = OptionMenu(unmortgageFrame, propName,
+                                         *unmortgageable, command=_showPrice)
         askPropertyDropdown.grid(row=0, column=1)
 
   # End Turn
