@@ -498,7 +498,7 @@ class Monopoly:
             priceLabel.grid(row=1, column=0, columnspan=2)
 
             acceptButton = Button(mortgageFrame, text="Accept",
-                                  command=lambda: self.game.mortgage(propName))
+                                  command=lambda: self._handleLogs(self.game.mortgage(propName)))
             acceptButton.grid(row=2, column=0, columnspan=2)
 
         askPropertyDropdown = OptionMenu(mortgageFrame, propName, *mortgageable, command=_showPrice)
@@ -528,7 +528,7 @@ class Monopoly:
             interestLabel.grid(row=1, column=1)
             Label(unmortgageFrame, text=f"Total: ${int(tile['price']*1.1)}")
             acceptButton = Button(unmortgageFrame, text="Accept",
-                                  command=lambda: self.game.unmortgage(propName))
+                                  command=lambda: self._handleLogs(self.game.unmortgage(propName)))
             acceptButton.grid(row=2, column=0, columnspan=2)
 
         askPropertyDropdown = OptionMenu(unmortgageFrame, propName,

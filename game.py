@@ -224,7 +224,7 @@ class Game:
         if (currentTile["owner"] is None) and currentTile["price"] < currentPlayer["cash"]:
             self.board.getTileObject(currentPlayer["location"]).setOwner(self.currentPlayer)
             self.currentPlayer.takeCash(currentTile["price"])
-            self.currentPlayer.giveProperty(currentPlayer["location"],self.board)
+            self.currentPlayer.giveProperty(currentPlayer["location"], self.board)
             return [("Buy Success", f"{currentPlayer['name']} bought {currentTile['name']}")]
         else:
             return [("Buy Fail", f"{currentPlayer['name']} cannot buy {currentTile['name']}")]
@@ -286,7 +286,12 @@ class Game:
             Parameter: tileName, the name of the tile to mortgage
             Requires: Must be of type string
         """
-        pass
+        tile = self.board.getTile(self.board.getTileId(tileName))
+        self.currentPlayer.giveCash(int(tile["price"]/2))
+        self.board.getTileObject(self.board.getTileId(tileName)).setMortgage()
+
+        return [("Mortgage Success",
+                 f"{self.currentPlayer.toDict()['name']} mortgage {tileName} for ${int(tile['price']/2)}")]
 
     def unmortgage(self, tileName):
         """
@@ -298,7 +303,18 @@ class Game:
             Parameter: tileName, the name of the tile to unmortgage
             Requires: Must be of type string
         """
-        pass
+        tile = self.board.getTile(self.board.getTileId(tileName))
+        currentPlayer = self.currentPlayer.toDict()
+        cost = int(1.1*(tile['price']/2))
+        if currentPlayer["cash"] > cost:
+            self.currentPlayer.takeCash(cost)
+            self.board.getTileObject(self.board.getTileId(tileName)).setMortgage()
+            return [("Mortgage Success",
+                     f"{currentPlayer['name']} paid ${cost} to unmortgage {tileName}")]
+        else:
+            return [("Mortgage Fail",
+                     f"{currentPlayer['name']} doesn't have enough money to unmortgage {tileName}")]
+
     # Quitting
 
     def quit(self):
@@ -621,4 +637,4 @@ class Game:
             Returns a list of dictionaries representing every tile that the current player owns
         """
         return list(map(lambda propName: self.board.getTile(self.board.getTileId(propName)),
-                        self.currentPlayer.toDict()["properties"])) 
+                        self.currentPlayer.toDict()["properties"]))
