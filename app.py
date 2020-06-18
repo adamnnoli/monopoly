@@ -445,9 +445,38 @@ class Monopoly:
 
         playerNames = [""] if len(playerNames) == 0 else playerNames
 
+        def _playerTwoTradeFrame(playerName):
+
+            for player in self.game.getPlayers():
+                if player['name'] == playerName:
+                    player2Dict = player
+
+            p2Frame = Frame(self._tradeWindow)
+
+            Label(p2Frame, text=f"{playerName} Cash").grid(row=0, column=0)
+            p2CashEntry = Entry(p2Frame)
+            p2CashEntry.grid(row=0, column=1)
+
+            Label(p2Frame, text=f"{playerName} Properties").grid(row=1, column=0)
+
+            p2PropList = StringVar()
+            p2OwnedProps = player2Dict["properties"] if player2Dict["properties"] != [] else [""]
+
+            askP2Props = Listbox(p2Frame, listvariable=p2PropList)
+            askP2Props.insert(END, *p2OwnedProps)
+            askP2Props.grid(row=1, column=1)
+
+            Label(p2Frame, text=f"{playerName} Get Out Of Jail Free Cards").grid(row=2, column=0)
+            p2JailCards = IntVar()
+            p2JailList = [""] if player2Dict["jailCards"] == 0 else list(
+                range(1, player2Dict["jailCard"]))
+            p2JailDropdown = OptionMenu(p2Frame, p2JailCards, *p2JailList)
+            p2JailDropdown.grid(row=2, column=1)
+            p2Frame.grid(row=1, column=1)
+        
         player2 = StringVar()
         dropdown = OptionMenu(self._tradeWindow, player2, *playerNames,
-                              command=lambda player2: self._playerTwoTradeFrame(player2))
+                              command=lambda player2: _playerTwoTradeFrame(player2))
         dropdown.grid(row=0, column=1)
         self._playerOneTradeFrame()
 
@@ -478,9 +507,6 @@ class Monopoly:
         p1JailEntry.grid(row=2, column=1)
 
         p1Frame.grid(row=1, column=0)
-
-    def _playerTwoTradeFrame(self, playerName):
-        pass
 
     def _createTrade(self, p1Trade, p2Trade):
         """
