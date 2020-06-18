@@ -433,13 +433,53 @@ class Monopoly:
 
             Creates a Top Level which allows the current player to trade with another player
         """
-        pass
+        self._tradeWindow = Toplevel()
+
+        Label(self._tradeWindow, text="Select Player:").grid(row=0, column=0)
+        currPlayerName = self.game.getCurrentPlayer()["name"]
+
+        playerNames = []
+        for player in self.game.getPlayers():
+            if player["name"] != currPlayerName:
+                playerNames.append(player["name"])
+
+        playerNames = [""] if len(playerNames) == 0 else playerNames
+
+        player2 = StringVar()
+        dropdown = OptionMenu(self._tradeWindow, player2, *playerNames,
+                              command=lambda player2: self._playerTwoTradeFrame(player2))
+        dropdown.grid(row=0, column=1)
+        self._playerOneTradeFrame()
 
     def _playerOneTradeFrame(self):
         """
             Creates the Frame that contains the entries for the current player to enter what
             they will give up in the trade
         """
+        currentPlayer = self.game.getCurrentPlayer()
+        p1Frame = LabelFrame(self._tradeWindow, text="Your Items")
+
+        p1Cash = Label(p1Frame, text=f"{currentPlayer['name']} Cash")
+        p1Cash.grid(row=0, column=0)
+        p1CashEntry = Entry(p1Frame)
+        p1CashEntry.grid(row=0, column=1)
+
+        p1Props = Label(p1Frame, text=f"{currentPlayer['name']} Properties")
+        p1Props.grid(row=1, column=0)
+        props = [""] if len(currentPlayer["properties"]) == 0 else currentPlayer["properties"]
+        propList = StringVar()
+        askProps = Listbox(p1Frame, listvariable=propList)
+        askProps.insert(END, *props)
+        askProps.grid(row=1, column=1)
+
+        p1GetOutJail = Label(p1Frame, text=f"{currentPlayer['name']} Get Out of Jail Free Cards")
+        p1GetOutJail.grid(row=2, column=0)
+        p1JailEntry = Entry(p1Frame)
+        p1JailEntry.grid(row=2, column=1)
+
+        p1Frame.grid(row=1, column=0)
+
+    def _playerTwoTradeFrame(self, playerName):
         pass
 
     def _createTrade(self, p1Trade, p2Trade):
@@ -526,7 +566,8 @@ class Monopoly:
             priceLabel.grid(row=1, column=0)
             interestLabel = Label(unmortgageFrame, text=f"Interest: ${int(.1*tile['price'])}")
             interestLabel.grid(row=1, column=1)
-            Label(unmortgageFrame, text=f"Total: ${int(tile['price']*1.1)}")
+            Label(unmortgageFrame,
+                  text=f"Total: ${int(tile['price']*.6)}").grid(row=2, column=0, columnspan=2)
             acceptButton = Button(unmortgageFrame, text="Accept",
                                   command=lambda: self._handleLogs(self.game.unmortgage(propName)))
             acceptButton.grid(row=2, column=0, columnspan=2)

@@ -305,7 +305,7 @@ class Game:
         """
         tile = self.board.getTile(self.board.getTileId(tileName))
         currentPlayer = self.currentPlayer.toDict()
-        cost = int(1.1*(tile['price']/2))
+        cost = int(.6*tile['price'])
         if currentPlayer["cash"] > cost:
             self.currentPlayer.takeCash(cost)
             self.board.getTileObject(self.board.getTileId(tileName)).setMortgage()
