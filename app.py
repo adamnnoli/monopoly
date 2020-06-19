@@ -437,6 +437,7 @@ class Monopoly:
 
         Label(self._tradeWindow, text="Select Player:").grid(row=0, column=0)
         currPlayerName = self.game.getCurrentPlayer()["name"]
+        p1TradeInfo = self._playerOneTradeFrame()
 
         playerNames = []
         for player in self.game.getPlayers():
@@ -444,9 +445,18 @@ class Monopoly:
                 playerNames.append(player["name"])
 
         playerNames = [""] if len(playerNames) == 0 else playerNames
+        p2TradeInfo = ()
 
         def _playerTwoTradeFrame(playerName):
+            """
+                Creates a frame in the trade window that contains entries for the player with name
+                playerName to enter what they will give up in the trade 
 
+                Parameter: playerName, the name of the other player that will be trading
+                Requires: Must be of type string
+
+                Must be a closure in order to store information of the other player's trade
+            """
             for player in self.game.getPlayers():
                 if player['name'] == playerName:
                     player2Dict = player
@@ -462,28 +472,34 @@ class Monopoly:
             p2PropList = StringVar()
             p2OwnedProps = player2Dict["properties"] if player2Dict["properties"] != [] else [""]
 
-            askP2Props = Listbox(p2Frame, listvariable=p2PropList)
+            askP2Props = Listbox(p2Frame, listvariable=p2PropList,exportselection=False)
             askP2Props.insert(END, *p2OwnedProps)
             askP2Props.grid(row=1, column=1)
 
             Label(p2Frame, text=f"{playerName} Get Out Of Jail Free Cards").grid(row=2, column=0)
             p2JailCards = IntVar()
             p2JailList = [""] if player2Dict["jailCards"] == 0 else list(
-                range(1, player2Dict["jailCard"]))
+                range(1, player2Dict["jailCards"]))
             p2JailDropdown = OptionMenu(p2Frame, p2JailCards, *p2JailList)
             p2JailDropdown.grid(row=2, column=1)
             p2Frame.grid(row=1, column=1)
-        
+            p2TradeInfo = (playerName, p2CashEntry, p2PropList, p2JailCards)
+
+            Button(self._tradeWindow, text="Accept",
+                   command=lambda: self._executeTrade(p1TradeInfo, p2TradeInfo)).grid(row=2, column=0, columnspan=2)
+
         player2 = StringVar()
         dropdown = OptionMenu(self._tradeWindow, player2, *playerNames,
                               command=lambda player2: _playerTwoTradeFrame(player2))
         dropdown.grid(row=0, column=1)
-        self._playerOneTradeFrame()
 
     def _playerOneTradeFrame(self):
         """
             Creates the Frame that contains the entries for the current player to enter what
             they will give up in the trade
+
+            Returns: The variables that have the information of the current player's trade
+                     type (Entry, StringVar, IntVar)
         """
         currentPlayer = self.game.getCurrentPlayer()
         p1Frame = LabelFrame(self._tradeWindow, text="Your Items")
@@ -497,16 +513,24 @@ class Monopoly:
         p1Props.grid(row=1, column=0)
         props = [""] if len(currentPlayer["properties"]) == 0 else currentPlayer["properties"]
         propList = StringVar()
-        askProps = Listbox(p1Frame, listvariable=propList)
+        askProps = Listbox(p1Frame, listvariable=propList,exportselection=False)
         askProps.insert(END, *props)
         askProps.grid(row=1, column=1)
 
-        p1GetOutJail = Label(p1Frame, text=f"{currentPlayer['name']} Get Out of Jail Free Cards")
-        p1GetOutJail.grid(row=2, column=0)
-        p1JailEntry = Entry(p1Frame)
-        p1JailEntry.grid(row=2, column=1)
+        Label(p1Frame, text=f"{currentPlayer['name']} Get Out Of Jail Free Cards").grid(
+            row=2, column=0)
+        p1JailCards = IntVar()
+        p1JailList = [""] if currentPlayer["jailCards"] == 0 else list(
+            range(1, currentPlayer["jailCards"]))
+        p1JailDropdown = OptionMenu(p1Frame, p1JailCards, *p1JailList)
+        p1JailDropdown.grid(row=2, column=1)
 
         p1Frame.grid(row=1, column=0)
+
+        return (p1CashEntry, propList, p1JailCards)
+
+    def _executeTrade(self, p1Trade, p2Trade):
+        self._handleLogs(self.game.trade(self._createTrade(p1Trade, p2Trade)))
 
     def _createTrade(self, p1Trade, p2Trade):
         """
@@ -514,12 +538,27 @@ class Monopoly:
             inputs in Game's Trade function
 
             Parameter: p1Trade, tuple of inputs of what the current player will give up in the trade
-            Requires: Must be of type (Entry, RadioButton list, IntVar)
+            Requires: Must be of type (Entry, StringVar, IntVar)
 
             Parameter: p2Trade, tuple of inputs of what the other player will give up in the trade
-            Requires: Must be of type (StringVar, Entry, RadioButton list, IntVar)
+            Requires: Must be of type (string, Entry, StringVar, IntVar)
         """
-        pass
+        print(type(p1Trade[1].get()))
+        print(list(map(lambda string: string.strip('\''), p1Trade[1].get().strip('()').split(', '))))
+        p1TradeDict = {
+            "cash": p1Trade[0].get(),
+            "properties": list(map(lambda string: string.strip('\''), p1Trade[1].get().strip('()').split(', '))),
+            "jailCards": p1Trade[2].get()
+        }
+        p2TradeDict = {
+            "name": p1Trade[0],
+            "cash": p1Trade[1].get(),
+            "properties": list(map(lambda string: string.strip('\''), p2Trade[2].get().strip('()').split(', '))),
+            "jailCards": p1Trade[3].get()
+        }
+        print(p2TradeDict["properties"])
+        return (p1TradeDict, p2TradeDict)
+
   # Mortgage
 
     def _mortage(self):
@@ -601,7 +640,6 @@ class Monopoly:
         askPropertyDropdown = OptionMenu(unmortgageFrame, propName,
                                          *unmortgageable, command=_showPrice)
         askPropertyDropdown.grid(row=0, column=1)
-
   # End Turn
 
     def _endTurn(self):

@@ -20,6 +20,7 @@ class Game:
         self.currentPlayer = self.players[0]
         self.currentChanceIndex = 0
         self.currentCommunityChestIndex = 0
+        self.numRolled = 0
         self.hasRolled = False
         self.numDoublesRolled = 0
 
@@ -207,6 +208,7 @@ class Game:
                     return [("Roll", "You rolled 3 doubles in a row, Go To Jail")]
                 logs.append(("Roll", "You rolled doubles, roll again"))
             self.currentPlayer.move(dice1+dice2)
+            self.roll = dice1 + dice2
             result = self._handleTile()
             if result is None:
                 return logs
@@ -566,21 +568,43 @@ class Game:
                 logs.append(actionReturn)
             return logs
 
-    def _takeRent(self):
+    def _takeRent(self,roll):
         """
             Pays rent owed to the owner of the current tile.
 
             Returns: A rent log if the current player can pay the rent, a Bankruptcy Player log otherwise
         """
-        currentPlayer = self.currentPlayer.toDict()
-        tile = self.board.getTile(currentPlayer["location"])
-        rentOwed = tile["rents"][tile["numHouses"]]
-        if rentOwed > currentPlayer["cash"]:
-            return [("Bankruptcy Player", f"You owe {rentOwed} to {tile['owner'].toDict()['name']}")]
+        tile = self.board.getTile(self.currentPlayer.toDict()["location"])
+        railroads = ["Reading Railroad", "Pennsylvania Railroad", "B. & O. Railroad", "Short Line"]
+        utilities = ["Electric Company", "Water Works"]
+        if tile["name"] in railroads:
+            numOwned = self._numOwned(tile["owner"], railroads)
+            if numOwned == 1:
+                return self._attemptTakeRent(tile["owner"],25)
+            elif numOwned == 2:
+                return self._attemptTakeRent(tile["owner"],50)
+            elif numOwned == 3:
+                return self._attemptTakeRent(tile["owner"],100)
+            elif numOwned == 4:
+                return self._attemptTakeRent(tile["owner"],200)
+        if tile["name"] in utilities:
+            numOwned = self._numOwned(tile["owner"], utilities)
+            if numOwned == 1:
+                return self._attemptTakeRent(tile["owner"],4 * self.numRolled)
+            if numOwned == 2:
+                return self._attemptTakeRent(tile["owner"], 10 * self.numRolled)
         else:
-            self.currentPlayer.takeCash(rentOwed)
-            tile['owner'].giveCash(rentOwed)
-            return [('Rent', f"{currentPlayer['name']} paid ${rentOwed} to {tile['owner'].toDict()['name']}")]
+            return self._attemptTakeRent(tile["owner"], tile["rents"][tile["numHouses"]])
+             
+
+    def _attemptTakeRent(self, owner, amount):
+        currentPlayer = self.currentPlayer.toDict()
+        if amount > currentPlayer["cash"]:
+            return [("Bankruptcy Player", f"You owe {amount} to {owner.toDict()['name']}")]
+        else:
+            self.currentPlayer.takeCash(amount)
+            owner.giveCash(amount)
+            return [('Rent', f"{currentPlayer['name']} paid ${amount} to {owner.toDict()['name']}")]
 
     def _takeTax(self):
         """
@@ -602,6 +626,22 @@ class Game:
             else:
                 self.currentPlayer.takeCash(100)
                 return [("Tax", f"{currentPlayer['name']} paid $100 in Luxury Tax")]
+
+    def _numOwned(self, owner, props):
+        """
+            Returns the number of properties in props that are owned by owner.
+
+            Parameter: owner, the owner requested
+            Requires: Must be of type Player
+
+            Parameter: props, list of the names of properties to check
+            Requires: Must be of type string list
+        """
+        total = 0
+        for prop in props:
+            if self._board.getOwner(self._board.getID(prop)) == owner:
+                total += 1
+        return total
 # Jail Helpers
 
     def _goToJail(self):
