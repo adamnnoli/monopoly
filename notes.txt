@@ -1,26 +1,10 @@
 To-Do 
-  You were working on handle logs and end turns and that region of stuff. You were also working on 
-  buying and building 
-
-  Next Time you are here this is what I recommend doing 
-  1. Focus on getting all logs implemented, don't worry about making functions return them yet, just 
-  set up the handle log function and functions you already made to handle every log in the game
-  2. Then go through and design every window in the game, don't fill in any functions yet, just stub 
-  in what you need for the button and drop down commands
-  3. Then focus on getting rolling and landing on tiles working, implement the logs with pay taxes 
-  and drawing cards. This means getting multiple logs truly working 
-  4. Then get ending turns working. Implement the features needed to make jail work with what you 
-  have. 
-  This should keep you busy for long enough, but while I am here let me outline my ideas for 
-  everything else.
-  5. Then get jail working, fill in the functions you stubbed in before and make sure it all works
-  6. Then get buying and building finished. Finsih the functions you have stubbed in and make sure 
-  it all works
-  7. If you got building done, mortgaging should be easy to do 
-  8. Get trading done, the check trades will be tough, but you can get through it.
-  9. Get auctioning working 
-  10. Figure out what to do with Bankruptcy and ending the game
-
+  Problem:
+    Chance cards where player must pay x times the rent owed were not implemented properly
+    Will probably have to hard code the behaviors of those functions without using somehting like 
+    handle tile.
+    Check if owned, if not return a buy log, if it is return the attempt take rent of the amount 
+    owed.
 
 Acceptable Logs:
   Idea, make the logs tuples, (Category, Message)

@@ -479,39 +479,77 @@ class Game:
         """
             Advances player to the nearest railroad if it is owned the pays the owner double the
             amount owed. 
-
-            Returns: A Buy log if the tile is unowned and a Rent log otherwise
+            Returns: A Buy log if the tile is unowned and a Rent log if the current player can 
+            pay double the rent owed, a Bankruptcy Log otherwise
         """
-        readingLoc = self.board.getTileId("Reading Railrod")
+        readingLoc = self.board.getTileId("Reading Railroad")
         pennsylvaniaLoc = self.board.getTileId("Pennsylvania Railroad")
         bAndOLoc = self.board.getTileId("B. & O. Railroad")
         shortLoc = self.board.getTileId("Short Line")
         currentLocation = self.currentPlayer.toDict()["location"]
 
         if currentLocation < readingLoc or currentLocation > shortLoc:
-            return self._advanceTo("Reading Railroad")
+            self.currentPlayer.advanceTo("Reading Railroad", self.board)
         elif currentLocation < pennsylvaniaLoc:
-            return self._advanceTo("Pennsylvania Railroad")
+            self.currentPlayer.advanceTo("Pennsylvania Railroad", self.board)
         elif currentLocation < bAndOLoc:
-            return self._advanceTo("B. & O. Railroad")
+            self.currentPlayer.advanceTo("B. & O. Railroad", self.board)
         else:
-            return self._advanceTo("Short Line")
+            self.currentPlayer.advanceTo("Short Line", self.board)
+        return self._handleAdvanceToRail(self)
+
+    def _handleAdvanceToRail(self):
+        """
+            Returns a Buy Log if the current tile is not owned, if it is owned, pays the owner
+            twice the amount owed
+
+            Requires: The current tile is a railroad tile
+        """
+        currentPlayer = self.currentPlayer.toDict()
+        tile = self.board.getTile(currentPlayer["location"])
+        if tile["owner"] is None:
+            return [("Buy", "Not owned")]
+        else:
+            railroads = ["Reading Railroad", "Pennsylvania Railroad",
+                         "B. & O. Railroad", "Short Line"]
+            numOwned = self._numOwned(tile["owner"], railroads)
+            if numOwned == 1:
+                return self._attemptTakeRent(tile["owner"], 50)
+            elif numOwned == 2:
+                return self._attemptTakeRent(tile["owner"], 100)
+            elif numOwned == 3:
+                return self._attemptTakeRent(tile["owner"], 200)
+            elif numOwned == 4:
+                return self._attemptTakeRent(tile["owner"], 400)
 
     def _advanceToNearestUtility(self):
         """
             Advances player to the nearest utility if it is owned rolls the dice and pays the owner 
             10x the number rolled. 
 
-            Returns: A Buy log if the tile is unowned and a Rent log otherwise 
+            Returns: A Buy log if the tile is unowned and a Rent log if the current player can 
+            pay double the rent owed, a Bankruptcy Log otherwise
         """
         electricCompLoc = self.board.getTileId("Electric Company")
         waterWorksLoc = self.board.getTileId("Water Works")
         currentLocation = self.currentPlayer.toDict()["location"]
 
         if currentLocation > waterWorksLoc or currentLocation < electricCompLoc:
-            return self._advanceTo("Electric Company")
+            self.currentPlayer.advanceTo("Electric Company", self.board)
+            currentPlayer = self.currentPlayer.toDict()
+            tile = self.board.getTile(currentPlayer["location"])
+            if tile["owner"] is None:
+                return [("Buy", "Not owned")]
+            else:
+                return self._attemptTakeRent(tile["owner"], random.randint(2, 12)*10)
         else:
-            return self._advanceTo("Water Works")
+            self.currentPlayer.advanceTo("Water Works", self.board)
+            currentPlayer = self.currentPlayer.toDict()
+            tile = self.board.getTile(currentPlayer["location"])
+            if tile["owner"] is None:
+                return [("Buy", "Not owned")]
+            else:
+                return self._attemptTakeRent(tile["owner"], random.randint(2, 12)*10)
 
     def _move(self, spaces):
         """
@@ -568,7 +606,7 @@ class Game:
                 logs.append(actionReturn)
             return logs
 
-    def _takeRent(self,roll):
+    def _takeRent(self, roll):
         """
             Pays rent owed to the owner of the current tile.
 
@@ -580,22 +618,21 @@ class Game:
         if tile["name"] in railroads:
             numOwned = self._numOwned(tile["owner"], railroads)
             if numOwned == 1:
-                return self._attemptTakeRent(tile["owner"],25)
+                return self._attemptTakeRent(tile["owner"], 25)
             elif numOwned == 2:
-                return self._attemptTakeRent(tile["owner"],50)
+                return self._attemptTakeRent(tile["owner"], 50)
             elif numOwned == 3:
-                return self._attemptTakeRent(tile["owner"],100)
+                return self._attemptTakeRent(tile["owner"], 100)
             elif numOwned == 4:
-                return self._attemptTakeRent(tile["owner"],200)
+                return self._attemptTakeRent(tile["owner"], 200)
         if tile["name"] in utilities:
             numOwned = self._numOwned(tile["owner"], utilities)
             if numOwned == 1:
-                return self._attemptTakeRent(tile["owner"],4 * self.numRolled)
+                return self._attemptTakeRent(tile["owner"], 4 * self.numRolled)
             if numOwned == 2:
                 return self._attemptTakeRent(tile["owner"], 10 * self.numRolled)
         else:
             return self._attemptTakeRent(tile["owner"], tile["rents"][tile["numHouses"]])
-             
 
     def _attemptTakeRent(self, owner, amount):
         currentPlayer = self.currentPlayer.toDict()
