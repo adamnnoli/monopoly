@@ -222,7 +222,7 @@ class Player:
         self.location += spaces
         if self.location > 39:
             self.location % 39
-            self.cash += 200 
+            self.cash += 200
 
     def giveCash(self, amount):
         """
@@ -242,7 +242,7 @@ class Player:
         """
         self.cash -= amount
 
-    def giveProperty(self, tileId,board):
+    def giveProperty(self, tileId, board):
         """
             Gives the player the tile with id, tileId
 
@@ -254,7 +254,7 @@ class Player:
         """
         self.properties.add(board.getTile(tileId)["name"])
 
-    def takeProperty(self, tileId,board):
+    def takeProperty(self, tileId, board):
         """
             Takes the tile with id, tileId, from the player 
 
@@ -374,6 +374,12 @@ class Player:
             Gives the player 1 Get Out of Jail Free Card
         """
         self.jailCards += 1
+
+    def takeJailCard(self):
+        """
+            Takes 1 Get Out of Jail Free Card from the player
+        """
+        self.jailCards -= 1
 
 
 class Card:

@@ -208,7 +208,7 @@ class Game:
                     return [("Roll", "You rolled 3 doubles in a row, Go To Jail")]
                 logs.append(("Roll", "You rolled doubles, roll again"))
             self.currentPlayer.move(dice1+dice2)
-            self.roll = dice1 + dice2
+            self.numRolled = dice1 + dice2
             result = self._handleTile()
             if result is None:
                 return logs
@@ -263,7 +263,7 @@ class Game:
 
     def trade(self, p1Trade, p2Trade):
         """
-            Attempts to have the current player trade the items in p1Trade for the items in 
+            Attempts to have the current player trade the items in p1Trade for the items in
             p2Trade with the player that has name p2Dict["name"]
 
             Returns: A Trade Fail log if one of the players is missing an item, a Trade Success
@@ -275,7 +275,40 @@ class Game:
             Parameter: p2Trade, the dictionary specifying what player 2 gives to player 1
             Requires: Must be of type dict
         """
-        pass
+        result = self._checkTrade(p1Trade, p2Trade)
+
+        if result[0] == "Trade Fail":
+            return [result]
+
+        for player in self.players:
+            if player.toDict()["name"] == p2Trade["name"]:
+                player2 = player
+
+        self.currentPlayer.takeCash(p1Trade["cash"])
+        player2.giveCash(p1Trade["cash"])
+        player2.takeCash(p2Trade["cash"])
+        self.currentPlayer.giveCash(p2Trade["cash"])
+
+        for prop in p1Trade["properties"]:
+            tileId = self.getTileId(prop)
+            self.currentPlayer.takeProperty(tileId, self.board)
+            player2.giveProperty(tileId, self.board)
+
+        for prop in p2Trade["properties"]:
+            tileId = self.getTileId(prop)
+            self.currentPlayer.giveProperty(tileId, self.board)
+            player2.takeProperty(tileId, self.board)
+
+        for i in range(p1Trade["jailCards"]):
+            self.currentPlayer.takeJailCard()
+            player2.giveJailCard()
+
+        for i in range(p2Trade["jailCards"]):
+            self.currentPlayer.giveJailCard()
+            player2.takeJailCard()
+
+        return [("Trade Success", self._makeTradeString(p1Trade, p2Trade))]
+
     # Mortgaging
 
     def mortgage(self, tileName):
@@ -283,7 +316,7 @@ class Game:
             Sets the status of the tile with name, tileName to mortgaged, giving the player
             the proceeds
 
-            Returns: A Mortgage Success Log 
+            Returns: A Mortgage Success Log
 
             Parameter: tileName, the name of the tile to mortgage
             Requires: Must be of type string
@@ -300,7 +333,7 @@ class Game:
             Attempts to unmortgage the tile with name tileName
 
             Returns: A Mortgage Success log if the player had enough cash, A Mortgage Fail log
-            otherwise 
+            otherwise
 
             Parameter: tileName, the name of the tile to unmortgage
             Requires: Must be of type string
@@ -358,7 +391,7 @@ class Game:
 
     def endTurn(self):
         """
-            Attempts to end the current player's turn and begin the next player's turn 
+            Attempts to end the current player's turn and begin the next player's turn
 
             Returns: A log appropriate based on the result of the attempt
         """
@@ -367,6 +400,7 @@ class Game:
         nextPlayerIndex = (self.players.index(self.currentPlayer) + 1) % len(self.players)
         self.currentPlayer = self.players[nextPlayerIndex]
         self.hasRolled = False
+        self.numRolled = 0
         self.numDoublesRolled = 0
 # HELPERS
 
@@ -478,8 +512,8 @@ class Game:
     def _advanceToNearestRailRoad(self):
         """
             Advances player to the nearest railroad if it is owned the pays the owner double the
-            amount owed. 
-            Returns: A Buy log if the tile is unowned and a Rent log if the current player can 
+            amount owed.
+            Returns: A Buy log if the tile is unowned and a Rent log if the current player can
             pay double the rent owed, a Bankruptcy Log otherwise
         """
         readingLoc = self.board.getTileId("Reading Railroad")
@@ -524,10 +558,10 @@ class Game:
 
     def _advanceToNearestUtility(self):
         """
-            Advances player to the nearest utility if it is owned rolls the dice and pays the owner 
-            10x the number rolled. 
+            Advances player to the nearest utility if it is owned rolls the dice and pays the owner
+            10x the number rolled.
 
-            Returns: A Buy log if the tile is unowned and a Rent log if the current player can 
+            Returns: A Buy log if the tile is unowned and a Rent log if the current player can
             pay double the rent owed, a Bankruptcy Log otherwise
         """
         electricCompLoc = self.board.getTileId("Electric Company")
@@ -560,7 +594,7 @@ class Game:
 
     def _handleTile(self):
         """
-            Calls the necessary functions and performs the necessary actions to be executed when 
+            Calls the necessary functions and performs the necessary actions to be executed when
             the current player lands on the current tile.
 
             Returns: A list of appropriate logs
@@ -578,7 +612,7 @@ class Game:
 
     def _drawCard(self):
         """
-            If the current player is on a chance card tile, draws the current chance card, if the 
+            If the current player is on a chance card tile, draws the current chance card, if the
             current player is on a community chest card tile, draws the current community chest
             card.
 
@@ -606,7 +640,7 @@ class Game:
                 logs.append(actionReturn)
             return logs
 
-    def _takeRent(self, roll):
+    def _takeRent(self):
         """
             Pays rent owed to the owner of the current tile.
 
@@ -635,6 +669,16 @@ class Game:
             return self._attemptTakeRent(tile["owner"], tile["rents"][tile["numHouses"]])
 
     def _attemptTakeRent(self, owner, amount):
+        """
+            Takes amount from the current player and gives it to owner, returning a Rent log if this
+            was successful, a Bankruptcy Log if the current player does not have amount
+
+            Parameter: owner, the player that will receive the rent
+            Requires: Must be of type Player
+
+            Parameter: amount, the amount of cash to give the owner
+            Requires: Must be of type int
+        """
         currentPlayer = self.currentPlayer.toDict()
         if amount > currentPlayer["cash"]:
             return [("Bankruptcy Player", f"You owe {amount} to {owner.toDict()['name']}")]
@@ -700,13 +744,87 @@ class Game:
             return [("Bankruptcy Bank", "You owe $50 to the Bank")]
 # Trade Helpers
 
-    def _checkTrade(self):
+    def _checkTrade(self, p1Dict, p2Dict):
         """
             Verifies that the current player owns everything in the p1Dict, and the player with name
             p2Dict["name"] has everything in p2Dict.
             Returns: A Trade Fail log if one of the players is missing something, None otherwise
+
+            Parameter: p1Dict, the dictionary specifying what player 1 gives to player 2
+            Requires: Must be of type dict
+
+            Parameter: p2Dict, the dictionary specifying what player 2 gives to player 1
+            Requires: Must be of type dict
         """
-        pass
+        currentPlayer = self.currentPlayer.toDict()
+        for player in self.getPlayers():
+            if player["name"] == p2Dict["name"]:
+                player2 = player
+
+        if currentPlayer['cash'] < p1Dict['cash']:
+            return ("Trade Fail", f"{currentPlayer['name']} doesn't have ${p1Dict['cash']}")
+        if player2['cash'] < p2Dict["cash"]:
+            return ("Trade Fail", f"{player2['name']} doesn't have ${p2Dict['cash']}")
+
+        for propName in p1Dict['properties']:
+            if propName not in currentPlayer['properties']:
+                return ("Trade Fail", f"{currentPlayer['name']} doesn't own {propName}")
+
+        for propName in p2Dict['properties']:
+            if propName not in player2['properties']:
+                return ("Trade Fail", f"{player2['name']} doesn't own {propName}")
+
+        if currentPlayer['jailCards'] < p1Dict['jailCards']:
+            return ("Trade Fail", f"{currentPlayer['name']} doesn't have {p1Dict['jailCards']} Get Out of Jail Free Cards")
+        if player2['jailCards'] < p2Dict['jailCards']:
+            return ("Trade Fail", f"{player2['name']} doesn't have {p2Dict['jailCards']} Get Out of Jail Free Cards")
+
+    def _makeTradeString(self, p1Dict, p2Dict):
+        """
+            Returns a string summarizing what player 1 trade with player 2
+
+            Parameter: p1Dict, the dictionary specifying what player 1 gives to player 2
+            Requires: Must be of type dict
+
+            Parameter: p2Dict, the dictionary specifying what player 2 gives to player 1
+            Requires: Must be of type dict
+        """
+        def makeProper(stringList):
+            if len(stringList) == 0:
+                return ""
+            if len(stringList) == 1:
+                return stringList[0]
+            if len(stringList) == 2:
+                return f"{stringList[0]} and {stringList[1]}"
+            result = ""
+            for entry in stringList[:-1]:
+                result += f"{entry}, "
+            result += f"and {stringList[-1]}"
+            return result
+
+        p1CashString = '' if p1Dict['cash'] == 0 else f"${p1Dict['cash']}, "
+        p2CashString = '' if p2Dict['cash'] == 0 else f"${p2Dict['cash']}, "
+
+        p1Props = makeProper(p1Dict['properties'])
+        p1Props = p1Props + ', ' if p1Props != '' else p1Props
+
+        p2Props = makeProper(p2Dict['properties'])
+        p2Props = p2Props + ', ' if p2Props != '' else p2Props
+
+        if p1Dict['jailCards'] == 0:
+            p1JailString = ''
+        else:
+            p1JailString = f", and {p1Dict['jailCards']} Get Out of Jail Free Cards"
+
+        if p2Dict['jailCards'] == 0:
+            p2JailString = ''
+        else:
+            p2JailString = f", and {p2Dict['jailCards']} Get Out of Jail Free Cards"
+
+        tradeString = (f"{self.currentPlayer.toDict()['name']} traded"
+                       f"{p1CashString}{p1Props}{p1JailString} with {p2Dict['name']}"
+                       f"for{p1CashString}{p1Props}{p1JailString}.")
+        return tradeString
 
 # Build and Mortgage Helpers
     def _getOwnedTiles(self):

@@ -450,7 +450,7 @@ class Monopoly:
         def _playerTwoTradeFrame(playerName):
             """
                 Creates a frame in the trade window that contains entries for the player with name
-                playerName to enter what they will give up in the trade 
+                playerName to enter what they will give up in the trade
 
                 Parameter: playerName, the name of the other player that will be trading
                 Requires: Must be of type string
@@ -472,7 +472,7 @@ class Monopoly:
             p2PropList = StringVar()
             p2OwnedProps = player2Dict["properties"] if player2Dict["properties"] != [] else [""]
 
-            askP2Props = Listbox(p2Frame, listvariable=p2PropList,exportselection=False)
+            askP2Props = Listbox(p2Frame, listvariable=p2PropList, exportselection=False)
             askP2Props.insert(END, *p2OwnedProps)
             askP2Props.grid(row=1, column=1)
 
@@ -513,7 +513,7 @@ class Monopoly:
         p1Props.grid(row=1, column=0)
         props = [""] if len(currentPlayer["properties"]) == 0 else currentPlayer["properties"]
         propList = StringVar()
-        askProps = Listbox(p1Frame, listvariable=propList,exportselection=False)
+        askProps = Listbox(p1Frame, listvariable=propList, exportselection=False)
         askProps.insert(END, *props)
         askProps.grid(row=1, column=1)
 
@@ -530,7 +530,8 @@ class Monopoly:
         return (p1CashEntry, propList, p1JailCards)
 
     def _executeTrade(self, p1Trade, p2Trade):
-        self._handleLogs(self.game.trade(self._createTrade(p1Trade, p2Trade)))
+        tradeDicts = self._createTrade(p1Trade, p2Trade)
+        self._handleLogs(self.game.trade(tradeDicts[0], tradeDicts[1]))
 
     def _createTrade(self, p1Trade, p2Trade):
         """
@@ -543,18 +544,24 @@ class Monopoly:
             Parameter: p2Trade, tuple of inputs of what the other player will give up in the trade
             Requires: Must be of type (string, Entry, StringVar, IntVar)
         """
-        print(type(p1Trade[1].get()))
-        print(list(map(lambda string: string.strip('\''), p1Trade[1].get().strip('()').split(', '))))
+        def getProps(propString):
+            result = []
+            for entry in propString.strip('()').split(', '):
+                fixed = entry.strip(' ').strip('\'')
+                if fixed != '':
+                    result.append(fixed)
+            return result
+
         p1TradeDict = {
             "cash": p1Trade[0].get(),
-            "properties": list(map(lambda string: string.strip('\''), p1Trade[1].get().strip('()').split(', '))),
+            "properties": getProps(p1Trade[1].get()),
             "jailCards": p1Trade[2].get()
         }
         p2TradeDict = {
-            "name": p1Trade[0],
-            "cash": p1Trade[1].get(),
-            "properties": list(map(lambda string: string.strip('\''), p2Trade[2].get().strip('()').split(', '))),
-            "jailCards": p1Trade[3].get()
+            "name": p2Trade[0],
+            "cash": p2Trade[1].get(),
+            "properties": getProps(p2Trade[2].get()),
+            "jailCards": p2Trade[3].get()
         }
         print(p2TradeDict["properties"])
         return (p1TradeDict, p2TradeDict)
