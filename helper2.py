@@ -1,4 +1,4 @@
-testString = "('ant',)"
+testString = "('Vermont Avenue',)"
 testString2 = "('ant', 'bee', 'cicada', 'dung beetle')"
 
 def fixer(messyString):

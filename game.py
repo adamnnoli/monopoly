@@ -277,7 +277,7 @@ class Game:
         """
         result = self._checkTrade(p1Trade, p2Trade)
 
-        if result[0] == "Trade Fail":
+        if result is not None:
             return [result]
 
         for player in self.players:
@@ -802,14 +802,13 @@ class Game:
             result += f"and {stringList[-1]}"
             return result
 
-        p1CashString = '' if p1Dict['cash'] == 0 else f"${p1Dict['cash']}, "
-        p2CashString = '' if p2Dict['cash'] == 0 else f"${p2Dict['cash']}, "
+        p1CashString = '' if p1Dict['cash'] == 0 else f"${p1Dict['cash']}"
+        p2CashString = '' if p2Dict['cash'] == 0 else f"${p2Dict['cash']}"
 
         p1Props = makeProper(p1Dict['properties'])
-        p1Props = p1Props + ', ' if p1Props != '' else p1Props
-
+        p1Props = ', ' + p1Props if p1Props != '' else p1Props
         p2Props = makeProper(p2Dict['properties'])
-        p2Props = p2Props + ', ' if p2Props != '' else p2Props
+        p2Props = ', ' + p2Props if p2Props != '' else p2Props
 
         if p1Dict['jailCards'] == 0:
             p1JailString = ''
@@ -821,9 +820,9 @@ class Game:
         else:
             p2JailString = f", and {p2Dict['jailCards']} Get Out of Jail Free Cards"
 
-        tradeString = (f"{self.currentPlayer.toDict()['name']} traded"
-                       f"{p1CashString}{p1Props}{p1JailString} with {p2Dict['name']}"
-                       f"for{p1CashString}{p1Props}{p1JailString}.")
+        tradeString = (f"{self.currentPlayer.toDict()['name']} traded "
+                       f"{p1CashString}{p1Props}{p1JailString} with {p2Dict['name']} "
+                       f"for {p2CashString}{p2Props}{p2JailString}.")
         return tradeString
 
 # Build and Mortgage Helpers

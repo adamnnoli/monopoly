@@ -464,7 +464,9 @@ class Monopoly:
             p2Frame = Frame(self._tradeWindow)
 
             Label(p2Frame, text=f"{playerName} Cash").grid(row=0, column=0)
-            p2CashEntry = Entry(p2Frame)
+
+            checker = Label(p2Frame).register(str.isnumeric)
+            p2CashEntry = Entry(p2Frame, validate="all", validatecommand=(checker, "%P"))
             p2CashEntry.grid(row=0, column=1)
 
             Label(p2Frame, text=f"{playerName} Properties").grid(row=1, column=0)
@@ -472,7 +474,8 @@ class Monopoly:
             p2PropList = StringVar()
             p2OwnedProps = player2Dict["properties"] if player2Dict["properties"] != [] else [""]
 
-            askP2Props = Listbox(p2Frame, listvariable=p2PropList, exportselection=False)
+            askP2Props = Listbox(p2Frame, listvariable=p2PropList,
+                                 exportselection=False, selectmode=MULTIPLE)
             askP2Props.insert(END, *p2OwnedProps)
             askP2Props.grid(row=1, column=1)
 
@@ -504,16 +507,18 @@ class Monopoly:
         currentPlayer = self.game.getCurrentPlayer()
         p1Frame = LabelFrame(self._tradeWindow, text="Your Items")
 
-        p1Cash = Label(p1Frame, text=f"{currentPlayer['name']} Cash")
-        p1Cash.grid(row=0, column=0)
-        p1CashEntry = Entry(p1Frame)
+        Label(p1Frame, text=f"{currentPlayer['name']} Cash").grid(row=0, column=0)
+
+        checker = Label(p1Frame).register(str.isnumeric)
+        p1CashEntry = Entry(p1Frame, validate="all", validatecommand=(checker, "%P"))
         p1CashEntry.grid(row=0, column=1)
 
         p1Props = Label(p1Frame, text=f"{currentPlayer['name']} Properties")
         p1Props.grid(row=1, column=0)
         props = [""] if len(currentPlayer["properties"]) == 0 else currentPlayer["properties"]
         propList = StringVar()
-        askProps = Listbox(p1Frame, listvariable=propList, exportselection=False)
+        askProps = Listbox(p1Frame, listvariable=propList,
+                           exportselection=False, selectmode=MULTIPLE)
         askProps.insert(END, *props)
         askProps.grid(row=1, column=1)
 
@@ -546,24 +551,24 @@ class Monopoly:
         """
         def getProps(propString):
             result = []
-            for entry in propString.strip('()').split(', '):
+            for entry in propString.strip('()').split(','):
                 fixed = entry.strip(' ').strip('\'')
                 if fixed != '':
                     result.append(fixed)
             return result
-
+        print(p1Trade[1].get())
         p1TradeDict = {
-            "cash": p1Trade[0].get(),
+            "cash": int(p1Trade[0].get()),
             "properties": getProps(p1Trade[1].get()),
             "jailCards": p1Trade[2].get()
         }
         p2TradeDict = {
             "name": p2Trade[0],
-            "cash": p2Trade[1].get(),
+            "cash": int(p2Trade[1].get()),
             "properties": getProps(p2Trade[2].get()),
             "jailCards": p2Trade[3].get()
         }
-        print(p2TradeDict["properties"])
+        print(p1TradeDict["properties"])
         return (p1TradeDict, p2TradeDict)
 
   # Mortgage
@@ -789,9 +794,10 @@ class Monopoly:
             Parameter: result, the log to handle
             Requires: Must be of type (string,string); Must be a Trade Success or Trade Fail log
         """
+        print(result)
         if result[0] == "Trade Success":
             if self._tradeWindow is not None:
-                self._tradeWindow.destroy
+                self._tradeWindow.destroy()
         self._log(result[1])
 
     def _jailLog(self, result):
