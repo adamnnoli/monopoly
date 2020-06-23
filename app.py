@@ -13,14 +13,6 @@ class Monopoly:
             Creates a Single Monopoly Object and begins the game
         """
         self.mainWindow = Tk()
-        width = GAME_WIDTH
-        height = GAME_HEIGHT
-        screenWidth = GetSystemMetrics(0)
-        screenHeight = GetSystemMetrics(1)
-        windowX = int((screenWidth-width)/2)
-        windowY = int((screenHeight-height)/2)
-        # self.mainWindow.geometry(f"0x0+{windowX}+{windowY}")
-        self.mainWindow.configure(bg="#08ff8c")
         self._playerInfo = None
         self.gameLog = None
         self.showWelcome()
@@ -32,8 +24,7 @@ class Monopoly:
         welcomeFrame = Frame(self.mainWindow)
         welcomeFrame.grid(row=0, column=0, sticky=N+E+S+W)
 
-        title = Label(welcomeFrame, text="Monopoly")
-        title.grid(row=0, column=0)
+        Label(welcomeFrame, text="Monopoly").grid(row=0, column=0)
 
         rules = Text(welcomeFrame)
         rules.insert(END, WELCOME_MESSAGE)
@@ -42,8 +33,7 @@ class Monopoly:
         rules.tag_add("title", 0.0, 19.0)
         rules.tag_config("title", justify=CENTER)
 
-        startButton = Button(welcomeFrame, text="Start", command=self.showPlayerSelection)
-        startButton.grid(row=2, column=0)
+        Button(welcomeFrame, text="Start", command=self.showPlayerSelection).grid(row=2, column=0)
 
     def showPlayerSelection(self):
         """
@@ -54,8 +44,7 @@ class Monopoly:
         selectionFrame = Frame(self.mainWindow)
         selectionFrame.grid(row=0, column=0)
 
-        text = Label(selectionFrame, text="How Many People Will Be Playing: ", padx=5)
-        text.grid(row=0, column=0)
+        Label(selectionFrame, text="How Many People Will Be Playing: ", padx=5).grid(row=0, column=0)
 
         playersFrame = Frame(selectionFrame)
         playersFrame.grid(row=1, column=0, columnspan=2)
@@ -75,17 +64,17 @@ class Monopoly:
             self._clear(playersFrame)
             playerInfo = []
             for i in range(1, numPlayers + 1):
-                texti = Label(playersFrame, text=f"Player {i}:", padx=5)
+                Label(playersFrame, text=f"Player {i}:", padx=5).grid(row=i, column=0)
+
                 namei = Entry(playersFrame, width=15)
+                namei.grid(row=i, column=1)
 
                 playerIColor = StringVar()
-                # Save Player colors in global variable for later
-                playerInfo.append((namei, playerIColor))
                 colors = ["red", "blue", "green", "yellow", "white", "black", "magenta", "cyan"]
-                colori = OptionMenu(playersFrame, playerIColor, *colors)
-                texti.grid(row=i, column=0)
-                namei.grid(row=i, column=1)
-                colori.grid(row=i, column=2)
+                OptionMenu(playersFrame, playerIColor, *colors).grid(row=i, column=2)
+
+                # Save Info to Use when making game
+                playerInfo.append((namei, playerIColor))
 
             # Create Start Button
             startButton = Button(playersFrame, text="Play!", command=lambda: self.play(playerInfo))
@@ -93,10 +82,8 @@ class Monopoly:
 
         # Ask how many players and create next dialogue box to get names and colors
         numPlayers = IntVar()
-        maxPlayerList = [x for x in range(1, 5)]
-        askPlayers = OptionMenu(selectionFrame, numPlayers, *maxPlayerList,
-                                command=lambda numPlayers: showPlayers(numPlayers))
-        askPlayers.grid(row=0, column=1)
+        OptionMenu(selectionFrame, numPlayers, *[x for x in range(1, 5)],
+                   command=lambda numPlayers: showPlayers(numPlayers)).grid(row=0, column=1)
 
     def play(self, playerInfo):
         """
@@ -158,26 +145,25 @@ class Monopoly:
         controlFrame = LabelFrame(self.mainWindow, text="Controls", labelanchor='n')
         controlFrame.grid(row=0, column=1)
 
-        rollDice = Button(controlFrame, text="Roll Dice", padx=5, command=self._roll, bg="#03c2fc")
-        rollDice.grid(row=0, column=0)
+        Button(controlFrame, text="Roll Dice", padx=5,
+               command=self._roll, bg="#03c2fc").grid(row=0, column=0)
 
-        build = Button(controlFrame, text="Build", padx=13, command=self._build, bg="#03c2fc")
-        build.grid(row=0, column=1)
+        Button(controlFrame, text="Build", padx=13,
+               command=self._build, bg="#03c2fc").grid(row=0, column=1)
 
-        trade = Button(controlFrame, text="Trade", padx=5, command=self._trade, bg="#03c2fc")
-        trade.grid(row=0, column=2)
+        Button(controlFrame, text="Trade", padx=5,
+               command=self._trade, bg="#03c2fc").grid(row=0, column=2)
 
-        endTurn = Button(controlFrame, text="End Turn", padx=5, command=self._endTurn, bg="#03c2fc")
-        endTurn.grid(row=1, column=0)
+        Button(controlFrame, text="End Turn", padx=5,
+               command=self._endTurn, bg="#03c2fc").grid(row=1, column=0)
 
-        mortgage = Button(controlFrame, text="Mortgage", command=self._mortage, bg="#03c2fc")
-        mortgage.grid(row=1, column=1)
+        Button(controlFrame, text="Mortgage", command=self._mortage,
+               bg="#03c2fc").grid(row=1, column=1)
 
-        quitButton = Button(controlFrame, text="Quit", padx=9, command=self._quit, bg="red")
-        quitButton.grid(row=1, column=2)
+        Button(controlFrame, text="Quit", padx=9, command=self._quit, bg="red").grid(row=1, column=2)
 
-        helpButton = Button(controlFrame, text="Help", padx=5, command=self._help, bg="#03c2fc")
-        helpButton.grid(row=2, column=1)
+        Button(controlFrame, text="Help", padx=5, command=self._help,
+               bg="#03c2fc").grid(row=2, column=1)
 
     def createPlayerInfo(self):
         """
@@ -194,9 +180,9 @@ class Monopoly:
 
         tileName = self.game.getTile(playerInfo["location"])["name"]
 
-        nameLabel = Label(playerInfoFrame, text=f"Name: {name}").pack()
-        cashLabel = Label(playerInfoFrame, text=f"Cash: {cash}").pack()
-        locationLabel = Label(playerInfoFrame, text=f"Currently At: {tileName}").pack()
+        Label(playerInfoFrame, text=f"Name: {name}").pack()
+        Label(playerInfoFrame, text=f"Cash: {cash}").pack()
+        Label(playerInfoFrame, text=f"Currently At: {tileName}").pack()
 
         self._playerInfo = playerInfoFrame
 
@@ -269,8 +255,6 @@ class Monopoly:
             return (longPlus[tileId-21], 0)
         elif tileId < 40:
             return (longPlus[9], longPlus[tileId-31])
-        else:
-            return "Invalid tileId"
 
     def _toHex(self, color):
         """
@@ -360,14 +344,10 @@ class Monopoly:
         self._buyWindow = Toplevel()
 
         name = self.game.getTile(self.game.getCurrentPlayer()["location"])["name"]
-        text = Label(self._buyWindow, text=f"Buy {name}?")
-        text.grid(row=0, column=0, columnspan=2)
 
-        yesBtn = Button(self._buyWindow, text="Yes", command=self._buy)
-        yesBtn.grid(row=1, column=0)
-
-        noBtn = Button(self._buyWindow, text="No", command=self._auction)
-        noBtn.grid(row=1, column=1)
+        Label(self._buyWindow, text=f"Buy {name}?").grid(row=0, column=0, columnspan=2)
+        Button(self._buyWindow, text="Yes", command=self._buy).grid(row=1, column=0)
+        Button(self._buyWindow, text="No", command=self._auction).grid(row=1, column=1)
 
     def _buy(self):
         """
@@ -376,6 +356,7 @@ class Monopoly:
             Calls handle log of the result of the buy function in game
         """
         self._handleLogs(self.game.buy())
+        self.redraw()
   #  Build
 
     def _build(self):
@@ -385,46 +366,43 @@ class Monopoly:
             Asks if the player would like to build or sell and opens the appropriate window
         """
         self._buildWindow = Toplevel()
-        text = Label(self._buildWindow, text="What would you like to do?")
-        text.grid(row=0, column=0, columnspan=2)
 
-        buildButton = Button(self._buildWindow, text="Build", command=self._createBuildWindow)
-        buildButton.grid(row=1, column=0)
-
-        sellButton = Button(self._buildWindow, text="Sell", command=self._createSellWindow)
-        sellButton.grid(row=1, column=1)
+        Label(self._buildWindow, text="What would you like to do?").grid(
+            row=0, column=0, columnspan=2)
+        Button(self._buildWindow, text="Build", command=self._createBuildWindow).grid(row=1, column=0)
+        Button(self._buildWindow, text="Sell", command=self._createSellWindow).grid(row=1, column=1)
 
     def _createBuildWindow(self):
         """
             Clears the build window and adds a frame which allows the current player to build
             a house on a property
         """
-        self._clear(self._buildWindow)
-
-        frame = Frame(self._buildWindow)
+        buildFrame = Frame(self._buildWindow)
+        buildFrame.grid(row=2, column=0, columnspan=2)
 
         def _showPrice():
             pass
-        propName = StringVar()
-        text = Label(frame, text="Select Property: ")
-        text.grid(row=0, column=0)
-        availableProps = [""] if self.game.getBuildable() == [] else self.game.getBuildable()
-        props = OptionMenu(frame, propName, *availableProps, command=_showPrice)
-        props.grid(row=0, column=1)
 
-        frame.grid(row=0, column=0)
+        Label(buildFrame, text="Select Property: ").grid(row=0, column=0)
+
+        propName = StringVar()
+        availableProps = [""] if self.game.getBuildable() == [] else self.game.getBuildable()
+        OptionMenu(buildFrame, propName, *availableProps, command=_showPrice).grid(row=0, column=1)
 
     def _createSellWindow(self):
         """
             Clears the build window and adds a frame which allows the current player to sell
             a house on a property
         """
+        sellFrame = Frame(self._buildWindow)
+        sellFrame.grid(row=2, column=0, columnspan=2)
+
         def _showPrice():
             pass
-        text = Label(self._buildAskWindow, text="Select Property: ")
+        Label(sellFrame, text="Select Property: ").grid(row=0, column=0)
         propName = StringVar()
         availableProps = [""] if self.game.getSellable() == [] else self.game.getSellable()
-        props = OptionMenu(self._buildAskWindow, propName, *availableProps, command=_showPrice)
+        props = OptionMenu(sellFrame, propName, *availableProps, command=_showPrice)
   # Trade
 
     def _trade(self):
@@ -463,31 +441,29 @@ class Monopoly:
 
             p2Frame = Frame(self._tradeWindow)
 
+            # Cash
             Label(p2Frame, text=f"{playerName} Cash").grid(row=0, column=0)
-
             checker = Label(p2Frame).register(str.isnumeric)
             p2CashEntry = Entry(p2Frame, validate="all", validatecommand=(checker, "%P"))
             p2CashEntry.grid(row=0, column=1)
 
+            # Properties
             Label(p2Frame, text=f"{playerName} Properties").grid(row=1, column=0)
-
             p2PropList = StringVar()
             p2OwnedProps = player2Dict["properties"] if player2Dict["properties"] != [] else [""]
-
             askP2Props = Listbox(p2Frame, listvariable=p2PropList,
                                  exportselection=False, selectmode=MULTIPLE)
             askP2Props.insert(END, *p2OwnedProps)
             askP2Props.grid(row=1, column=1)
-
+            # Jail Cards
             Label(p2Frame, text=f"{playerName} Get Out Of Jail Free Cards").grid(row=2, column=0)
             p2JailCards = IntVar()
             p2JailList = [""] if player2Dict["jailCards"] == 0 else list(
                 range(1, player2Dict["jailCards"]))
-            p2JailDropdown = OptionMenu(p2Frame, p2JailCards, *p2JailList)
-            p2JailDropdown.grid(row=2, column=1)
+            OptionMenu(p2Frame, p2JailCards, *p2JailList).grid(row=2, column=1)
             p2Frame.grid(row=1, column=1)
-            p2TradeInfo = (playerName, p2CashEntry, p2PropList, p2JailCards)
 
+            p2TradeInfo = (playerName, p2CashEntry, p2PropList, p2JailCards)
             Button(self._tradeWindow, text="Accept",
                    command=lambda: self._executeTrade(p1TradeInfo, p2TradeInfo)).grid(row=2, column=0, columnspan=2)
 
@@ -507,14 +483,14 @@ class Monopoly:
         currentPlayer = self.game.getCurrentPlayer()
         p1Frame = LabelFrame(self._tradeWindow, text="Your Items")
 
+        # Cash
         Label(p1Frame, text=f"{currentPlayer['name']} Cash").grid(row=0, column=0)
-
         checker = Label(p1Frame).register(str.isnumeric)
         p1CashEntry = Entry(p1Frame, validate="all", validatecommand=(checker, "%P"))
         p1CashEntry.grid(row=0, column=1)
 
-        p1Props = Label(p1Frame, text=f"{currentPlayer['name']} Properties")
-        p1Props.grid(row=1, column=0)
+        # Properties
+        Label(p1Frame, text=f"{currentPlayer['name']} Properties").grid(row=1, column=0)
         props = [""] if len(currentPlayer["properties"]) == 0 else currentPlayer["properties"]
         propList = StringVar()
         askProps = Listbox(p1Frame, listvariable=propList,
@@ -522,21 +498,21 @@ class Monopoly:
         askProps.insert(END, *props)
         askProps.grid(row=1, column=1)
 
+        # Jail Cards
         Label(p1Frame, text=f"{currentPlayer['name']} Get Out Of Jail Free Cards").grid(
             row=2, column=0)
         p1JailCards = IntVar()
         p1JailList = [""] if currentPlayer["jailCards"] == 0 else list(
             range(1, currentPlayer["jailCards"]))
-        p1JailDropdown = OptionMenu(p1Frame, p1JailCards, *p1JailList)
-        p1JailDropdown.grid(row=2, column=1)
+        OptionMenu(p1Frame, p1JailCards, *p1JailList).grid(row=2, column=1)
 
         p1Frame.grid(row=1, column=0)
-
         return (p1CashEntry, propList, p1JailCards)
 
     def _executeTrade(self, p1Trade, p2Trade):
         tradeDicts = self._createTrade(p1Trade, p2Trade)
         self._handleLogs(self.game.trade(tradeDicts[0], tradeDicts[1]))
+        self.redraw()
 
     def _createTrade(self, p1Trade, p2Trade):
         """
@@ -548,15 +524,24 @@ class Monopoly:
 
             Parameter: p2Trade, tuple of inputs of what the other player will give up in the trade
             Requires: Must be of type (string, Entry, StringVar, IntVar)
+
+            Returns: A tuple contain both dictionaries; (dict, dict)
         """
         def getProps(propString):
+            """
+                Turns a tuple in the form of a string into a list of strings
+                Ex: "('ant', 'bee', 'cicada')" -> ['ant', 'bee', 'cicada']
+
+                Parameter: propString, the string to convert
+                Requires: Must be of type string
+            """
             result = []
             for entry in propString.strip('()').split(','):
                 fixed = entry.strip(' ').strip('\'')
                 if fixed != '':
                     result.append(fixed)
             return result
-        print(p1Trade[1].get())
+
         p1TradeDict = {
             "cash": int(p1Trade[0].get()),
             "properties": getProps(p1Trade[1].get()),
@@ -568,9 +553,8 @@ class Monopoly:
             "properties": getProps(p2Trade[2].get()),
             "jailCards": p2Trade[3].get()
         }
-        print(p1TradeDict["properties"])
-        return (p1TradeDict, p2TradeDict)
 
+        return (p1TradeDict, p2TradeDict)
   # Mortgage
 
     def _mortage(self):
@@ -581,77 +565,98 @@ class Monopoly:
             the appropriate window
         """
         self._mortgageWindow = Toplevel()
+
         mainFrame = Frame(self._mortgageWindow)
         mainFrame.grid(row=0, column=0)
-        question = Label(mainFrame, text="Mortgage or Unmortgage")
-        question.grid(row=0, column=0, columnspan=2)
 
-        mortgageButton = Button(mainFrame, text="Mortgage",
-                                command=self._createMortgageWindow)
-        mortgageButton.grid(row=1, column=0)
-
-        unmortgageButton = Button(mainFrame, text="Unmortgage",
-                                  command=self._createUnmortgageWindow)
-        unmortgageButton.grid(row=1, column=1)
+        Label(mainFrame, text="Mortgage or Unmortgage").grid(row=0, column=0, columnspan=2)
+        Button(mainFrame, text="Mortgage", command=self._createMortgageWindow).grid(row=1, column=0)
+        Button(mainFrame, text="Unmortgage", command=self._createUnmortgageWindow).grid(row=1, column=1)
 
     def _createMortgageWindow(self):
         """
             Creates a Top Level which allows the current player to mortgage a property
         """
-        if len(self._mortgageWindow.winfo_children()) > 1:
-            self._mortgageWindow.winfo_children()[1].destroy()
         mortgageFrame = Frame(self._mortgageWindow)
         mortgageFrame.grid(row=1, column=0, columnspan=2)
 
-        askProperty = Label(mortgageFrame, text="Select Property:")
-        askProperty.grid(row=0, column=0)
+        Label(mortgageFrame, text="Select Property:").grid(row=0, column=0)
 
         propName = StringVar()
         mortgageable = [""] if self.game.getMortgageable() == [] else self.game.getMortgageable()
 
         def _showPrice(propName):
-            tile = self.game.getTile(self.game.getTileId(propName))
-            priceLabel = Label(mortgageFrame, text=f"Would receive ${int(tile['price']/2)}")
-            priceLabel.grid(row=1, column=0, columnspan=2)
+            """
+                Adds a label to the mortgage frame with the proceeds from mortgaging the property
+                with name propName, adds an accept button the mortgage frame to execute the mortgage.
 
-            acceptButton = Button(mortgageFrame, text="Accept",
-                                  command=lambda: self._handleLogs(self.game.mortgage(propName)))
-            acceptButton.grid(row=2, column=0, columnspan=2)
+                Parameter: propName, the name of the property to mortgage
+                Requires: Must be of type string
+            """
+            amount = int(self.game.getTile(self.game.getTileId(propName))['price']/2)
+            Label(mortgageFrame,
+                  text=f"Would receive ${amount}").grid(row=1, column=0, columnspan=2)
 
-        askPropertyDropdown = OptionMenu(mortgageFrame, propName, *mortgageable, command=_showPrice)
-        askPropertyDropdown.grid(row=0, column=1)
+            Button(mortgageFrame, text="Accept", command=lambda: self._executeMortgage(
+                propName)).grid(row=2, column=0, columnspan=2)
+
+        OptionMenu(mortgageFrame, propName, *mortgageable, command=_showPrice).grid(row=0, column=1)
 
     def _createUnmortgageWindow(self):
         """
             Creates a Top Level which allows the current player to unmortgage a property
         """
-        if len(self._mortgageWindow.winfo_children()) > 1:
-            self._mortgageWindow.winfo_children()[1].destroy()
         unmortgageFrame = Frame(self._mortgageWindow)
-        unmortgageFrame.grid(row=2, column=0, columnspan=2)
+        unmortgageFrame.grid(row=1, column=0, columnspan=2)
 
-        askProperty = Label(unmortgageFrame, text="Select Property:")
-        askProperty.grid(row=0, column=0)
+        Label(unmortgageFrame, text="Select Property:").grid(row=0, column=0)
 
         propName = StringVar()
         unmortgageable = [""] if self.game.getUnmortgageable(
         ) == [] else self.game.getUnmortgageable()
 
         def _showPrice(propName):
-            tile = self.game.getTile(self.game.getTileId(propName))
-            priceLabel = Label(unmortgageFrame, text=f"Principal: ${int(tile['price']/2)}")
-            priceLabel.grid(row=1, column=0)
-            interestLabel = Label(unmortgageFrame, text=f"Interest: ${int(.1*tile['price'])}")
-            interestLabel.grid(row=1, column=1)
+            """
+                Adds labels to the mortgage frame with the cost to unmortgage broken down into the
+                principal and interest, adds an accept button the mortgage frame to execute the 
+                unmortgage.
+
+                Parameter: propName, the name of the property to unmortgage
+                Requires: Must be of type string
+            """
+            price = self.game.getTile(self.game.getTileId(propName))['price']
+            Label(unmortgageFrame, text=f"Principal: ${int(price/2)}").grid(row=1, column=0)
+            Label(unmortgageFrame, text=f"Interest: ${int(.1*price)}").grid(row=1, column=1)
             Label(unmortgageFrame,
-                  text=f"Total: ${int(tile['price']*.6)}").grid(row=2, column=0, columnspan=2)
-            acceptButton = Button(unmortgageFrame, text="Accept",
-                                  command=lambda: self._handleLogs(self.game.unmortgage(propName)))
-            acceptButton.grid(row=2, column=0, columnspan=2)
+                  text=f"Total: ${int(price*.6)}").grid(row=2, column=0, columnspan=2)
+            Button(unmortgageFrame, text="Accept", command=lambda: self._executeUnmortgage(
+                propName)).grid(row=2, column=0, columnspan=2)
 
         askPropertyDropdown = OptionMenu(unmortgageFrame, propName,
                                          *unmortgageable, command=_showPrice)
         askPropertyDropdown.grid(row=0, column=1)
+
+    def _executeMortgage(self, propName):
+        """
+            Mortgages the tile with name propName. Handles the logs that arise and redraws the 
+            board and player info frame
+
+            Parameter: propName, the name of the tile to unmortgage
+            Requires: Must be of type string
+        """
+        self._handleLogs(self.game.mortgage(propName))
+        self.redraw()
+
+    def _executeUnmortgage(self, propName):
+        """
+            Unmortgages the tile with name propName. Handles the logs that arise and redraws the 
+            board and player info frame
+
+            Parameter: propName, the name of the tile to unmortgage
+            Requires: Must be of type string
+        """
+        self._handleLogs(self.game.unmortgage(propName))
+        self.redraw()
   # End Turn
 
     def _endTurn(self):
@@ -703,8 +708,8 @@ class Monopoly:
             Parameter: text, the text to be logged
             Requires: Must be of type string
         """
-        label = Label(self.gameLog, text=text)
-        label.grid(row=self.gameLog.grid_size()[1]+1)
+        Label(self.gameLog, text=text).grid(row=self.gameLog.grid_size()[1]+1)
+
 
     def _handleLogs(self, logs):
         """
