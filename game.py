@@ -244,9 +244,22 @@ class Game:
             Requires: Building must not break the build evenly rule, the tile must not be
             mortgaged
         """
-        pass
+        tileDict = self.board.getTile(self.board.getTileId(tileName))
+        tile = self.board.getTileObject(self.board.getTileId(tileName))
+        currentPlayer = self.currentPlayer.toDict()
 
-    def sell(self):
+        if tileDict["mortgaged"]:
+            return [("Build Fail", f"{tileName} is mortgaged")]
+        elif tileName not in self.getBuildable():
+            return [("Build Fail", "You must build evenly")]
+        elif tileDict["houseCost"] > currentPlayer["cash"]:
+            return [("Build Fail", f"{currentPlayer['name']} doesn't have enough money to build a house on {tileName}")]
+        else:
+            self.currentPlayer.takeCash(tileDict["houseCost"])
+            tile.build()
+            return [("Build Success", f"{currentPlayer['name']} built a house on {tileName}")]
+
+    def sell(self, tileName):
         """
             Sells a house on the tile with name, tileName
 
@@ -258,7 +271,15 @@ class Game:
             Requires: Selling must not break the build evenly rule, the tile must have at least
             one house
         """
-        pass
+        tile = self.board.getTile(self.board.getTileId(tileName))
+        if tile["numHouses"] < 1:
+            return [("Build Fail", f"{tileName} does not have any houses.")]
+        elif tileName not in self.getSellable():
+            return [("Build Fail", "You must sell evenly")]
+        else:
+            self.currentPlayer.giveCash(int(tile["houseCost"]/2))
+            self.board.getTileObject(self.board.getTileId(tileName)).sell()
+            return [("Build Success", f"{self.currentPlayer.toDict()['name']} sold a house on {tileName}")]
     # Trading
 
     def trade(self, p1Trade, p2Trade):
@@ -293,11 +314,13 @@ class Game:
             tileId = self.getTileId(prop)
             self.currentPlayer.takeProperty(tileId, self.board)
             player2.giveProperty(tileId, self.board)
+            self.board.getTileObject(tileId).setOwner(player2)
 
         for prop in p2Trade["properties"]:
             tileId = self.getTileId(prop)
             self.currentPlayer.giveProperty(tileId, self.board)
             player2.takeProperty(tileId, self.board)
+            self.board.getTileObject(tileId).setOwner(self.currentPlayer)
 
         for i in range(p1Trade["jailCards"]):
             self.currentPlayer.takeJailCard()
@@ -321,12 +344,11 @@ class Game:
             Parameter: tileName, the name of the tile to mortgage
             Requires: Must be of type string
         """
-        tile = self.board.getTile(self.board.getTileId(tileName))
-        self.currentPlayer.giveCash(int(tile["price"]/2))
+        amount = int(self.board.getTile(self.board.getTileId(tileName))['price']/2)
+        self.currentPlayer.giveCash(amount)
         self.board.getTileObject(self.board.getTileId(tileName)).setMortgage()
 
-        return [("Mortgage Success",
-                 f"{self.currentPlayer.toDict()['name']} mortgage {tileName} for ${int(tile['price']/2)}")]
+        return [("Mortgage Success", f"{self.currentPlayer.toDict()['name']} mortgage {tileName} for ${amount}")]
 
     def unmortgage(self, tileName):
         """

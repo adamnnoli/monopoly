@@ -357,7 +357,7 @@ class Monopoly:
         """
         self._handleLogs(self.game.buy())
         self.redraw()
-  #  Build
+  # Build
 
     def _build(self):
         """
@@ -381,7 +381,17 @@ class Monopoly:
         buildFrame.grid(row=2, column=0, columnspan=2)
 
         def _showPrice():
-            pass
+            """
+                Adds a label to the buildFrame showing the cost of building a house on the tile
+                with name propName. Adds an accept button to execute the build
+
+                Parameter: propName, the name of the property to sell a house on
+                Requires: Must be of type string
+            """
+            amount = int(self.game.getTile(self.game.getTileId(propName))['houseCost'])
+            Label(buildFrame, text=f"Would cost: {amount}").grid(row=1, column=0, columnspan=2)
+            Button(buildFrame, text="Accept", command=lambda: self._executeBuild(
+                propName)).grid(row=2, column=0, columnspan=2)
 
         Label(buildFrame, text="Select Property: ").grid(row=0, column=0)
 
@@ -397,12 +407,46 @@ class Monopoly:
         sellFrame = Frame(self._buildWindow)
         sellFrame.grid(row=2, column=0, columnspan=2)
 
-        def _showPrice():
-            pass
+        def _showPrice(propName):
+            """
+                Adds a label to the sellFrame showing the proceeds from selling a house on the tile
+                with name propName. Adds an accept button to execute the sale
+
+                Parameter: propName, the name of the property to sell a house on
+                Requires: Must be of type string
+            """
+            amount = int(self.game.getTile(self.game.getTileId(propName))['houseCost']/2)
+            Label(sellFrame, text=f"Would receive: {amount}").grid(row=1, column=0, columnspan=2)
+            Button(sellFrame, text="Accept", command=lambda: self._executeSell(
+                propName)).grid(row=2, column=0, columnspan=2)
+
         Label(sellFrame, text="Select Property: ").grid(row=0, column=0)
         propName = StringVar()
         availableProps = [""] if self.game.getSellable() == [] else self.game.getSellable()
-        props = OptionMenu(sellFrame, propName, *availableProps, command=_showPrice)
+        OptionMenu(sellFrame, propName, *availableProps,
+                   command=lambda: _showPrice(propName)).grid(row=0, column=1)
+
+    def _executeSell(self, propName):
+        """
+            Sells a house on the tile with name, propName. Handles the logs that arise and redraws
+            the board and player info frame 
+
+            Parameter: propName, the name of the property to sell a house on
+            Requires: Must be of type string
+        """
+        self._handleLogs(self.game.sell(propName))
+        self.redraw()
+
+    def _executeBuild(self, propName):
+        """
+            Builds a house on the tile with name, propName. Handles the logs that arise and redraws
+            the board and player info frame 
+
+            Parameter: propName, the name of the property to build a house on
+            Requires: Must be of type string
+        """
+        self._handleLogs(self.game.build(propName))
+        self.redraw()
   # Trade
 
     def _trade(self):
@@ -709,7 +753,6 @@ class Monopoly:
             Requires: Must be of type string
         """
         Label(self.gameLog, text=text).grid(row=self.gameLog.grid_size()[1]+1)
-
 
     def _handleLogs(self, logs):
         """
