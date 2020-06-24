@@ -82,7 +82,7 @@ class Monopoly:
 
         # Ask how many players and create next dialogue box to get names and colors
         numPlayers = IntVar()
-        OptionMenu(selectionFrame, numPlayers, *[x for x in range(1, 5)],
+        OptionMenu(selectionFrame, numPlayers, *[x for x in range(1, 6)],
                    command=lambda numPlayers: showPlayers(numPlayers)).grid(row=0, column=1)
 
     def play(self, playerInfo):
@@ -213,7 +213,6 @@ class Monopoly:
         """
         x = self._getTopLeft(tileDict["id"])[0]  # Get Coordinates
         y = self._getTopLeft(tileDict["id"])[1]
-
         color = self._toHex(tileDict["color"])  # Fill Color
 
         # Outline Color
@@ -222,7 +221,6 @@ class Monopoly:
             ownerColor = "#ffffff" if ownerColor == GAME_BOARD_COLOR else ownerColor
         else:
             ownerColor = "#000000"
-
         # Dash to Show Mortgaged
         dashPattern = (1, 1) if tileDict["mortgaged"] else None
 
@@ -236,6 +234,72 @@ class Monopoly:
         elif tileDict["id"] in range(11, 20) or tileDict["id"] in range(31, 40):
             cvs.create_rectangle(x, y, x + longPlus[0], y + TILE_SHORT,
                                  fill=color, outline=ownerColor, dash=dashPattern, width=2)
+        self._drawHouses(cvs, tileDict)
+
+    def _drawPlayers(self, cvs):
+        """
+            Draws every player to the canvas, cvs
+
+            Parameter: cvs, the canvas to draw to
+            Requires: Must be of type tk.Canvas
+        """
+        for playerNumber, player in enumerate(self.game.getPlayers(), start=1):
+            color = None if player["color"] is None else self._toHex(player["color"])
+            color = "#ffffff" if color == GAME_BOARD_COLOR else color
+            x = self._getPlayerTopLeft(playerNumber, player["location"])[0]
+            y = self._getPlayerTopLeft(playerNumber, player["location"])[1]
+            cvs.create_rectangle(x, y, x+PIECE_SIZE, y+PIECE_SIZE, fill=color)
+
+    def _drawHouses(self, cvs, tile):
+        """
+            Draws the houses on the tile specified in tile to the canvas,cvs
+
+            Parameter: cvs, the canvas to draw to
+            Requires: Must be of type tk.Canvas
+
+            Parameter: tile, the dictionary containing the tile information
+            Requires: Must be of type dict
+        """
+        if tile["id"] < 10:
+            if tile["numHouses"] == 5:
+                x = longPlus[9-tile["id"]]
+                y = longPlus[9]
+                cvs.create_rectangle(x, y, x + (4 * HOUSE_SIZE), y + HOUSE_SIZE, fill=HOTEL_COLOR)
+            else:
+                for i in range(tile["numHouses"]):
+                    x = longPlus[9-tile["id"]] + (i * HOUSE_SIZE)
+                    y = longPlus[9]
+                    cvs.create_rectangle(x, y, x+HOUSE_SIZE, y+HOUSE_SIZE, fill=HOUSE_COLOR)
+        elif tile["id"] < 20:
+            if tile["numHouses"] == 5:
+                x = longPlus[0] - HOUSE_SIZE
+                y = longPlus[19 - tile["id"]]
+                cvs.create_rectangle(x, y, x + HOUSE_SIZE, y + (4 * HOUSE_SIZE), fill=HOTEL_COLOR)
+            else:
+                for i in range(tile["numHouses"]):
+                    x = longPlus[0] - HOUSE_SIZE
+                    y = longPlus[19 - tile["id"]] + (i * HOUSE_SIZE)
+                    cvs.create_rectangle(x, y, x + HOUSE_SIZE, y + HOUSE_SIZE, fill=HOUSE_COLOR)
+        elif tile["id"] < 30:
+            if tile["numHouses"] == 5:
+                x = longPlus[tile["id"]-21]
+                y = longPlus[0] - HOUSE_SIZE
+                cvs.create_rectangle(x, y, x + (4 * HOUSE_SIZE), y + HOUSE_SIZE, fill=HOTEL_COLOR)
+            else:
+                for i in range(tile["numHouses"]):
+                    x = longPlus[tile["id"]-21] + (i * HOUSE_SIZE)
+                    y = longPlus[0] - HOUSE_SIZE
+                    cvs.create_rectangle(x, y, x + HOUSE_SIZE, y + HOUSE_SIZE, fill=HOUSE_COLOR)
+        elif tile["id"] < 40:
+            if tile["numHouses"] == 5:
+                x = longPlus[9]
+                y = longPlus[tile["id"]-31]
+                cvs.create_rectangle(x, y, x + HOUSE_SIZE, y + (4 * HOUSE_SIZE), fill=HOTEL_COLOR)
+            else:
+                for i in range(tile["numHouses"]):
+                    x = longPlus[9]
+                    y = longPlus[tile["id"]-31] + (i * HOUSE_SIZE)
+                    cvs.create_rectangle(x, y, x + HOUSE_SIZE, y + HOUSE_SIZE, fill=HOUSE_COLOR)
 
     def _getTopLeft(self, tileId):
         """
@@ -290,20 +354,6 @@ class Monopoly:
         if color == "ORANGE":
             return "#ffa500"
 
-    def _drawPlayers(self, cvs):
-        """
-            Draws every player to the canvas, cvs
-
-            Parameter: cvs, the canvas to draw to
-            Requires: Must be of type tk.Canvas
-        """
-        for playerNumber, player in enumerate(self.game.getPlayers(), start=1):
-            color = None if player["color"] is None else self._toHex(player["color"])
-            color = "#ffffff" if color == GAME_BOARD_COLOR else color
-            x = self._getPlayerTopLeft(playerNumber, player["location"])[0]
-            y = self._getPlayerTopLeft(playerNumber, player["location"])[1]
-            cvs.create_rectangle(x, y, x+PIECE_SIZE, y+PIECE_SIZE, fill=color)
-
     def _getPlayerTopLeft(self, playerNumber, tileId):
         """
             Returns the (x,y) representing the top-left corner of the piece of the player
@@ -325,6 +375,7 @@ class Monopoly:
             return (longPlus[tileId-20]-PIECE_SIZE, offset-PIECE_SIZE)
         elif tileId < 40:
             return (cLength-offset, longPlus[tileId-30]-PIECE_SIZE)
+
   # Roll
 
     def _roll(self):

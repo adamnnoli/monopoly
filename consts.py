@@ -11,12 +11,19 @@ TILE_SHORT = 50
 STARTING_CASH = 1500
 
 # Length of one side of a game piece
-PIECE_SIZE = 25
+PIECE_SIZE = 15
+
+# Length of one side of a house piece
+HOUSE_SIZE = 12
 
 GAME_WIDTH = 1050
 GAME_HEIGHT = 700
 
 GAME_BOARD_COLOR = "#c0e2ca"
+
+HOUSE_COLOR = "#006b1d"
+
+HOTEL_COLOR = "#ba2800"
 
 WELCOME_MESSAGE = """Welcome to Monopoly!
 The object of the game is to become the last player standing by forcing all other players to become bankrupt.
@@ -162,7 +169,7 @@ Bankruptcy
   game. The last player left in the game wins
 """
 
-titleFont = None 
-subtitleFont = None 
+titleFont = None
+subtitleFont = None
 mainTextFont = None
 buttonFont = None

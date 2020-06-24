@@ -742,7 +742,7 @@ class Game:
         """
         total = 0
         for prop in props:
-            if self._board.getOwner(self._board.getID(prop)) == owner:
+            if self.board.getTile(self.board.getTileId(prop))["owner"] == owner:
                 total += 1
         return total
 # Jail Helpers
