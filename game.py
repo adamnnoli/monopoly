@@ -38,7 +38,7 @@ class Game:
                 tiles.append(newTile)
                 if possMonopolies.get(tile["color"]) is None:
                     possMonopolies[tile["color"]] = set()
-                possMonopolies[tile["color"]].add(i)
+                possMonopolies[tile["color"]].add(tile["name"])
         del possMonopolies["white"]
         self.possMonopolies = possMonopolies
         return Board(tiles)
@@ -227,6 +227,7 @@ class Game:
             self.board.getTileObject(currentPlayer["location"]).setOwner(self.currentPlayer)
             self.currentPlayer.takeCash(currentTile["price"])
             self.currentPlayer.giveProperty(currentPlayer["location"], self.board)
+            self._updateMonopolies()
             return [("Buy Success", f"{currentPlayer['name']} bought {currentTile['name']}")]
         else:
             return [("Buy Fail", f"{currentPlayer['name']} cannot buy {currentTile['name']}")]
@@ -330,6 +331,7 @@ class Game:
             self.currentPlayer.giveJailCard()
             player2.takeJailCard()
 
+        self._updateMonopolies()
         return [("Trade Success", self._makeTradeString(p1Trade, p2Trade))]
 
     # Mortgaging
@@ -627,7 +629,7 @@ class Game:
             return self._drawCard()
         if tile["name"] == "Income Tax" or tile["name"] == "Luxury Tax":
             return self._takeTax()
-        if tile["owner"] is not None and not tile["mortgaged"]:
+        if tile["owner"] is not None and tile["owner"] != self.currentPlayer and not tile["mortgaged"]:
             return self._takeRent()
         if tile["owner"] is None and tile["price"] > 0:
             return [("Buy", "Not Owned")]
@@ -688,7 +690,7 @@ class Game:
             if numOwned == 2:
                 return self._attemptTakeRent(tile["owner"], 10 * self.numRolled)
         else:
-            return self._attemptTakeRent(tile["owner"], tile["rents"][tile["numHouses"]])
+            return self._attemptTakeRent(tile["owner"], self._getOwedRent(tile))
 
     def _attemptTakeRent(self, owner, amount):
         """
@@ -745,6 +747,23 @@ class Game:
             if self.board.getTile(self.board.getTileId(prop))["owner"] == owner:
                 total += 1
         return total
+
+    def _getOwedRent(self, tile):
+        """
+            Returns the amount of rent that would be paid if a player landed on the tile described
+            in tile
+
+            Parameter: tile, the dictionary describing the tile requested
+            Requires: Must be of type dict
+        """
+        currentMonopolies = self.board.getMonopolies()
+        if tile["color"] not in currentMonopolies:
+            return tile["rents"][0]
+        elif tile["numHouses"] == 0:
+            return tile["rents"][0] * 2
+        else:
+            return tile["rents"][tile["numHouses"]]
+
 # Jail Helpers
 
     def _goToJail(self):
@@ -854,3 +873,12 @@ class Game:
         """
         return list(map(lambda propName: self.board.getTile(self.board.getTileId(propName)),
                         self.currentPlayer.toDict()["properties"]))
+
+    def _updateMonopolies(self):
+        """
+            Updates the monopolies on the board to reflect the current game status
+        """
+        for playerDict in self.getPlayers():
+            for color, props in self.possMonopolies.items():
+                if props <= playerDict["properties"]:
+                    self.board.setMonopoly(playerDict["name"], color)

@@ -320,6 +320,28 @@ class Monopoly:
         elif tileId < 40:
             return (longPlus[9], longPlus[tileId-31])
 
+    def _getPlayerTopLeft(self, playerNumber, tileId):
+        """
+            Returns the (x,y) representing the top-left corner of the piece of the player
+            with number playerNumber on the tile with id tileId
+
+            Parameter: playerNumber, the id of the player(Player 1, Player 2, etc.)
+            Requires: Must be of type int
+
+            Parameter: tileId, the id of the tile the player is currently on
+            Requires: Must be of type int
+        """
+        cLength = 2 * TILE_LONG + 9 * TILE_SHORT
+        offset = playerNumber * PIECE_SIZE
+        if tileId < 10:
+            return (longPlus[9-tileId], cLength-offset)
+        elif tileId < 20:
+            return (offset-PIECE_SIZE, longPlus[19-tileId])
+        elif tileId < 30:
+            return (longPlus[tileId-20]-PIECE_SIZE, offset-PIECE_SIZE)
+        elif tileId < 40:
+            return (cLength-offset, longPlus[tileId-30]-PIECE_SIZE)
+
     def _toHex(self, color):
         """
             Returns a hex color code that matches color, changes white to the color of the monopoly
@@ -353,29 +375,6 @@ class Monopoly:
             return "#ffc0cb"
         if color == "ORANGE":
             return "#ffa500"
-
-    def _getPlayerTopLeft(self, playerNumber, tileId):
-        """
-            Returns the (x,y) representing the top-left corner of the piece of the player
-            with number playerNumber on the tile with id tileId
-
-            Parameter: playerNumber, the id of the player(Player 1, Player 2, etc.)
-            Requires: Must be of type int
-
-            Parameter: tileId, the id of the tile the player is currently on
-            Requires: Must be of type int
-        """
-        cLength = 2 * TILE_LONG + 9 * TILE_SHORT
-        offset = playerNumber * PIECE_SIZE
-        if tileId < 10:
-            return (longPlus[9-tileId], cLength-offset)
-        elif tileId < 20:
-            return (offset-PIECE_SIZE, longPlus[19-tileId])
-        elif tileId < 30:
-            return (longPlus[tileId-20]-PIECE_SIZE, offset-PIECE_SIZE)
-        elif tileId < 40:
-            return (cLength-offset, longPlus[tileId-30]-PIECE_SIZE)
-
   # Roll
 
     def _roll(self):
@@ -638,13 +637,13 @@ class Monopoly:
             return result
 
         p1TradeDict = {
-            "cash": int(p1Trade[0].get()),
+            "cash": int(p1Trade[0].get()) if p1Trade[0].get() != '' else 0,
             "properties": getProps(p1Trade[1].get()),
             "jailCards": p1Trade[2].get()
         }
         p2TradeDict = {
             "name": p2Trade[0],
-            "cash": int(p2Trade[1].get()),
+            "cash": int(p2Trade[1].get()) if p2Trade[1].get() != '' else 0,
             "properties": getProps(p2Trade[2].get()),
             "jailCards": p2Trade[3].get()
         }
