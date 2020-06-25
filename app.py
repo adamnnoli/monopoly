@@ -912,7 +912,7 @@ class Monopoly:
             Requires: Must be of type (string, string); Must be a Jail, Jail Success, or Jail Fail log
         """
         if result[0] == "Jail":
-            self._createJailWindow()
+            self._jail()
         if result[0] == "Jail Success":
             if self._jailWindow is not None:
                 self._jailWindow.destroy()
@@ -938,7 +938,37 @@ class Monopoly:
         """
             Creates a Top Level displaying the current players options if they are in jail
         """
-        pass
+        self._jailWindow = Toplevel()
+        Frame(self._jailWindow, text="What will you do?").grid(row=0, column=0, columnspan=3)
+        Button(self._jailWindow, text="Pay $50", command=self._payJail).grid(row=1, column=0)
+        Button(self._jailWindow, text="Roll For Doubles",
+               command=self._rollJail).grid(row=1, column=2)
+        Button(self._jailWindow, text="Use Get Out Of Jail Free Card",
+               command=self._cardJail).grid(row=1, column=2)
+
+    def _payJail(self):
+        """
+            Attempts to pay $50 to get the current player out of jail. Handles the logs that arise
+            and redraws the screen
+        """
+        self._handleLogs(self.game.payJail())
+        self.redraw()
+
+    def _rollJail(self):
+        """
+            Attempts to roll doubles to get the current player out of jail. Handles the logs that
+            arise and redraws the screen
+        """
+        self._handleLogs(self.game.rollJail())
+        self.redraw()
+
+    def _cardJail(self):
+        """
+            Attempts to have the current player use a get out of jail free card. Handles the logs
+            that arise and redraws the screen.
+        """
+        self._handleLogs(self.game.cardJail())
+        self.redraw()
   # Bankruptcy
 
     def _bankruptcy(self):

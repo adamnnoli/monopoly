@@ -182,6 +182,7 @@ class Game:
         return result
 # GAME FUNCTIONALITY -------------------------------------------------------------------------------
     # Rolling
+
     def roll(self):
         """
             If the current player can roll, rolls the dice and moves the player's piece,
@@ -204,6 +205,7 @@ class Game:
                 self.numDoublesRolled += 1
                 if self.numDoublesRolled >= 3:
                     self._goToJail()
+                    self.hasRolled = True
                     return [("Roll", "You rolled 3 doubles in a row, Go To Jail")]
                 logs.append(("Roll", "You rolled doubles, roll again"))
             self.currentPlayer.move(dice1+dice2)
@@ -389,7 +391,13 @@ class Game:
             Returns: A Jail Success log if the player had enough money, A Jail Fail log
             otherwise
         """
-        pass
+        currentPlayer = self.currentPlayer.toDict()
+        if currentPlayer["cash"] >= 50:
+            self.currentPlayer.takeCash(50)
+            self.currentPlayer.leaveJail()
+            return [("Jail Success", f"{currentPlayer['name']} paid $50 to get out of jail")]
+        else:
+            return [("Jail Fail", f"{currentPlayer['name']} does not have $50")]
 
     def rollJail(self):
         """
@@ -398,7 +406,20 @@ class Game:
             jail and the log from rolling the dice
             If the result is not a double returns A Jail Success Log
         """
-        pass
+        name = self.currentPlayer.toDict()["name"]
+        dice1 = random.randint(1, 6)
+        dice2 = random.randint(1, 6)
+        if dice1 == dice2:
+            self.currentPlayer.leaveJail()
+            self.currentPlayer.move(dice1+dice2)
+            self.numRolled = dice1 + dice2
+            result = self._handleTile()
+            if result is None:
+                return [("Jail Success", f"{name} rolled doubles to get out of jail")]
+            else:
+                return ([("Jail Success", f"{name} rolled doubles to get out of jail")] + result)
+        else:
+            return [("Jail Fail", f"{name} did not roll doubles and is still in jails")]
 
     def cardJail(self):
         """
@@ -407,7 +428,12 @@ class Game:
             Returns: A Jail Success Log if the player had a Get Out of Jail Free Card, a Jail
             Fail Log otherwise
         """
-        pass
+        currentPlayer = self.currentPlayer.toDict()
+        if currentPlayer["jailCards"] >= 1:
+            self.currentPlayer.useJailCard()
+            return [("Jail Success", f"{currentPlayer['name']} used a Get Out of Jail Free Card")]
+        else:
+            return [("Jail Fail", f"{currentPlayer['name']} does not have a Get Out of Jail Free Card")]
 
     # End Turn
     def endTurn(self):
@@ -423,6 +449,7 @@ class Game:
         self.hasRolled = False
         self.numRolled = 0
         self.numDoublesRolled = 0
+        return self._checkJail()
 # HELPERS
 
     # Init Helpers
@@ -648,7 +675,7 @@ class Game:
             logs = [("Card", card.getText())]
             actionReturn = card.getAction()(self.currentPlayer)
             if actionReturn is not None:
-                logs.append(actionReturn)
+                logs + actionReturn
             return logs
 
         if tileName == "Community Chest":
@@ -658,7 +685,7 @@ class Game:
             logs = [("Card", card.getText())]
             actionReturn = card.getAction()(self.currentPlayer)
             if actionReturn is not None:
-                logs.append(actionReturn)
+                logs + actionReturn
             return logs
 
     def _takeRent(self):
@@ -762,23 +789,32 @@ class Game:
             return tile["rents"][tile["numHouses"]]
 # Jail Helpers
 
+    def _checkJail(self):
+        """
+            If the current player is not jail, return none, if the current player is in jail, but 
+            has turns remaining, returns a Jail log, if the current player is in jail and does not
+            have turns remaining, forces them to pay $50 to leave jail returning Jail Success or 
+            Bankruptcy Log depending on the results of the action
+        """
+        currentPlayer = self.currentPlayer.toDict()
+        if not currentPlayer["inJail"]:
+            return None
+        elif currentPlayer["inJail"] and currentPlayer["numTurnsInJail"] < 3:
+            return [("Jail", "Began Turn")]
+        else:
+            if currentPlayer["cash"] >= 50:
+                self.currentPlayer.takeCash(50)
+                self.currentPlayer.leaveJail()
+                return [("Jail Success", f"{currentPlayer['name']} was forced to pay $50 to get out of jail")]
+            else:
+                return [("Bankruptcy Bank", "You owe $50 to the Bank")]
+
     def _goToJail(self):
         """
             Sends the current player to jail
         """
         self.currentPlayer.goToJail()
 
-    def _forceJail(self):
-        """
-            Forces the player to pay 50 dollars to get out of jail.
-
-            Returns: A Jail Fail log if the player was able to pay, a Bankruptcy log otherwise.
-        """
-        if self.currentPlayer.toDict()["cash"] >= 50:
-            self.currentPlayer.takeCash(50)
-            self.currentPlayer.leaveJail()
-        else:
-            return [("Bankruptcy Bank", "You owe $50 to the Bank")]
 # Trade Helpers
 
     def _checkTrade(self, p1Dict, p2Dict):
