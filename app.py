@@ -192,7 +192,7 @@ class Monopoly:
         """
         if self.gameLog is not None:
             self.gameLog.destroy()
-        self.gameLog = Frame(self.mainWindow)
+        self.gameLog = Text(self.mainWindow, width=50, height=15, state=DISABLED)
         self.gameLog.grid(row=2, column=1)
 
 # END GAME -----------------------------------------------------------------------------------------
@@ -243,12 +243,13 @@ class Monopoly:
             Parameter: cvs, the canvas to draw to
             Requires: Must be of type tk.Canvas
         """
+        pieceSize = int((TILE_LONG - HOUSE_SIZE) / len(self.game.getPlayers()))
         for playerNumber, player in enumerate(self.game.getPlayers(), start=1):
             color = None if player["color"] is None else self._toHex(player["color"])
             color = "#ffffff" if color == GAME_BOARD_COLOR else color
-            x = self._getPlayerTopLeft(playerNumber, player["location"])[0]
-            y = self._getPlayerTopLeft(playerNumber, player["location"])[1]
-            cvs.create_rectangle(x, y, x+PIECE_SIZE, y+PIECE_SIZE, fill=color)
+            x = self._getPlayerTopLeft(playerNumber, player["location"], pieceSize)[0]
+            y = self._getPlayerTopLeft(playerNumber, player["location"], pieceSize)[1]
+            cvs.create_rectangle(x, y, x+pieceSize, y+pieceSize, fill=color)
 
     def _drawHouses(self, cvs, tile):
         """
@@ -320,7 +321,7 @@ class Monopoly:
         elif tileId < 40:
             return (longPlus[9], longPlus[tileId-31])
 
-    def _getPlayerTopLeft(self, playerNumber, tileId):
+    def _getPlayerTopLeft(self, playerNumber, tileId, pieceSize):
         """
             Returns the (x,y) representing the top-left corner of the piece of the player
             with number playerNumber on the tile with id tileId
@@ -332,15 +333,15 @@ class Monopoly:
             Requires: Must be of type int
         """
         cLength = 2 * TILE_LONG + 9 * TILE_SHORT
-        offset = playerNumber * PIECE_SIZE
+        offset = playerNumber * pieceSize
         if tileId < 10:
             return (longPlus[9-tileId], cLength-offset)
         elif tileId < 20:
-            return (offset-PIECE_SIZE, longPlus[19-tileId])
+            return (offset-pieceSize, longPlus[19-tileId])
         elif tileId < 30:
-            return (longPlus[tileId-20]-PIECE_SIZE, offset-PIECE_SIZE)
+            return (longPlus[tileId-20]-pieceSize, offset-pieceSize)
         elif tileId < 40:
-            return (cLength-offset, longPlus[tileId-30]-PIECE_SIZE)
+            return (cLength-offset, longPlus[tileId-30]-pieceSize)
 
     def _toHex(self, color):
         """
@@ -795,14 +796,17 @@ class Monopoly:
         pass
   # Log
 
-    def _log(self, text):
+    def _log(self, newText):
         """
             Adds a label with text to the gameLog
 
             Parameter: text, the text to be logged
             Requires: Must be of type string
         """
-        Label(self.gameLog, text=text).grid(row=self.gameLog.grid_size()[1]+1)
+        self.gameLog.config(state=NORMAL)
+        self.gameLog.insert(END, newText+"\n")
+        self.gameLog.config(state=DISABLED)
+        self.gameLog.yview(END)
 
     def _handleLogs(self, logs):
         """

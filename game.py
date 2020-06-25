@@ -180,7 +180,6 @@ class Game:
             if tile["mortgaged"]:
                 result.append(tile["name"])
         return result
-
 # GAME FUNCTIONALITY -------------------------------------------------------------------------------
     # Rolling
     def roll(self):
@@ -231,8 +230,8 @@ class Game:
             return [("Buy Success", f"{currentPlayer['name']} bought {currentTile['name']}")]
         else:
             return [("Buy Fail", f"{currentPlayer['name']} cannot buy {currentTile['name']}")]
-    # Building
 
+    # Building
     def build(self, tileName):
         """
             Tries to build a house on the tile with name, tileName.
@@ -281,8 +280,8 @@ class Game:
             self.currentPlayer.giveCash(int(tile["houseCost"]/2))
             self.board.getTileObject(self.board.getTileId(tileName)).sell()
             return [("Build Success", f"{self.currentPlayer.toDict()['name']} sold a house on {tileName}")]
-    # Trading
 
+    # Trading
     def trade(self, p1Trade, p2Trade):
         """
             Attempts to have the current player trade the items in p1Trade for the items in
@@ -335,7 +334,6 @@ class Game:
         return [("Trade Success", self._makeTradeString(p1Trade, p2Trade))]
 
     # Mortgaging
-
     def mortgage(self, tileName):
         """
             Sets the status of the tile with name, tileName to mortgaged, giving the player
@@ -375,7 +373,6 @@ class Game:
                      f"{currentPlayer['name']} doesn't have enough money to unmortgage {tileName}")]
 
     # Quitting
-
     def quit(self):
         """
             Removes the current player from the game, forfeiting all assets to the bank
@@ -383,8 +380,8 @@ class Game:
             Returns: A Quit Log
         """
         pass
-    # Jail
 
+    # Jail
     def payJail(self):
         """
             Attempts to pay $50 to remove the current player from jail
@@ -411,8 +408,8 @@ class Game:
             Fail Log otherwise
         """
         pass
-    # End Turn
 
+    # End Turn
     def endTurn(self):
         """
             Attempts to end the current player's turn and begin the next player's turn
@@ -763,7 +760,6 @@ class Game:
             return tile["rents"][0] * 2
         else:
             return tile["rents"][tile["numHouses"]]
-
 # Jail Helpers
 
     def _goToJail(self):
@@ -865,8 +861,8 @@ class Game:
                        f"{p1CashString}{p1Props}{p1JailString} with {p2Dict['name']} "
                        f"for {p2CashString}{p2Props}{p2JailString}.")
         return tradeString
-
 # Build and Mortgage Helpers
+
     def _getOwnedTiles(self):
         """
             Returns a list of dictionaries representing every tile that the current player owns

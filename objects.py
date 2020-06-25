@@ -220,8 +220,8 @@ class Player:
             Requires: Must be of type int
         """
         self.location += spaces
-        if self.location > 39:
-            self.location % 39
+        if self.location > 40:
+            self.location % 40
             self.cash += 200
 
     def giveCash(self, amount):
