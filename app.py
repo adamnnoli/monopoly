@@ -30,8 +30,10 @@ class Monopoly:
         rules.insert(END, WELCOME_MESSAGE)
         rules.grid(row=1, column=0)
         rules.config(state=DISABLED, width=100)
-        rules.tag_add("title", 0.0, 19.0)
-        rules.tag_config("title", justify=CENTER)
+        rules.tag_add("title", 0.0, 2.0)
+        rules.tag_config("title", justify=CENTER, font=TITLE_FONT)
+        rules.tag_add("content", 2.0, END)
+        rules.tag_config("content", font=GENERAL_TEXT_FONT)
 
         Button(welcomeFrame, text="Start", command=self.showPlayerSelection).grid(row=2, column=0)
 
