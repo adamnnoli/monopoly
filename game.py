@@ -381,7 +381,19 @@ class Game:
 
             Returns: A Quit Log
         """
-        pass
+        for tile in self.getBoard():
+            if tile["owner"] == self.currentPlayer:
+                tileObj = self.board.getTileObject(tile["id"])
+                tileObj.setOwner(None)
+                if tile["mortgaged"]:
+                    tileObj.setMortgage()
+                for i in range(tile["numHouses"]):
+                    tileObj.sell()
+        playerToDelete = self.currentPlayer
+        nextPlayerIndex = (self.players.index(self.currentPlayer) + 1) % len(self.players)
+        self.currentPlayer = self.players[nextPlayerIndex]
+        self.players.remove(playerToDelete)
+        return [("Quit", f"{playerToDelete.toDict()['name']} quit the game")]
 
     # Jail
     def payJail(self):

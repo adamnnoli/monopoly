@@ -773,7 +773,18 @@ class Monopoly:
             Creates a Top Level asking the current player if they want to leave the game.
             If so, handles the log of the quit function in Game
         """
-        pass
+        self._quitWindow = Toplevel()
+        Label(self._quitWindow, text="Are you sure?").grid(row=0, column=0, columnspan=2)
+        Button(self._quitWindow, text="Yes", command=self._executeQuit).grid(row=1, column=0)
+        Button(self._quitWindow, text="No", command=self._quitWindow.destroy).grid(row=1, column=1)
+
+    def _executeQuit(self):
+        """
+            Removes the current player from the game, forfeiting their assets to the bank, handles
+            the logs that arise and redraws the screen
+        """
+        self._handleLogs(self.game.quit())
+        self.redraw()
   # Help
 
     def _help(self):
@@ -843,6 +854,8 @@ class Monopoly:
                 self._jailLog(log)
             elif log[0] in bankruptcyLogs:
                 self._bankruptcyLog(log)
+            elif log[0] == "Quit":
+                self._quitLog(log)
             else:
                 print(log)
 
@@ -936,6 +949,16 @@ class Monopoly:
         else:
             self._createBankBankruptcyWindow()
 
+    def _quitLog(self,result):
+        """
+            Logs the message in result, closes the Top Level quit window if result is a Quit log
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string,string); Must be a Quit Log
+        """
+        self._log(result[1])
+        if self._quitWindow is not None:
+            self._quitWindow.destroy()
     def _jail(self):
         """
             Creates a Top Level displaying the current players options if they are in jail
