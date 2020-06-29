@@ -793,7 +793,16 @@ class Monopoly:
 
             Creates a Top Level displaying the rules of the Game
         """
-        pass
+        helpWindow = Toplevel()
+        rules = Text(helpWindow)
+        rules.insert(END, HELP_MESSAGE)
+        rules.grid(row=1, column=0)
+        rules.config(state=DISABLED, width=100)
+        rules.tag_add("title", 0.0, 2.0)
+        rules.tag_config("title", justify=CENTER, font=TITLE_FONT)
+        rules.tag_add("content", 2.0, END)
+        rules.tag_config("content", font=GENERAL_TEXT_FONT)
+
   # Auction
 
     def _auction(self, propName):
