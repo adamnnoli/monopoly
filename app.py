@@ -400,7 +400,7 @@ class Monopoly:
 
         Label(self._buyWindow, text=f"Buy {name}?").grid(row=0, column=0, columnspan=2)
         Button(self._buyWindow, text="Yes", command=self._buy).grid(row=1, column=0)
-        Button(self._buyWindow, text="No", command=self._auction).grid(row=1, column=1)
+        Button(self._buyWindow, text="No", command=lambda: self._auction(name)).grid(row=1, column=1)
 
     def _buy(self):
         """
@@ -802,7 +802,6 @@ class Monopoly:
         rules.tag_config("title", justify=CENTER, font=TITLE_FONT)
         rules.tag_add("content", 2.0, END)
         rules.tag_config("content", font=GENERAL_TEXT_FONT)
-
   # Auction
 
     def _auction(self, propName):
@@ -815,7 +814,67 @@ class Monopoly:
             Parameter: propName, the name of the property being auctioned
             Requires: Must be of type string
         """
-        pass
+        self._auctionWindow = Toplevel()
+        players = self.game.getPlayers()
+
+        infoFrame = Frame(self._auctionWindow)
+        infoFrame.grid(row=0, column=0)
+        topBid = IntVar()
+        topBidString = StringVar(value=f"Highest Bid {topBid.get()}")
+        topBidder = StringVar(value=f"Highest Bidder: {players[0]['name']}")
+
+        Label(infoFrame, text=f"Bidding on: {propName}").grid(row=0, column=0, columnspan=2)
+        Label(infoFrame, textvariable=topBidString).grid(row=1, column=0)
+        Label(infoFrame, textvariable=topBidder).grid(row=1, column=1)
+
+        auctionFrame = Frame(self._auctionWindow)
+        auctionFrame.grid(row=1, column=0)
+        bids = {}
+
+        #Using Closures since all functions need to have access to the bids and top bid variables
+        def _add(name, amount):
+            """
+                Adds amount to the bid of the player with name name, updates the top bid and string
+                variables as necessary
+
+                Parameter: name, the name of the player who bid
+                Requires: Must be of type string
+
+                Parameter: amount, the amount to increase their bid
+                Requires: Must be of type int
+            """
+            bidVars = bids[name]
+            bidVars[0].set(bidVars[0].get()+amount)
+            bidVars[1].set(f"Current Bid: {bidVars[0].get()}")
+            if bidVars[0].get() > topBid.get():
+                topBid.set(bidVars[0].get())
+                topBidString.set(f"Highest Bid: ${topBid.get()}")
+                topBidder.set(f"Highest Bidder: {name}")
+
+        def _makeBidFrame(name):
+            """
+                Makes a frame in the auctionFrame where the player with name, name can bid
+
+                Parameter: name, the name of the player whose frame to make
+                Requires: Must be of type string
+            """
+            bidFrame = LabelFrame(auctionFrame, text=f"{name} Bid")
+            bidFrame.grid(row=0, column=auctionFrame.grid_size()[0]+1)
+
+            bid = IntVar()
+            bidString = StringVar(value=f"Current Bid:{bid.get()}")
+            bids[player["name"]] = (bid, bidString)
+
+            Label(bidFrame, textvariable=bidString).grid(row=0, column=0, columnspan=2)
+
+            Button(bidFrame, text="Add $1", command=lambda: _add(name, 1)).grid(row=1, column=0)
+            Button(bidFrame, text="Add $10", command=lambda: _add(name, 10)).grid(row=1, column=1)
+            Button(bidFrame, text="Add $50", command=lambda: _add(name, 50)).grid(row=2, column=0)
+            Button(bidFrame, text="Add $100", command=lambda: _add(name, 100)).grid(row=2, column=1)
+
+        for player in players:
+            _makeBidFrame(player)
+
   # Log
 
     def _log(self, newText):
@@ -958,7 +1017,7 @@ class Monopoly:
         else:
             self._createBankBankruptcyWindow()
 
-    def _quitLog(self,result):
+    def _quitLog(self, result):
         """
             Logs the message in result, closes the Top Level quit window if result is a Quit log
 
@@ -968,6 +1027,7 @@ class Monopoly:
         self._log(result[1])
         if self._quitWindow is not None:
             self._quitWindow.destroy()
+
     def _jail(self):
         """
             Creates a Top Level displaying the current players options if they are in jail

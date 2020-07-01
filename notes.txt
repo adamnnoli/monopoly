@@ -1,10 +1,8 @@
 To-Do 
   Problem:
-    Chance cards where player must pay x times the rent owed were not implemented properly
-    Will probably have to hard code the behaviors of those functions without using somehting like 
-    handle tile.
-    Check if owned, if not return a buy log, if it is return the attempt take rent of the amount 
-    owed.
+    Auction window, need to update the bid in the players frame and the max bid with a button 
+  Solution:
+    Button triggers closure function takes in the bid 
 
 Acceptable Logs:
   Idea, make the logs tuples, (Category, Message)
