@@ -374,7 +374,36 @@ class Game:
             return [("Mortgage Fail",
                      f"{currentPlayer['name']} doesn't have enough money to unmortgage {tileName}")]
 
+    def auction(self, tileName, winningBid, winningBidder):
+        """
+            Has the player with name, winningBidder, purchase the tile with name, tileName, for the
+            amount of winningBid
+
+            Requires: the player must have enough cash 
+            Returns: An auction log summarizing the transaction
+
+            Parameter: tileName, the name of the tile won
+            Requires: Must be of type string
+
+            Parameter: winningBid, the amount the winning player Bid
+            Requires: Must be of type int
+
+            Parameter: winningBidder, the name of the player one the auction
+            Requires: Must be of type string
+        """
+
+        for player in self.players:
+            if player.toDict()["name"] == winningBidder:
+                playerObj = player
+
+        playerObj.takeCash(winningBid)
+        playerObj.giveProperty(self.board.getTileId(tileName), self.board)
+        self.board.getTileObject(self.board.getTileId(tileName)).setOwner(playerObj)
+
+        return [("Auction", f"{winningBidder} won {tileName} at an auction by bidding {winningBid}")]
+
     # Quitting
+
     def quit(self):
         """
             Removes the current player from the game, forfeiting all assets to the bank

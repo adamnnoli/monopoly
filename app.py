@@ -831,11 +831,10 @@ class Monopoly:
         auctionFrame.grid(row=1, column=0)
         bids = {}
 
-        #Using Closures since all functions need to have access to the bids and top bid variables
-        def _add(name, amount):
+        # Using Closures since all functions need to have access to the bids and top bid variables
+        def _add(player, amount):
             """
-                Adds amount to the bid of the player with name name, updates the top bid and string
-                variables as necessary
+                Adds amount to player's bid, updates the top bid and string variables as necessary
 
                 Parameter: name, the name of the player who bid
                 Requires: Must be of type string
@@ -843,22 +842,26 @@ class Monopoly:
                 Parameter: amount, the amount to increase their bid
                 Requires: Must be of type int
             """
-            bidVars = bids[name]
-            bidVars[0].set(bidVars[0].get()+amount)
-            bidVars[1].set(f"Current Bid: {bidVars[0].get()}")
-            if bidVars[0].get() > topBid.get():
-                topBid.set(bidVars[0].get())
-                topBidString.set(f"Highest Bid: ${topBid.get()}")
-                topBidder.set(f"Highest Bidder: {name}")
+            bidVars = bids[player["name"]]
+            newBid = bidVars[0].get()+amount
+            if newBid <= player["cash"]:
+                bidVars[0].set(newBid)
+                bidVars[1].set(f"Current Bid: {bidVars[0].get()}")
+                if bidVars[0].get() > topBid.get():
+                    topBid.set(bidVars[0].get())
+                    topBidString.set(f"Highest Bid: ${topBid.get()}")
+                    topBidder.set(f"Highest Bidder: {player['name']}")
+            else:
+                self._log(f"{player['name']} doesn't have ${newBid}")
 
-        def _makeBidFrame(name):
+        def _makeBidFrame(player):
             """
                 Makes a frame in the auctionFrame where the player with name, name can bid
 
                 Parameter: name, the name of the player whose frame to make
                 Requires: Must be of type string
             """
-            bidFrame = LabelFrame(auctionFrame, text=f"{name} Bid")
+            bidFrame = LabelFrame(auctionFrame, text=f"{player['name']} Bid")
             bidFrame.grid(row=0, column=auctionFrame.grid_size()[0]+1)
 
             bid = IntVar()
@@ -867,14 +870,33 @@ class Monopoly:
 
             Label(bidFrame, textvariable=bidString).grid(row=0, column=0, columnspan=2)
 
-            Button(bidFrame, text="Add $1", command=lambda: _add(name, 1)).grid(row=1, column=0)
-            Button(bidFrame, text="Add $10", command=lambda: _add(name, 10)).grid(row=1, column=1)
-            Button(bidFrame, text="Add $50", command=lambda: _add(name, 50)).grid(row=2, column=0)
-            Button(bidFrame, text="Add $100", command=lambda: _add(name, 100)).grid(row=2, column=1)
+            Button(bidFrame, text="Add $1", command=lambda: _add(player, 1)).grid(row=1, column=0)
+            Button(bidFrame, text="Add $10", command=lambda: _add(player, 10)).grid(row=1, column=1)
+            Button(bidFrame, text="Add $50", command=lambda: _add(player, 50)).grid(row=2, column=0)
+            Button(bidFrame, text="Add $100", command=lambda: _add(player, 100)).grid(row=2, column=1)
 
         for player in players:
             _makeBidFrame(player)
 
+        Button(self._auctionWindow, text="End Auction",
+               command=lambda: self._executeAuction(propName, topBid, topBidder)).grid(row=2, column=0)
+
+    def _executeAuction(self, propName, topBid, topBidder):
+        """
+            Ends the auction by having the player detailed in topBidder buy propName for the amount
+            in topBid
+
+            Parameter: propName, the name of the property auctioned
+            Requires: Must be of type string
+
+            Parameter: topBid, the amount the highest bidder bid
+            Requires: Must be of type IntVar
+
+            Parameter: topBidder, string variable with the name of the highest bidder
+            Requires: Must be of type StringVar; Must be of the form "Highest Bidder: {name}"
+        """
+        self._handleLogs(self.game.auction(propName, topBid.get(), topBidder.get()[16:]))
+        self.redraw()
   # Log
 
     def _log(self, newText):
@@ -908,7 +930,7 @@ class Monopoly:
         otherLogs = ["Rent", "Tax", "Roll"]
 
         for log in logs:
-            if log[0] == "Card" or log[0] == "Auction" or log[0] in otherLogs:
+            if log[0] == "Card" or log[0] in otherLogs:
                 self._log(log[1])
             elif log[0] in buyLogs:
                 self._buyLog(log)
@@ -918,6 +940,8 @@ class Monopoly:
                 self._mortgageLog(log)
             elif log[0] in tradeLogs:
                 self._tradeLog(log)
+            elif log[0] == "Auction":
+                self._auctionLog(log)
             elif log[0] in jailLogs:
                 self._jailLog(log)
             elif log[0] in bankruptcyLogs:
@@ -983,6 +1007,17 @@ class Monopoly:
         if result[0] == "Trade Success":
             if self._tradeWindow is not None:
                 self._tradeWindow.destroy()
+        self._log(result[1])
+
+    def _auctionLog(self, result):
+        """
+            Closes the Top Level Auction Window and logs the message in result 
+
+            Parameter: result, the log to handle
+            Requires: Must be of type (string, string); Must be an Auction log
+        """
+        if self._auctionWindow is not None:
+            self._auctionWindow.destroy()
         self._log(result[1])
 
     def _jailLog(self, result):
