@@ -694,6 +694,8 @@ class Game:
             return self._drawCard()
         if tile["name"] == "Income Tax" or tile["name"] == "Luxury Tax":
             return self._takeTax()
+        if tile["name"] == "Go To Jail":
+            self._goToJail()
         if tile["owner"] is not None and tile["owner"] != self.currentPlayer and not tile["mortgaged"]:
             return self._takeRent()
         if tile["owner"] is None and tile["price"] > 0:

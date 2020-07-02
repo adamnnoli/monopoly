@@ -560,7 +560,7 @@ class Monopoly:
             OptionMenu(p2Frame, p2JailCards, *p2JailList).grid(row=2, column=1)
             p2Frame.grid(row=1, column=1)
 
-            p2TradeInfo = (playerName, p2CashEntry, p2PropList, p2JailCards)
+            p2TradeInfo = (playerName, p2CashEntry, askP2Props, p2JailCards)
             Button(self._tradeWindow, text="Accept",
                    command=lambda: self._executeTrade(p1TradeInfo, p2TradeInfo)).grid(row=2, column=0, columnspan=2)
 
@@ -604,7 +604,7 @@ class Monopoly:
         OptionMenu(p1Frame, p1JailCards, *p1JailList).grid(row=2, column=1)
 
         p1Frame.grid(row=1, column=0)
-        return (p1CashEntry, propList, p1JailCards)
+        return (p1CashEntry, askProps, p1JailCards)
 
     def _executeTrade(self, p1Trade, p2Trade):
         tradeDicts = self._createTrade(p1Trade, p2Trade)
@@ -641,13 +641,13 @@ class Monopoly:
 
         p1TradeDict = {
             "cash": int(p1Trade[0].get()) if p1Trade[0].get() != '' else 0,
-            "properties": getProps(p1Trade[1].get()),
+            "properties": getProps(p1Trade[1].get(ACTIVE)),
             "jailCards": p1Trade[2].get()
         }
         p2TradeDict = {
             "name": p2Trade[0],
             "cash": int(p2Trade[1].get()) if p2Trade[1].get() != '' else 0,
-            "properties": getProps(p2Trade[2].get()),
+            "properties": getProps(p2Trade[2].get(ACTIVE)),
             "jailCards": p2Trade[3].get()
         }
 
@@ -949,6 +949,7 @@ class Monopoly:
             elif log[0] == "Quit":
                 self._quitLog(log)
             else:
+                print("Unknown Log")
                 print(log)
 
     def _buyLog(self, result):
@@ -1018,6 +1019,8 @@ class Monopoly:
         """
         if self._auctionWindow is not None:
             self._auctionWindow.destroy()
+        if self._buyWindow is not None:
+            self._buyWindow.destroy()
         self._log(result[1])
 
     def _jailLog(self, result):
