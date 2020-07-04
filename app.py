@@ -1103,10 +1103,17 @@ class Monopoly:
         self.redraw()
   # Bankruptcy
 
-    def _bankruptcy(self):
+    def _bankruptcy(self, bankruptcyMessage):
         """
         """
-        pass
+        self._bankruptcyWindow = Toplevel()
+
+        Label(self._bankruptcyWindow, text=bankruptcyMessage).grid(row=0, column=0, columnspan=4)
+        Button(self._bankruptcyWindow, text="Pay").grid(row=1, column=0)
+        Button(self._bankruptcyWindow, text="Sell Houses").grid(row=1, column=1)
+        Button(self._bankruptcyWindow, text="Mortgage Properties").grid(row=1, column=2)
+        Button(self._bankruptcyWindow, text="Trade With Other Players").grid(row=1, column=3)
+        Button(self._bankruptcyWindow, text="Quit").grid(row=2, column=0, columnspan=4)
  # General
 
     def _clear(self, window):
